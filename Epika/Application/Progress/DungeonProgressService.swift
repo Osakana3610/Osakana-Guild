@@ -33,8 +33,12 @@ actor DungeonProgressService {
         self.contextProvider = contextProvider
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     /// ダンジョン進行変更通知を送信
-    private func notifyDungeonChange(dungeonIds: [UInt16]) {
+    nonisolated private func notifyDungeonChange(dungeonIds: [UInt16]) {
         Task { @MainActor in
             NotificationCenter.default.post(
                 name: .dungeonProgressDidChange,
@@ -45,94 +49,100 @@ actor DungeonProgressService {
     }
 
     func allDungeonSnapshots(definitions: [UInt16: DungeonDefinition]) async throws -> [CachedDungeonProgress] {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<DungeonRecord>()
-        let records = try context.fetch(descriptor)
-        return records.compactMap { record in
-            guard let definition = definitions[record.dungeonId] else { return nil }
-            return Self.snapshot(from: record, definition: definition)
+        try await withContext { context in
+            let descriptor = FetchDescriptor<DungeonRecord>()
+            let records = try context.fetch(descriptor)
+            return records.compactMap { record in
+                guard let definition = definitions[record.dungeonId] else { return nil }
+                return Self.snapshot(from: record, definition: definition)
+            }
         }
     }
 
     func ensureDungeonSnapshot(for dungeonId: UInt16, definition: DungeonDefinition) async throws -> CachedDungeonProgress {
-        let context = contextProvider.makeContext()
-        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        try saveIfNeeded(context)
-        return Self.snapshot(from: record, definition: definition)
+        try await withContext { context in
+            let record = try self.ensureDungeonRecord(dungeonId: dungeonId, context: context)
+            try self.saveIfNeeded(context)
+            return Self.snapshot(from: record, definition: definition)
+        }
     }
 
     @discardableResult
     func setUnlocked(_ isUnlocked: Bool, dungeonId: UInt16) async throws -> Bool {
-        let context = contextProvider.makeContext()
-        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        var didChange = false
-        if record.isUnlocked != isUnlocked {
-            record.isUnlocked = isUnlocked
-            record.updatedAt = Date()
-            didChange = true
+        try await withContext { context in
+            let record = try self.ensureDungeonRecord(dungeonId: dungeonId, context: context)
+            var didChange = false
+            if record.isUnlocked != isUnlocked {
+                record.isUnlocked = isUnlocked
+                record.updatedAt = Date()
+                didChange = true
+            }
+            try self.saveIfNeeded(context)
+            if didChange {
+                self.notifyDungeonChange(dungeonIds: [dungeonId])
+            }
+            return didChange
         }
-        try saveIfNeeded(context)
-        if didChange {
-            notifyDungeonChange(dungeonIds: [dungeonId])
-        }
-        return didChange
     }
 
     /// ダンジョンをクリア済みとしてマーク
     /// - Returns: 初クリアの場合は`true`
     @discardableResult
     func markCleared(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8) async throws -> Bool {
-        let context = contextProvider.makeContext()
-        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        let now = Date()
+        try await withContext { context in
+            let record = try self.ensureDungeonRecord(dungeonId: dungeonId, context: context)
+            let now = Date()
 
-        // 初クリアかどうかを判定（highestClearedDifficultyがnilの場合）
-        let isFirstClear = record.highestClearedDifficulty == nil
+            // 初クリアかどうかを判定（highestClearedDifficultyがnilの場合）
+            let isFirstClear = record.highestClearedDifficulty == nil
 
-        // クリアした難易度を更新
-        if let current = record.highestClearedDifficulty {
-            if difficulty > current {
+            // クリアした難易度を更新
+            if let current = record.highestClearedDifficulty {
+                if difficulty > current {
+                    record.highestClearedDifficulty = difficulty
+                }
+            } else {
                 record.highestClearedDifficulty = difficulty
             }
-        } else {
-            record.highestClearedDifficulty = difficulty
-        }
 
-        record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
-        record.updatedAt = now
-        try saveIfNeeded(context)
-        notifyDungeonChange(dungeonIds: [dungeonId])
-        return isFirstClear
+            record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
+            record.updatedAt = now
+            try self.saveIfNeeded(context)
+            self.notifyDungeonChange(dungeonIds: [dungeonId])
+            return isFirstClear
+        }
     }
 
     @discardableResult
     func unlockDifficulty(dungeonId: UInt16, difficulty: UInt8) async throws -> Bool {
-        let context = contextProvider.makeContext()
-        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        var didChange = false
-        if record.highestUnlockedDifficulty < difficulty {
-            record.highestUnlockedDifficulty = difficulty
-            record.furthestClearedFloor = 0
-            record.updatedAt = Date()
-            didChange = true
+        try await withContext { context in
+            let record = try self.ensureDungeonRecord(dungeonId: dungeonId, context: context)
+            var didChange = false
+            if record.highestUnlockedDifficulty < difficulty {
+                record.highestUnlockedDifficulty = difficulty
+                record.furthestClearedFloor = 0
+                record.updatedAt = Date()
+                didChange = true
+            }
+            try self.saveIfNeeded(context)
+            if didChange {
+                self.notifyDungeonChange(dungeonIds: [dungeonId])
+            }
+            return didChange
         }
-        try saveIfNeeded(context)
-        if didChange {
-            notifyDungeonChange(dungeonIds: [dungeonId])
-        }
-        return didChange
     }
 
     func updatePartialProgress(dungeonId: UInt16, difficulty: UInt8, furthestFloor: UInt8) async throws {
         guard furthestFloor > 0 else { return }
-        let context = contextProvider.makeContext()
-        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        if difficulty == record.highestUnlockedDifficulty {
-            record.furthestClearedFloor = max(record.furthestClearedFloor, furthestFloor)
-            record.updatedAt = Date()
+        try await withContext { context in
+            let record = try self.ensureDungeonRecord(dungeonId: dungeonId, context: context)
+            if difficulty == record.highestUnlockedDifficulty {
+                record.furthestClearedFloor = max(record.furthestClearedFloor, furthestFloor)
+                record.updatedAt = Date()
+            }
+            try self.saveIfNeeded(context)
+            self.notifyDungeonChange(dungeonIds: [dungeonId])
         }
-        try saveIfNeeded(context)
-        notifyDungeonChange(dungeonIds: [dungeonId])
     }
 
     /// ダンジョンクリアを記録し、次の難易度を解放してスナップショットを返す（1回のDB操作で完結）
@@ -143,36 +153,37 @@ actor DungeonProgressService {
     ///   - definition: ダンジョン定義
     /// - Returns: 更新後のスナップショット
     func markClearedAndUnlockNext(dungeonId: UInt16, difficulty: UInt8, totalFloors: UInt8, definition: DungeonDefinition) async throws -> CachedDungeonProgress {
-        let context = contextProvider.makeContext()
-        let record = try ensureDungeonRecord(dungeonId: dungeonId, context: context)
-        let now = Date()
+        try await withContext { context in
+            let record = try self.ensureDungeonRecord(dungeonId: dungeonId, context: context)
+            let now = Date()
 
-        // クリアした難易度を更新
-        if let current = record.highestClearedDifficulty {
-            if difficulty > current {
+            // クリアした難易度を更新
+            if let current = record.highestClearedDifficulty {
+                if difficulty > current {
+                    record.highestClearedDifficulty = difficulty
+                }
+            } else {
                 record.highestClearedDifficulty = difficulty
             }
-        } else {
-            record.highestClearedDifficulty = difficulty
-        }
-        record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
+            record.furthestClearedFloor = max(record.furthestClearedFloor, totalFloors)
 
-        // 次の難易度を解放（条件を満たす場合）
-        if let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: difficulty),
-           record.highestUnlockedDifficulty < nextDifficulty {
-            record.highestUnlockedDifficulty = nextDifficulty
-            record.furthestClearedFloor = 0
-        }
+            // 次の難易度を解放（条件を満たす場合）
+            if let nextDifficulty = DungeonDisplayNameFormatter.nextDifficulty(after: difficulty),
+               record.highestUnlockedDifficulty < nextDifficulty {
+                record.highestUnlockedDifficulty = nextDifficulty
+                record.furthestClearedFloor = 0
+            }
 
-        record.updatedAt = now
-        try saveIfNeeded(context)
-        notifyDungeonChange(dungeonIds: [dungeonId])
-        return Self.snapshot(from: record, definition: definition)
+            record.updatedAt = now
+            try self.saveIfNeeded(context)
+            self.notifyDungeonChange(dungeonIds: [dungeonId])
+            return Self.snapshot(from: record, definition: definition)
+        }
     }
 }
 
 private extension DungeonProgressService {
-    func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {
+    nonisolated func ensureDungeonRecord(dungeonId: UInt16, context: ModelContext) throws -> DungeonRecord {
         var descriptor = FetchDescriptor<DungeonRecord>(predicate: #Predicate { $0.dungeonId == dungeonId })
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {
@@ -189,7 +200,7 @@ private extension DungeonProgressService {
         return record
     }
 
-    func saveIfNeeded(_ context: ModelContext) throws {
+    nonisolated func saveIfNeeded(_ context: ModelContext) throws {
         guard context.hasChanges else { return }
         try context.save()
     }

@@ -60,18 +60,22 @@ actor CharacterProgressService {
     }
 
     private let contextProvider: SwiftDataContextProvider
-    private let masterData: MasterDataCache
+    nonisolated private let masterData: MasterDataCache
 
     init(contextProvider: SwiftDataContextProvider, masterData: MasterDataCache) {
         self.contextProvider = contextProvider
         self.masterData = masterData
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     /// キャラクター変更通知を送信（差分更新対応）
     /// - Parameters:
     ///   - upserted: 追加・更新されたキャラクターのID配列
     ///   - removed: 削除されたキャラクターのID配列
-    private func notifyCharacterChange(upserted: [UInt8] = [], removed: [UInt8] = []) {
+    nonisolated private func notifyCharacterChange(upserted: [UInt8] = [], removed: [UInt8] = []) {
         let change = UserDataLoadService.CharacterChange(upserted: upserted, removed: removed)
         Task { @MainActor in
             NotificationCenter.default.post(
@@ -88,51 +92,51 @@ actor CharacterProgressService {
     /// - Parameter updates: 適用する更新の配列
     /// - Returns: レベルアップしたキャラクターのID配列
     @discardableResult
-    func applyBattleResults(_ updates: [BattleResultUpdate]) throws -> [UInt8] {
+    func applyBattleResults(_ updates: [BattleResultUpdate]) async throws -> [UInt8] {
         guard !updates.isEmpty else { return [] }
+        return try await withContext { context in
+            let characterIds = Array(Set(updates.map(\.characterId)))
+            let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
+            let records = try context.fetch(descriptor)
+            let recordsById = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
 
-        let context = contextProvider.makeContext()
-        let characterIds = Array(Set(updates.map(\.characterId)))
-        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
-        let records = try context.fetch(descriptor)
-        let recordsById = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
-
-        var leveledUpIds: [UInt8] = []
-        for update in updates {
-            guard let record = recordsById[update.characterId] else {
-                throw ProgressError.characterNotFound
-            }
-            if update.experienceDelta != 0 {
-                let previousLevel = record.level
-                let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
-                guard !addition.overflow else {
-                    throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+            var leveledUpIds: [UInt8] = []
+            for update in updates {
+                guard let record = recordsById[update.characterId] else {
+                    throw ProgressError.characterNotFound
                 }
-                let updatedExperience = max(0, Int(addition.partialValue))
-                let cappedExperience = try clampExperience(updatedExperience, raceId: record.raceId)
-                record.experience = UInt64(cappedExperience)
-                let computedLevel = try resolveLevel(for: cappedExperience, raceId: record.raceId)
-                if computedLevel != Int(previousLevel) {
-                    record.level = UInt8(computedLevel)
-                    leveledUpIds.append(update.characterId)
+                if update.experienceDelta != 0 {
+                    let previousLevel = record.level
+                    let addition = Int64(record.experience).addingReportingOverflow(Int64(update.experienceDelta))
+                    guard !addition.overflow else {
+                        throw ProgressError.invalidInput(description: "経験値計算中にオーバーフローが発生しました")
+                    }
+                    let updatedExperience = max(0, Int(addition.partialValue))
+                    let cappedExperience = try self.clampExperience(updatedExperience, raceId: record.raceId)
+                    record.experience = UInt64(cappedExperience)
+                    let computedLevel = try self.resolveLevel(for: cappedExperience, raceId: record.raceId)
+                    if computedLevel != Int(previousLevel) {
+                        record.level = UInt8(computedLevel)
+                        leveledUpIds.append(update.characterId)
+                    }
+                }
+                if update.hpDelta != 0 {
+                    let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
+                    record.currentHP = UInt32(max(0, newHP))
                 }
             }
-            if update.hpDelta != 0 {
-                let newHP = Int64(record.currentHP) + Int64(update.hpDelta)
-                record.currentHP = UInt32(max(0, newHP))
-            }
-        }
 
-        if context.hasChanges {
-            try context.save()
-            if !leveledUpIds.isEmpty {
-                notifyCharacterChange(upserted: leveledUpIds)
+            if context.hasChanges {
+                try context.save()
+                if !leveledUpIds.isEmpty {
+                    self.notifyCharacterChange(upserted: leveledUpIds)
+                }
             }
+            return leveledUpIds
         }
-        return leveledUpIds
     }
 
-    private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
+    nonisolated private func resolveLevel(for experience: Int, raceId: UInt8) throws -> Int {
         let maxLevel = try raceMaxLevel(for: raceId)
         do {
             return try CharacterExperienceTable.level(forTotalExperience: experience, maximumLevel: maxLevel)
@@ -145,26 +149,26 @@ actor CharacterProgressService {
         }
     }
 
-    private func raceMaxLevel(for raceId: UInt8) throws -> Int {
-        guard let definition = masterData.race(raceId) else {
+    nonisolated private func raceMaxLevel(for raceId: UInt8) throws -> Int {
+        guard let definition = self.masterData.race(raceId) else {
             throw ProgressError.invalidInput(description: "種族マスタに存在しないIDです (\(raceId))")
         }
         return definition.maxLevel
     }
 
-    private func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
+    nonisolated private func clampExperience(_ experience: Int, raceId: UInt8) throws -> Int {
         guard experience > 0 else { return 0 }
         let maximum = try raceMaxExperience(for: raceId)
         return min(experience, maximum)
     }
 
-    private func raceMaxExperience(for raceId: UInt8) throws -> Int {
+    nonisolated private func raceMaxExperience(for raceId: UInt8) throws -> Int {
         let maxLevel = try raceMaxLevel(for: raceId)
         return try CharacterExperienceTable.totalExperience(toReach: maxLevel)
     }
 
     /// インベントリ変更通知を送信（装備のつけ外し時に使用、stackKeyと数量のみ）
-    private func postInventoryChange(
+    nonisolated private func postInventoryChange(
         upserted: [InventoryItemRecord] = [],
         removed: [String] = [],
         equippedItemsChange: UserDataLoadService.InventoryChange.EquippedItemsChange? = nil
@@ -192,37 +196,39 @@ actor CharacterProgressService {
 
     // MARK: - Read Operations
 
-    func allCharacters() throws -> [CachedCharacter] {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>()
-        descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
-        let records = try context.fetch(descriptor)
-        return try makeCachedCharacters(records, context: context)
+    func allCharacters() async throws -> [CachedCharacter] {
+        try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>()
+            descriptor.sortBy = [SortDescriptor(\CharacterRecord.displayOrder, order: .forward)]
+            let records = try context.fetch(descriptor)
+            return try self.makeCachedCharacters(records, context: context)
+        }
     }
 
-    func characters(withIds ids: [UInt8]) throws -> [CachedCharacter] {
+    func characters(withIds ids: [UInt8]) async throws -> [CachedCharacter] {
         guard !ids.isEmpty else { return [] }
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
-        let records = try context.fetch(descriptor)
-        let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
-        var ordered: [CharacterRecord] = []
-        var missing: [UInt8] = []
-        var seen: Set<UInt8> = []
-        for id in ids {
-            guard let record = map[id] else {
-                missing.append(id)
-                continue
+        return try await withContext { context in
+            let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { ids.contains($0.id) })
+            let records = try context.fetch(descriptor)
+            let map = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+            var ordered: [CharacterRecord] = []
+            var missing: [UInt8] = []
+            var seen: Set<UInt8> = []
+            for id in ids {
+                guard let record = map[id] else {
+                    missing.append(id)
+                    continue
+                }
+                if seen.insert(id).inserted {
+                    ordered.append(record)
+                }
             }
-            if seen.insert(id).inserted {
-                ordered.append(record)
+            if !missing.isEmpty {
+                let identifierList = missing.map { String($0) }.joined(separator: ", ")
+                throw ProgressError.invalidInput(description: "キャラクターが見つかりません (ID: \(identifierList))")
             }
+            return try self.makeCachedCharacters(ordered, context: context)
         }
-        if !missing.isEmpty {
-            let identifierList = missing.map { String($0) }.joined(separator: ", ")
-            throw ProgressError.invalidInput(description: "キャラクターが見つかりません (ID: \(identifierList))")
-        }
-        return try makeCachedCharacters(ordered, context: context)
     }
 
     /// 装備変更時の高速CachedCharacter再構築
@@ -235,14 +241,14 @@ actor CharacterProgressService {
         try CachedCharacterFactory.withEquipmentChange(
             current: current,
             newEquippedItems: newEquippedItems,
-            masterData: masterData,
+            masterData: self.masterData,
             pandoraBoxItems: pandoraBoxItems
         )
     }
 
     /// CharacterRecordからCharacterInputを生成（計算なし）。
     /// Progress層からRuntime層へデータを渡すために使用。
-    func loadInput(_ record: CharacterRecord, context: ModelContext) throws -> CharacterInput {
+    nonisolated func loadInput(_ record: CharacterRecord, context: ModelContext) throws -> CharacterInput {
         let characterId = record.id
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(
             predicate: #Predicate { $0.characterId == characterId }
@@ -296,55 +302,54 @@ actor CharacterProgressService {
 
     // MARK: - Create
 
-    func createCharacter(_ request: CharacterCreationRequest) throws -> CachedCharacter {
+    func createCharacter(_ request: CharacterCreationRequest) async throws -> CachedCharacter {
         let trimmedName = request.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
         }
+        return try await withContext { context in
+            // ID採番: 1〜200で最小の未使用IDを割り当てる
+            let newId = try self.allocateCharacterId(context: context)
 
-        let context = contextProvider.makeContext()
+            // displayOrder採番: 既存の最大値+1
+            let newDisplayOrder = try self.allocateDisplayOrder(context: context)
 
-        // ID採番: 1〜200で最小の未使用IDを割り当てる
-        let newId = try allocateCharacterId(context: context)
+            // 種族のgenderCodeを取得してavatarIdを計算（職業画像: genderCode * 100 + jobId）
+            let race = self.masterData.race(request.raceId)
+            let avatarId: UInt16 = if let race {
+                UInt16(race.genderCode) * 100 + UInt16(request.jobId)
+            } else {
+                0
+            }
 
-        // displayOrder採番: 既存の最大値+1
-        let newDisplayOrder = try allocateDisplayOrder(context: context)
+            let record = CharacterRecord(
+                id: newId,
+                displayName: trimmedName,
+                raceId: request.raceId,
+                jobId: request.jobId,
+                avatarId: avatarId,
+                level: 1,
+                experience: 0,
+                currentHP: 0,  // makeSnapshot後に正しい値を設定
+                primaryPersonalityId: 0,
+                secondaryPersonalityId: 0,
+                actionRateAttack: 100,
+                actionRatePriestMagic: 75,
+                actionRateMageMagic: 75,
+                actionRateBreath: 50
+            )
+            record.displayOrder = newDisplayOrder
+            context.insert(record)
+            try context.save()
 
-        // 種族のgenderCodeを取得してavatarIdを計算（職業画像: genderCode * 100 + jobId）
-        let race = masterData.race(request.raceId)
-        let avatarId: UInt16 = if let race {
-            UInt16(race.genderCode) * 100 + UInt16(request.jobId)
-        } else {
-            0
+            // ステータス計算を行い、maxHPを取得してrecordに書き戻す
+            let character = try self.makeCachedCharacter(record, context: context)
+            record.currentHP = UInt32(character.maxHP)
+            try context.save()
+
+            self.notifyCharacterChange(upserted: [newId])
+            return character
         }
-
-        let record = CharacterRecord(
-            id: newId,
-            displayName: trimmedName,
-            raceId: request.raceId,
-            jobId: request.jobId,
-            avatarId: avatarId,
-            level: 1,
-            experience: 0,
-            currentHP: 0,  // makeSnapshot後に正しい値を設定
-            primaryPersonalityId: 0,
-            secondaryPersonalityId: 0,
-            actionRateAttack: 100,
-            actionRatePriestMagic: 75,
-            actionRateMageMagic: 75,
-            actionRateBreath: 50
-        )
-        record.displayOrder = newDisplayOrder
-        context.insert(record)
-        try context.save()
-
-        // ステータス計算を行い、maxHPを取得してrecordに書き戻す
-        let character = try makeCachedCharacter(record, context: context)
-        record.currentHP = UInt32(character.maxHP)
-        try context.save()
-
-        notifyCharacterChange(upserted: [newId])
-        return character
     }
 
     /// デバッグ用: 複数キャラクターを一括作成
@@ -356,140 +361,146 @@ actor CharacterProgressService {
         onProgress: (@Sendable (Int, Int) async -> Void)? = nil
     ) async throws -> Int {
         guard !requests.isEmpty else { return 0 }
-        let context = contextProvider.makeContext()
-
-        // 使用可能なIDを確保
-        let occupied = Set(try context.fetch(FetchDescriptor<CharacterRecord>()).map(\.id))
-        let availableCount = (1...200).filter { !occupied.contains(UInt8($0)) }.count
-        if availableCount < requests.count {
-            throw ProgressError.invalidInput(
-                description: "キャラクター数が上限に達しています（空き: \(availableCount), 要求: \(requests.count)）"
-            )
-        }
-        let availableIds = (1...200).lazy.map(UInt8.init).filter { !occupied.contains($0) }
-        var idIterator = availableIds.makeIterator()
-
-        // 現在の最大displayOrderを取得（UInt8なので255を超えないようにクランプ）
-        let existingRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
-        let maxDisplayOrder = existingRecords.map { Int($0.displayOrder) }.max() ?? 0
-        var displayOrder = min(maxDisplayOrder + 1, 255)
-
-        var createdIds: [UInt8] = []
-        let total = requests.count
-
-        for request in requests {
-            guard let newId = idIterator.next() else {
-                throw ProgressError.invalidInput(description: "キャラクターIDの割り当てに失敗しました")
+        let progressHandler = onProgress
+        return try await withContext { context in
+            // 使用可能なIDを確保
+            let occupied = Set(try context.fetch(FetchDescriptor<CharacterRecord>()).map(\.id))
+            let availableCount = (1...200).filter { !occupied.contains(UInt8($0)) }.count
+            if availableCount < requests.count {
+                throw ProgressError.invalidInput(
+                    description: "キャラクター数が上限に達しています（空き: \(availableCount), 要求: \(requests.count)）"
+                )
             }
+            let availableIds = (1...200).lazy.map(UInt8.init).filter { !occupied.contains($0) }
+            var idIterator = availableIds.makeIterator()
 
-            // 種族・職業の存在チェック
-            guard let race = masterData.race(request.raceId) else {
-                throw ProgressError.invalidInput(description: "種族ID \(request.raceId) のマスターデータが見つかりません")
-            }
-            guard masterData.job(request.jobId) != nil else {
-                throw ProgressError.invalidInput(description: "職業ID \(request.jobId) のマスターデータが見つかりません")
-            }
+            // 現在の最大displayOrderを取得（UInt8なので255を超えないようにクランプ）
+            let existingRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
+            let maxDisplayOrder = existingRecords.map { Int($0.displayOrder) }.max() ?? 0
+            var displayOrder = min(maxDisplayOrder + 1, 255)
 
-            // 前職の存在チェック（0以外の場合）
-            if request.previousJobId > 0 {
-                guard masterData.job(request.previousJobId) != nil else {
-                    throw ProgressError.invalidInput(description: "前職ID \(request.previousJobId) のマスターデータが見つかりません")
+            var createdIds: [UInt8] = []
+            let total = requests.count
+
+            for request in requests {
+                guard let newId = idIterator.next() else {
+                    throw ProgressError.invalidInput(description: "キャラクターIDの割り当てに失敗しました")
+                }
+
+                // 種族・職業の存在チェック
+                guard let race = self.masterData.race(request.raceId) else {
+                    throw ProgressError.invalidInput(description: "種族ID \(request.raceId) のマスターデータが見つかりません")
+                }
+                guard self.masterData.job(request.jobId) != nil else {
+                    throw ProgressError.invalidInput(description: "職業ID \(request.jobId) のマスターデータが見つかりません")
+                }
+
+                // 前職の存在チェック（0以外の場合）
+                if request.previousJobId > 0 {
+                    guard self.masterData.job(request.previousJobId) != nil else {
+                        throw ProgressError.invalidInput(description: "前職ID \(request.previousJobId) のマスターデータが見つかりません")
+                    }
+                }
+
+                // レベルの入力検証（1未満はエラー、種族最大超過はクランプ）
+                if request.level < 1 {
+                    throw ProgressError.invalidInput(description: "レベルは1以上である必要があります（入力: \(request.level)）")
+                }
+                let effectiveLevel = min(request.level, min(race.maxLevel, 255))
+
+                let avatarId = UInt16(race.genderCode) * 100 + UInt16(request.jobId)
+
+                // 指定レベルに必要な経験値を計算
+                let experience: UInt64
+                if effectiveLevel > 1 {
+                    let rawExperience = try CharacterExperienceTable.totalExperience(toReach: effectiveLevel)
+                    experience = UInt64(rawExperience)
+                } else {
+                    experience = 0
+                }
+
+                let record = CharacterRecord(
+                    id: newId,
+                    displayName: request.displayName,
+                    raceId: request.raceId,
+                    jobId: request.jobId,
+                    previousJobId: request.previousJobId,
+                    avatarId: avatarId,
+                    level: UInt8(effectiveLevel),
+                    experience: experience,
+                    currentHP: 0,
+                    primaryPersonalityId: 0,
+                    secondaryPersonalityId: 0,
+                    actionRateAttack: 100,
+                    actionRatePriestMagic: 75,
+                    actionRateMageMagic: 75,
+                    actionRateBreath: 50
+                )
+                record.displayOrder = UInt8(displayOrder)
+                if displayOrder < 255 { displayOrder += 1 }
+                context.insert(record)
+
+                createdIds.append(newId)
+                if let progressHandler {
+                    let currentCount = createdIds.count
+                    Task { await progressHandler(currentCount, total) }
                 }
             }
 
-            // レベルの入力検証（1未満はエラー、種族最大超過はクランプ）
-            if request.level < 1 {
-                throw ProgressError.invalidInput(description: "レベルは1以上である必要があります（入力: \(request.level)）")
+            try context.save()
+
+            // HP設定（新規作成分のみmaxHPで初期化）
+            let createdIdSet = Set(createdIds)
+            let allRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
+            // デバッグ用バッチ作成ではGameStateがない可能性があるため、エラー時は空セットを使用
+            let pandoraBoxItems = (try? self.fetchPandoraBoxItems(context: context)) ?? []
+            for record in allRecords where createdIdSet.contains(record.id) {
+                let input = try self.loadInput(record, context: context)
+                let runtimeCharacter = try CachedCharacterFactory.make(from: input, masterData: self.masterData, pandoraBoxItems: pandoraBoxItems)
+                record.currentHP = UInt32(runtimeCharacter.maxHP)
             }
-            let effectiveLevel = min(request.level, min(race.maxLevel, 255))
+            try context.save()
 
-            let avatarId = UInt16(race.genderCode) * 100 + UInt16(request.jobId)
-
-            // 指定レベルに必要な経験値を計算
-            let experience: UInt64
-            if effectiveLevel > 1 {
-                let rawExperience = try CharacterExperienceTable.totalExperience(toReach: effectiveLevel)
-                experience = UInt64(rawExperience)
-            } else {
-                experience = 0
-            }
-
-            let record = CharacterRecord(
-                id: newId,
-                displayName: request.displayName,
-                raceId: request.raceId,
-                jobId: request.jobId,
-                previousJobId: request.previousJobId,
-                avatarId: avatarId,
-                level: UInt8(effectiveLevel),
-                experience: experience,
-                currentHP: 0,
-                primaryPersonalityId: 0,
-                secondaryPersonalityId: 0,
-                actionRateAttack: 100,
-                actionRatePriestMagic: 75,
-                actionRateMageMagic: 75,
-                actionRateBreath: 50
-            )
-            record.displayOrder = UInt8(displayOrder)
-            if displayOrder < 255 { displayOrder += 1 }
-            context.insert(record)
-
-            createdIds.append(newId)
-            await onProgress?(createdIds.count, total)
+            self.notifyCharacterChange(upserted: createdIds)
+            return createdIds.count
         }
-
-        try context.save()
-
-        // HP設定（新規作成分のみmaxHPで初期化）
-        let createdIdSet = Set(createdIds)
-        let allRecords = try context.fetch(FetchDescriptor<CharacterRecord>())
-        // デバッグ用バッチ作成ではGameStateがない可能性があるため、エラー時は空セットを使用
-        let pandoraBoxItems = (try? fetchPandoraBoxItems(context: context)) ?? []
-        for record in allRecords where createdIdSet.contains(record.id) {
-            let input = try loadInput(record, context: context)
-            let runtimeCharacter = try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
-            record.currentHP = UInt32(runtimeCharacter.maxHP)
-        }
-        try context.save()
-
-        notifyCharacterChange(upserted: createdIds)
-        return createdIds.count
     }
 
     // MARK: - Update
 
     /// 表示名を更新
     @discardableResult
-    func updateName(characterId: UInt8, newName: String) throws -> CachedCharacter {
+    func updateName(characterId: UInt8, newName: String) async throws -> CachedCharacter {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw ProgressError.invalidInput(description: "キャラクター名が設定されていません")
         }
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.characterNotFound
+        return try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.characterNotFound
+            }
+            record.displayName = trimmed
+            try context.save()
+            self.notifyCharacterChange(upserted: [characterId])
+            return try self.makeCachedCharacter(record, context: context)
         }
-        record.displayName = trimmed
-        try context.save()
-        notifyCharacterChange(upserted: [characterId])
-        return try makeCachedCharacter(record, context: context)
     }
 
     /// アバターを更新
-    func updateAvatar(characterId: UInt8, newAvatarId: UInt16) throws -> CachedCharacter {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.characterNotFound
+    func updateAvatar(characterId: UInt8, newAvatarId: UInt16) async throws -> CachedCharacter {
+        try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.characterNotFound
+            }
+            record.avatarId = newAvatarId
+            try context.save()
+            self.notifyCharacterChange(upserted: [characterId])
+            return try self.makeCachedCharacter(record, context: context)
         }
-        record.avatarId = newAvatarId
-        try context.save()
-        notifyCharacterChange(upserted: [characterId])
-        return try makeCachedCharacter(record, context: context)
     }
 
     /// 行動優先度を更新
@@ -499,7 +510,7 @@ actor CharacterProgressService {
         priestMagic: Int,
         mageMagic: Int,
         breath: Int
-    ) throws -> CachedCharacter {
+    ) async throws -> CachedCharacter {
         // 値を正規化（0-100にクランプ）
         let normalized = CharacterValues.ActionPreferences.normalized(
             attack: attack,
@@ -508,71 +519,74 @@ actor CharacterProgressService {
             breath: breath
         )
 
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.characterNotFound
+        return try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.characterNotFound
+            }
+            record.actionRateAttack = UInt8(normalized.attack)
+            record.actionRatePriestMagic = UInt8(normalized.priestMagic)
+            record.actionRateMageMagic = UInt8(normalized.mageMagic)
+            record.actionRateBreath = UInt8(normalized.breath)
+            try context.save()
+            self.notifyCharacterChange(upserted: [characterId])
+            return try self.makeCachedCharacter(record, context: context)
         }
-        record.actionRateAttack = UInt8(normalized.attack)
-        record.actionRatePriestMagic = UInt8(normalized.priestMagic)
-        record.actionRateMageMagic = UInt8(normalized.mageMagic)
-        record.actionRateBreath = UInt8(normalized.breath)
-        try context.save()
-        notifyCharacterChange(upserted: [characterId])
-        return try makeCachedCharacter(record, context: context)
     }
 
     /// HP 0のキャラクターを蘇生（HP = maxHP / 2、最低1）
-    func reviveCharacter(id: UInt8) throws {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.characterNotFound
+    func reviveCharacter(id: UInt8) async throws {
+        try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.characterNotFound
+            }
+            guard record.currentHP == 0 else {
+                throw ProgressError.invalidInput(description: "このキャラクターは既に生存しています")
+            }
+            // maxHPを計算
+            let input = try self.loadInput(record, context: context)
+            let pandoraBoxItems = try self.fetchPandoraBoxItems(context: context)
+            let character = try CachedCharacterFactory.make(from: input, masterData: self.masterData, pandoraBoxItems: pandoraBoxItems)
+            record.currentHP = UInt32(max(1, character.maxHP / 2))
+            try context.save()
+            self.notifyCharacterChange(upserted: [id])
         }
-        guard record.currentHP == 0 else {
-            throw ProgressError.invalidInput(description: "このキャラクターは既に生存しています")
-        }
-        // maxHPを計算
-        let input = try loadInput(record, context: context)
-        let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
-        let character = try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
-        record.currentHP = UInt32(max(1, character.maxHP / 2))
-        try context.save()
-        notifyCharacterChange(upserted: [id])
     }
 
     /// HP > 0 のキャラクターを全回復する
     /// - Parameter characterIds: 対象キャラクターID配列
-    func healToFull(characterIds: [UInt8]) throws {
+    func healToFull(characterIds: [UInt8]) async throws {
         guard !characterIds.isEmpty else { return }
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
-        let records = try context.fetch(descriptor)
+        try await withContext { context in
+            let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { characterIds.contains($0.id) })
+            let records = try context.fetch(descriptor)
 
-        // ループの外で1回だけ取得
-        let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
+            // ループの外で1回だけ取得
+            let pandoraBoxItems = try self.fetchPandoraBoxItems(context: context)
 
-        var modifiedIds: [UInt8] = []
-        for record in records {
-            // HP > 0 のキャラクターのみ回復（HP 0 は蘇生経路を使う）
-            guard record.currentHP > 0 else { continue }
+            var modifiedIds: [UInt8] = []
+            for record in records {
+                // HP > 0 のキャラクターのみ回復（HP 0 は蘇生経路を使う）
+                guard record.currentHP > 0 else { continue }
 
-            // maxHPを計算
-            let input = try loadInput(record, context: context)
-            let runtimeCharacter = try CachedCharacterFactory.make(from: input, masterData: masterData, pandoraBoxItems: pandoraBoxItems)
-            let maxHP = UInt32(runtimeCharacter.maxHP)
+                // maxHPを計算
+                let input = try self.loadInput(record, context: context)
+                let runtimeCharacter = try CachedCharacterFactory.make(from: input, masterData: self.masterData, pandoraBoxItems: pandoraBoxItems)
+                let maxHP = UInt32(runtimeCharacter.maxHP)
 
-            if record.currentHP < maxHP {
-                record.currentHP = maxHP
-                modifiedIds.append(record.id)
+                if record.currentHP < maxHP {
+                    record.currentHP = maxHP
+                    modifiedIds.append(record.id)
+                }
             }
-        }
 
-        if !modifiedIds.isEmpty {
-            try context.save()
-            notifyCharacterChange(upserted: modifiedIds)
+            if !modifiedIds.isEmpty {
+                try context.save()
+                self.notifyCharacterChange(upserted: modifiedIds)
+            }
         }
     }
 
@@ -583,119 +597,122 @@ actor CharacterProgressService {
     ///   - characterId: キャラクターID
     ///   - newJobId: 新しい職業ID（1〜16: 通常職、101〜116: マスター職）
     /// - Returns: 更新後のキャラクター
-    func changeJob(characterId: UInt8, newJobId: UInt8) throws -> CachedCharacter {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.characterNotFound
-        }
-
-        // 探索中のキャラクターは転職不可
-        if try isCharacterExploring(characterId: characterId, context: context) {
-            throw ProgressError.invalidInput(description: "探索中のキャラクターは転職できません")
-        }
-
-        // 転職は1回のみ
-        if record.previousJobId != 0 {
-            throw ProgressError.invalidInput(description: "このキャラクターは既に転職済みです")
-        }
-
-        // マスター職（id 101〜116）への転職条件チェック
-        if newJobId >= 101 && newJobId <= 116 {
-            let baseJobId = newJobId - 100  // 101→1, 102→2, ...
-            // 現在の職業が対応する基本職で、かつLv50以上であること
-            if record.jobId != baseJobId {
-                throw ProgressError.invalidInput(description: "マスター職への転職は元の職業から行う必要があります")
+    func changeJob(characterId: UInt8, newJobId: UInt8) async throws -> CachedCharacter {
+        try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == characterId })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.characterNotFound
             }
-            if record.level < 50 {
-                throw ProgressError.invalidInput(description: "マスター職への転職にはLv50以上が必要です")
+
+            // 探索中のキャラクターは転職不可
+            if try self.isCharacterExploring(characterId: characterId, context: context) {
+                throw ProgressError.invalidInput(description: "探索中のキャラクターは転職できません")
             }
+
+            // 転職は1回のみ
+            if record.previousJobId != 0 {
+                throw ProgressError.invalidInput(description: "このキャラクターは既に転職済みです")
+            }
+
+            // マスター職（id 101〜116）への転職条件チェック
+            if newJobId >= 101 && newJobId <= 116 {
+                let baseJobId = newJobId - 100  // 101→1, 102→2, ...
+                // 現在の職業が対応する基本職で、かつLv50以上であること
+                if record.jobId != baseJobId {
+                    throw ProgressError.invalidInput(description: "マスター職への転職は元の職業から行う必要があります")
+                }
+                if record.level < 50 {
+                    throw ProgressError.invalidInput(description: "マスター職への転職にはLv50以上が必要です")
+                }
+            }
+
+            // 同じ職業への転職は不可
+            if record.jobId == newJobId {
+                throw ProgressError.invalidInput(description: "現在と同じ職業には転職できません")
+            }
+
+            // 装備を全てインベントリに戻す（レベルが1にリセットされるため）
+            try self.unequipAllItems(characterId: characterId, context: context)
+
+            // 装備キャッシュを空にする通知を送信
+            let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
+                characterId: characterId,
+                items: []
+            )
+            self.postInventoryChange(equippedItemsChange: equippedItemsChange)
+
+            // 転職実行
+            record.previousJobId = record.jobId
+            record.jobId = newJobId
+            record.level = 1
+            record.experience = 0
+
+            // avatarIdを再計算（職業画像: genderCode * 100 + jobId）
+            let race = self.masterData.race(record.raceId)
+            if let race {
+                record.avatarId = UInt16(race.genderCode) * 100 + UInt16(newJobId)
+            }
+
+            try context.save()
+            self.notifyCharacterChange(upserted: [characterId])
+            return try self.makeCachedCharacter(record, context: context)
         }
-
-        // 同じ職業への転職は不可
-        if record.jobId == newJobId {
-            throw ProgressError.invalidInput(description: "現在と同じ職業には転職できません")
-        }
-
-        // 装備を全てインベントリに戻す（レベルが1にリセットされるため）
-        try unequipAllItems(characterId: characterId, context: context)
-
-        // 装備キャッシュを空にする通知を送信
-        let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
-            characterId: characterId,
-            items: []
-        )
-        postInventoryChange(equippedItemsChange: equippedItemsChange)
-
-        // 転職実行
-        record.previousJobId = record.jobId
-        record.jobId = newJobId
-        record.level = 1
-        record.experience = 0
-
-        // avatarIdを再計算（職業画像: genderCode * 100 + jobId）
-        let race = masterData.race(record.raceId)
-        if let race {
-            record.avatarId = UInt16(race.genderCode) * 100 + UInt16(newJobId)
-        }
-
-        try context.save()
-        notifyCharacterChange(upserted: [characterId])
-        return try makeCachedCharacter(record, context: context)
     }
 
     // MARK: - Delete
 
-    func deleteCharacter(id: UInt8) throws {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else { return }
+    func deleteCharacter(id: UInt8) async throws {
+        try await withContext { context in
+            var descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { $0.id == id })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else { return }
 
-        // 探索中のキャラクターは解雇不可
-        if try isCharacterExploring(characterId: id, context: context) {
-            throw ProgressError.invalidInput(description: "探索中のキャラクターを解雇できません")
+            // 探索中のキャラクターは解雇不可
+            if try self.isCharacterExploring(characterId: id, context: context) {
+                throw ProgressError.invalidInput(description: "探索中のキャラクターを解雇できません")
+            }
+
+            try self.deleteEquipment(for: id, context: context)
+            try self.removeFromParties(characterId: id, context: context)
+            context.delete(record)
+            try context.save()
+            self.notifyCharacterChange(removed: [id])
         }
-
-        try deleteEquipment(for: id, context: context)
-        try removeFromParties(characterId: id, context: context)
-        context.delete(record)
-        try context.save()
-        notifyCharacterChange(removed: [id])
     }
 
     // MARK: - Display Order
 
     /// キャラクターの表示順序を更新
     /// - Parameter orderedIds: 新しい順序でのキャラクターID配列
-    func reorderCharacters(orderedIds: [UInt8]) throws {
+    func reorderCharacters(orderedIds: [UInt8]) async throws {
         guard !orderedIds.isEmpty else { return }
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { orderedIds.contains($0.id) })
-        let records = try context.fetch(descriptor)
-        let recordMap = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+        try await withContext { context in
+            let descriptor = FetchDescriptor<CharacterRecord>(predicate: #Predicate { orderedIds.contains($0.id) })
+            let records = try context.fetch(descriptor)
+            let recordMap = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
 
-        // 指定されたIDがすべて存在するか確認
-        let missingIds = orderedIds.filter { recordMap[$0] == nil }
-        if !missingIds.isEmpty {
-            let idList = missingIds.map { String($0) }.joined(separator: ", ")
-            throw ProgressError.invalidInput(description: "指定されたキャラクターが見つかりません (ID: \(idList))")
+            // 指定されたIDがすべて存在するか確認
+            let missingIds = orderedIds.filter { recordMap[$0] == nil }
+            if !missingIds.isEmpty {
+                let idList = missingIds.map { String($0) }.joined(separator: ", ")
+                throw ProgressError.invalidInput(description: "指定されたキャラクターが見つかりません (ID: \(idList))")
+            }
+
+            for (index, id) in orderedIds.enumerated() {
+                let record = recordMap[id]!
+                record.displayOrder = UInt8(index + 1)
+            }
+
+            try context.save()
+            self.notifyCharacterChange(upserted: orderedIds)
         }
-
-        for (index, id) in orderedIds.enumerated() {
-            let record = recordMap[id]!
-            record.displayOrder = UInt8(index + 1)
-        }
-
-        try context.save()
-        notifyCharacterChange(upserted: orderedIds)
     }
 
     // MARK: - Equipment Management
 
     /// 装備処理の結果
-    struct EquipResult {
+    struct EquipResult: Sendable {
         let equippedItems: [CharacterValues.EquippedItem]
     }
 
@@ -707,7 +724,7 @@ actor CharacterProgressService {
     ///   - equipmentCapacity: 装備上限（呼び出し元が既に持っているCachedCharacterから取得）
     ///   - skipNotification: trueの場合、インベントリ変更通知を送信しない（呼び出し元で手動更新する場合）
     /// - Returns: 装備処理の結果（装備リストとインベントリ変更情報）
-    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, equipmentCapacity: Int, skipNotification: Bool = false) throws -> EquipResult {
+    func equipItem(characterId: UInt8, inventoryItemStackKey: String, quantity: Int = 1, equipmentCapacity: Int, skipNotification: Bool = false) async throws -> EquipResult {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "装備数量は1以上である必要があります")
         }
@@ -716,84 +733,83 @@ actor CharacterProgressService {
         guard let components = StackKeyComponents(stackKey: inventoryItemStackKey) else {
             throw ProgressError.invalidInput(description: "無効なstackKeyです")
         }
+        return try await withContext { context in
+            // 探索中のキャラクターは装備変更不可
+            if try self.isCharacterExploring(characterId: characterId, context: context) {
+                throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
+            }
 
-        let context = contextProvider.makeContext()
+            // インベントリアイテムの取得（個別フィールドで検索）
+            let storageTypeValue = ItemStorage.playerItem.rawValue
+            let superRare = components.superRareTitleId
+            let normal = components.normalTitleId
+            let itemId = components.itemId
+            let socketSuperRare = components.socketSuperRareTitleId
+            let socketNormal = components.socketNormalTitleId
+            let socketItem = components.socketItemId
+            var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.storageType == storageTypeValue &&
+                $0.superRareTitleId == superRare &&
+                $0.normalTitleId == normal &&
+                $0.itemId == itemId &&
+                $0.socketSuperRareTitleId == socketSuperRare &&
+                $0.socketNormalTitleId == socketNormal &&
+                $0.socketItemId == socketItem
+            })
+            inventoryDescriptor.fetchLimit = 1
+            guard let inventoryRecord = try context.fetch(inventoryDescriptor).first else {
+                throw ProgressError.invalidInput(description: "アイテムが見つかりません")
+            }
 
-        // 探索中のキャラクターは装備変更不可
-        if try isCharacterExploring(characterId: characterId, context: context) {
-            throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
+            guard inventoryRecord.quantity >= quantity else {
+                throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
+            }
+
+            // 現在の装備数をチェック
+            let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
+            let currentEquipment = try context.fetch(equipmentDescriptor)
+
+            if currentEquipment.count + quantity > equipmentCapacity {
+                throw ProgressError.invalidInput(description: "装備数が上限(\(equipmentCapacity)個)を超えます")
+            }
+
+            // 装備レコード作成（1アイテム1レコード、quantityなし）
+            for _ in 0..<quantity {
+                let equipmentRecord = CharacterEquipmentRecord(
+                    characterId: characterId,
+                    superRareTitleId: inventoryRecord.superRareTitleId,
+                    normalTitleId: inventoryRecord.normalTitleId,
+                    itemId: inventoryRecord.itemId,
+                    socketSuperRareTitleId: inventoryRecord.socketSuperRareTitleId,
+                    socketNormalTitleId: inventoryRecord.socketNormalTitleId,
+                    socketItemId: inventoryRecord.socketItemId
+                )
+                context.insert(equipmentRecord)
+            }
+
+            // インベントリから減算（数量0でも削除しない）
+            inventoryRecord.quantity -= UInt16(quantity)
+
+            try context.save()
+
+            // 更新後の装備リストを取得
+            let equippedItems = try self.fetchEquippedItems(characterId: characterId, context: context)
+
+            // キャッシュ更新のためインベントリ変更通知を送信（装備変更も含む）
+            if !skipNotification {
+                let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
+                    characterId: characterId,
+                    items: equippedItems
+                )
+                self.postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
+            }
+
+            return EquipResult(equippedItems: equippedItems)
         }
-
-        // インベントリアイテムの取得（個別フィールドで検索）
-        let storageTypeValue = ItemStorage.playerItem.rawValue
-        let superRare = components.superRareTitleId
-        let normal = components.normalTitleId
-        let itemId = components.itemId
-        let socketSuperRare = components.socketSuperRareTitleId
-        let socketNormal = components.socketNormalTitleId
-        let socketItem = components.socketItemId
-        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue &&
-            $0.superRareTitleId == superRare &&
-            $0.normalTitleId == normal &&
-            $0.itemId == itemId &&
-            $0.socketSuperRareTitleId == socketSuperRare &&
-            $0.socketNormalTitleId == socketNormal &&
-            $0.socketItemId == socketItem
-        })
-        inventoryDescriptor.fetchLimit = 1
-        guard let inventoryRecord = try context.fetch(inventoryDescriptor).first else {
-            throw ProgressError.invalidInput(description: "アイテムが見つかりません")
-        }
-
-        guard inventoryRecord.quantity >= quantity else {
-            throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
-        }
-
-        // 現在の装備数をチェック
-        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
-        let currentEquipment = try context.fetch(equipmentDescriptor)
-
-        if currentEquipment.count + quantity > equipmentCapacity {
-            throw ProgressError.invalidInput(description: "装備数が上限(\(equipmentCapacity)個)を超えます")
-        }
-
-        // 装備レコード作成（1アイテム1レコード、quantityなし）
-        for _ in 0..<quantity {
-            let equipmentRecord = CharacterEquipmentRecord(
-                characterId: characterId,
-                superRareTitleId: inventoryRecord.superRareTitleId,
-                normalTitleId: inventoryRecord.normalTitleId,
-                itemId: inventoryRecord.itemId,
-                socketSuperRareTitleId: inventoryRecord.socketSuperRareTitleId,
-                socketNormalTitleId: inventoryRecord.socketNormalTitleId,
-                socketItemId: inventoryRecord.socketItemId
-            )
-            context.insert(equipmentRecord)
-        }
-
-        // インベントリから減算（数量0でも削除しない）
-        inventoryRecord.quantity -= UInt16(quantity)
-
-        try context.save()
-
-        // 更新後の装備リストを取得
-        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
-
-        // キャッシュ更新のためインベントリ変更通知を送信（装備変更も含む）
-        if !skipNotification {
-            let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
-                characterId: characterId,
-                items: equippedItems
-            )
-            postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
-        }
-
-        return EquipResult(equippedItems: equippedItems)
     }
 
     /// 解除処理の結果
-    struct UnequipResult {
+    struct UnequipResult: Sendable {
         let equippedItems: [CharacterValues.EquippedItem]
     }
 
@@ -804,7 +820,7 @@ actor CharacterProgressService {
     ///   - quantity: 解除数量（デフォルト1）
     ///   - skipNotification: trueの場合、インベントリ変更通知を送信しない（呼び出し元で手動更新する場合）
     /// - Returns: 解除処理の結果（装備リストとインベントリ変更情報）
-    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1, skipNotification: Bool = false) throws -> UnequipResult {
+    func unequipItem(characterId: UInt8, equipmentStackKey: String, quantity: Int = 1, skipNotification: Bool = false) async throws -> UnequipResult {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "解除数量は1以上である必要があります")
         }
@@ -813,98 +829,97 @@ actor CharacterProgressService {
         guard let components = StackKeyComponents(stackKey: equipmentStackKey) else {
             throw ProgressError.invalidInput(description: "無効なstackKeyです")
         }
+        return try await withContext { context in
+            // 探索中のキャラクターは装備変更不可
+            if try self.isCharacterExploring(characterId: characterId, context: context) {
+                throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
+            }
 
-        let context = contextProvider.makeContext()
+            // 装備レコードの取得（個別フィールドで検索）
+            let superRare = components.superRareTitleId
+            let normal = components.normalTitleId
+            let itemId = components.itemId
+            let socketSuperRare = components.socketSuperRareTitleId
+            let socketNormal = components.socketNormalTitleId
+            let socketItem = components.socketItemId
+            let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate {
+                $0.characterId == characterId &&
+                $0.superRareTitleId == superRare &&
+                $0.normalTitleId == normal &&
+                $0.itemId == itemId &&
+                $0.socketSuperRareTitleId == socketSuperRare &&
+                $0.socketNormalTitleId == socketNormal &&
+                $0.socketItemId == socketItem
+            })
+            let matchingEquipment = try context.fetch(equipmentDescriptor)
 
-        // 探索中のキャラクターは装備変更不可
-        if try isCharacterExploring(characterId: characterId, context: context) {
-            throw ProgressError.invalidInput(description: "探索中のキャラクターは装備を変更できません")
+            guard matchingEquipment.count >= quantity else {
+                throw ProgressError.invalidInput(description: "解除数量が装備数を超えています")
+            }
+
+            let storage = ItemStorage.playerItem
+
+            // インベントリに戻す（個別フィールドで検索）
+            let storageTypeValue = storage.rawValue
+            var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.storageType == storageTypeValue &&
+                $0.superRareTitleId == superRare &&
+                $0.normalTitleId == normal &&
+                $0.itemId == itemId &&
+                $0.socketSuperRareTitleId == socketSuperRare &&
+                $0.socketNormalTitleId == socketNormal &&
+                $0.socketItemId == socketItem
+            })
+            inventoryDescriptor.fetchLimit = 1
+
+            // インベントリレコードの数量を+1（装備時に削除しないので必ず存在するはず）
+            let inventoryRecord: InventoryItemRecord
+            if let existingInventory = try context.fetch(inventoryDescriptor).first {
+                existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
+                inventoryRecord = existingInventory
+            } else if let firstEquip = matchingEquipment.first {
+                // フォールバック：過去データとの互換性のため新規作成
+                let newRecord = InventoryItemRecord(
+                    superRareTitleId: firstEquip.superRareTitleId,
+                    normalTitleId: firstEquip.normalTitleId,
+                    itemId: firstEquip.itemId,
+                    socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
+                    socketNormalTitleId: firstEquip.socketNormalTitleId,
+                    socketItemId: firstEquip.socketItemId,
+                    quantity: UInt16(quantity),
+                    storage: storage
+                )
+                context.insert(newRecord)
+                inventoryRecord = newRecord
+            } else {
+                throw ProgressError.invalidInput(description: "インベントリレコードが見つかりません")
+            }
+
+            // 装備レコードを削除（quantity個）
+            for i in 0..<quantity {
+                context.delete(matchingEquipment[i])
+            }
+
+            try context.save()
+
+            // 更新後の装備リストを取得
+            let equippedItems = try self.fetchEquippedItems(characterId: characterId, context: context)
+
+            // キャッシュ更新のためインベントリ変更通知を送信（装備変更も含む）
+            if !skipNotification {
+                let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
+                    characterId: characterId,
+                    items: equippedItems
+                )
+                self.postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
+            }
+
+            return UnequipResult(equippedItems: equippedItems)
         }
-
-        // 装備レコードの取得（個別フィールドで検索）
-        let superRare = components.superRareTitleId
-        let normal = components.normalTitleId
-        let itemId = components.itemId
-        let socketSuperRare = components.socketSuperRareTitleId
-        let socketNormal = components.socketNormalTitleId
-        let socketItem = components.socketItemId
-        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate {
-            $0.characterId == characterId &&
-            $0.superRareTitleId == superRare &&
-            $0.normalTitleId == normal &&
-            $0.itemId == itemId &&
-            $0.socketSuperRareTitleId == socketSuperRare &&
-            $0.socketNormalTitleId == socketNormal &&
-            $0.socketItemId == socketItem
-        })
-        let matchingEquipment = try context.fetch(equipmentDescriptor)
-
-        guard matchingEquipment.count >= quantity else {
-            throw ProgressError.invalidInput(description: "解除数量が装備数を超えています")
-        }
-
-        let storage = ItemStorage.playerItem
-
-        // インベントリに戻す（個別フィールドで検索）
-        let storageTypeValue = storage.rawValue
-        var inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue &&
-            $0.superRareTitleId == superRare &&
-            $0.normalTitleId == normal &&
-            $0.itemId == itemId &&
-            $0.socketSuperRareTitleId == socketSuperRare &&
-            $0.socketNormalTitleId == socketNormal &&
-            $0.socketItemId == socketItem
-        })
-        inventoryDescriptor.fetchLimit = 1
-
-        // インベントリレコードの数量を+1（装備時に削除しないので必ず存在するはず）
-        let inventoryRecord: InventoryItemRecord
-        if let existingInventory = try context.fetch(inventoryDescriptor).first {
-            existingInventory.quantity = min(existingInventory.quantity + UInt16(quantity), 99)
-            inventoryRecord = existingInventory
-        } else if let firstEquip = matchingEquipment.first {
-            // フォールバック：過去データとの互換性のため新規作成
-            let newRecord = InventoryItemRecord(
-                superRareTitleId: firstEquip.superRareTitleId,
-                normalTitleId: firstEquip.normalTitleId,
-                itemId: firstEquip.itemId,
-                socketSuperRareTitleId: firstEquip.socketSuperRareTitleId,
-                socketNormalTitleId: firstEquip.socketNormalTitleId,
-                socketItemId: firstEquip.socketItemId,
-                quantity: UInt16(quantity),
-                storage: storage
-            )
-            context.insert(newRecord)
-            inventoryRecord = newRecord
-        } else {
-            throw ProgressError.invalidInput(description: "インベントリレコードが見つかりません")
-        }
-
-        // 装備レコードを削除（quantity個）
-        for i in 0..<quantity {
-            context.delete(matchingEquipment[i])
-        }
-
-        try context.save()
-
-        // 更新後の装備リストを取得
-        let equippedItems = try fetchEquippedItems(characterId: characterId, context: context)
-
-        // キャッシュ更新のためインベントリ変更通知を送信（装備変更も含む）
-        if !skipNotification {
-            let equippedItemsChange = UserDataLoadService.InventoryChange.EquippedItemsChange(
-                characterId: characterId,
-                items: equippedItems
-            )
-            postInventoryChange(upserted: [inventoryRecord], equippedItemsChange: equippedItemsChange)
-        }
-
-        return UnequipResult(equippedItems: equippedItems)
     }
 
     /// 装備リストを取得（内部ヘルパー、既存contextを使用）
-    private func fetchEquippedItems(characterId: UInt8, context: ModelContext) throws -> [CharacterValues.EquippedItem] {
+    nonisolated private func fetchEquippedItems(characterId: UInt8, context: ModelContext) throws -> [CharacterValues.EquippedItem] {
         let descriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         let records = try context.fetch(descriptor)
 
@@ -936,27 +951,27 @@ actor CharacterProgressService {
 // MARK: - Private Helpers
 
 private extension CharacterProgressService {
-    func makeCachedCharacters(_ records: [CharacterRecord], context: ModelContext) throws -> [CachedCharacter] {
+    nonisolated func makeCachedCharacters(_ records: [CharacterRecord], context: ModelContext) throws -> [CachedCharacter] {
         var characters: [CachedCharacter] = []
         characters.reserveCapacity(records.count)
         for record in records {
-            let character = try makeCachedCharacter(record, context: context)
+            let character = try self.makeCachedCharacter(record, context: context)
             characters.append(character)
         }
         return characters
     }
 
-    func makeCachedCharacter(_ record: CharacterRecord, context: ModelContext) throws -> CachedCharacter {
-        let input = try loadInput(record, context: context)
-        let pandoraBoxItems = try fetchPandoraBoxItems(context: context)
+    nonisolated func makeCachedCharacter(_ record: CharacterRecord, context: ModelContext) throws -> CachedCharacter {
+        let input = try self.loadInput(record, context: context)
+        let pandoraBoxItems = try self.fetchPandoraBoxItems(context: context)
         return try CachedCharacterFactory.make(
             from: input,
-            masterData: masterData,
+            masterData: self.masterData,
             pandoraBoxItems: pandoraBoxItems
         )
     }
 
-    func deleteEquipment(for characterId: UInt8, context: ModelContext) throws {
+    nonisolated func deleteEquipment(for characterId: UInt8, context: ModelContext) throws {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(predicate: #Predicate { $0.characterId == characterId })
         for record in try context.fetch(equipmentDescriptor) {
             context.delete(record)
@@ -964,7 +979,7 @@ private extension CharacterProgressService {
     }
 
     /// キャラクターが探索中かどうかをチェック
-    func isCharacterExploring(characterId: UInt8, context: ModelContext) throws -> Bool {
+    nonisolated func isCharacterExploring(characterId: UInt8, context: ModelContext) throws -> Bool {
         // running状態の探索を取得
         let runningStatus = ExplorationResult.running.rawValue
         let runningDescriptor = FetchDescriptor<ExplorationRunRecord>(
@@ -988,7 +1003,7 @@ private extension CharacterProgressService {
     }
 
     /// キャラクターの装備を全てインベントリに戻す
-    func unequipAllItems(characterId: UInt8, context: ModelContext) throws {
+    nonisolated func unequipAllItems(characterId: UInt8, context: ModelContext) throws {
         let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>(
             predicate: #Predicate { $0.characterId == characterId }
         )
@@ -1039,7 +1054,7 @@ private extension CharacterProgressService {
     }
 
     /// 1〜200の範囲で最小の未使用IDを割り当てる
-    func allocateCharacterId(context: ModelContext) throws -> UInt8 {
+    nonisolated func allocateCharacterId(context: ModelContext) throws -> UInt8 {
         let occupied = Set(try context.fetch(FetchDescriptor<CharacterRecord>()).map(\.id))
         guard let id = (1...200).lazy.map(UInt8.init).first(where: { !occupied.contains($0) }) else {
             throw ProgressError.invalidInput(description: "キャラクター数が上限（200体）に達しています")
@@ -1048,13 +1063,13 @@ private extension CharacterProgressService {
     }
 
     /// 既存の最大displayOrder+1を割り当てる
-    func allocateDisplayOrder(context: ModelContext) throws -> UInt8 {
+    nonisolated func allocateDisplayOrder(context: ModelContext) throws -> UInt8 {
         let records = try context.fetch(FetchDescriptor<CharacterRecord>())
         let maxOrder = records.map(\.displayOrder).max() ?? 0
         return maxOrder + 1
     }
 
-    func removeFromParties(characterId: UInt8, context: ModelContext) throws {
+    nonisolated func removeFromParties(characterId: UInt8, context: ModelContext) throws {
         let descriptor = FetchDescriptor<PartyRecord>()
         let parties = try context.fetch(descriptor)
         let now = Date()
@@ -1066,7 +1081,7 @@ private extension CharacterProgressService {
         }
     }
 
-    func fetchPandoraBoxItems(context: ModelContext) throws -> Set<UInt64> {
+    nonisolated func fetchPandoraBoxItems(context: ModelContext) throws -> Set<UInt64> {
         var descriptor = FetchDescriptor<GameStateRecord>()
         descriptor.fetchLimit = 1
         guard let gameState = try context.fetch(descriptor).first else {

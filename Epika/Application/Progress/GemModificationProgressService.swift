@@ -43,35 +43,41 @@ actor GemModificationProgressService {
         self.inventoryService = inventoryService
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     // MARK: - Public API
 
     /// 指定した宝石をソケットとして装着可能なアイテムのstackKey一覧を取得
     func getSocketableStackKeys(for _: String) async throws -> [String] {
-        let context = contextProvider.makeContext()
-        let storageTypeValue = ItemStorage.playerItem.rawValue
-        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue && $0.socketItemId == 0
-        })
-        descriptor.sortBy = [
-            SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
-            SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
-            SortDescriptor(\InventoryItemRecord.itemId, order: .forward)
-        ]
-        let records = try context.fetch(descriptor)
-        guard !records.isEmpty else { return [] }
+        let masterData = masterDataCache
+        return try await withContext { context in
+            let storageTypeValue = ItemStorage.playerItem.rawValue
+            var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.storageType == storageTypeValue && $0.socketItemId == 0
+            })
+            descriptor.sortBy = [
+                SortDescriptor(\InventoryItemRecord.superRareTitleId, order: .forward),
+                SortDescriptor(\InventoryItemRecord.normalTitleId, order: .forward),
+                SortDescriptor(\InventoryItemRecord.itemId, order: .forward)
+            ]
+            let records = try context.fetch(descriptor)
+            guard !records.isEmpty else { return [] }
 
-        let itemIds = Array(Set(records.map { $0.itemId }))
-        let definitions = masterDataCache.items(itemIds)
+            let itemIds = Array(Set(records.map { $0.itemId }))
+            let definitions = masterData.items(itemIds)
 
-        // 宝石・合成用アイテムを除外
-        let socketableIds = Set(definitions
-            .filter { $0.category != ItemSaleCategory.gem.rawValue }
-            .filter { !Self.nonSocketableCategories.contains($0.category) }
-            .map { $0.id })
+            // 宝石・合成用アイテムを除外
+            let socketableIds = Set(definitions
+                .filter { $0.category != ItemSaleCategory.gem.rawValue }
+                .filter { !Self.nonSocketableCategories.contains($0.category) }
+                .map { $0.id })
 
-        return records
-            .filter { socketableIds.contains($0.itemId) }
-            .map { $0.stackKey }
+            return records
+                .filter { socketableIds.contains($0.itemId) }
+                .map { $0.stackKey }
+        }
     }
 
     /// 宝石を装備アイテムに装着

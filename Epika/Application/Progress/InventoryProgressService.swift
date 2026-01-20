@@ -31,7 +31,7 @@ import SwiftData
 actor InventoryProgressService {
     private let contextProvider: SwiftDataContextProvider
     private let gameStateService: GameStateService
-    private let maxStackSize: UInt16 = 99
+    nonisolated private let maxStackSize: UInt16 = 99
 
     struct PlayerItemSnapshot: Sendable {
         let stackKey: String
@@ -90,33 +90,35 @@ actor InventoryProgressService {
 
     /// 指定した保管場所のレコードをSwiftDataから取得し、値型に変換して返す
     func inventoryRecordData(storage: ItemStorage) async throws -> [ItemRecordData] {
-        let context = contextProvider.makeContext()
-        let descriptor = fetchDescriptor(for: storage)
-        let records = try context.fetch(descriptor)
-        guard !records.isEmpty else { return [] }
-        return records.map(ItemRecordData.init)
+        try await withContext { context in
+            let descriptor = self.fetchDescriptor(for: storage)
+            let records = try context.fetch(descriptor)
+            guard !records.isEmpty else { return [] }
+            return records.map(ItemRecordData.init)
+        }
     }
 
     /// プレイヤーインベントリのスナップショットを取得
     /// - Parameter stackKeys: nilの場合は全件。指定時は対象stackKeyのみ
     func playerItemSnapshots(stackKeys: Set<String>? = nil) async throws -> [PlayerItemSnapshot] {
-        let context = contextProvider.makeContext()
-        let descriptor = fetchDescriptor(for: .playerItem)
-        let records = try context.fetch(descriptor)
-        let filtered: [InventoryItemRecord]
-        if let stackKeys, !stackKeys.isEmpty {
-            filtered = records.filter { stackKeys.contains($0.stackKey) }
-        } else {
-            filtered = records
-        }
-        guard !filtered.isEmpty else { return [] }
-        return filtered.map {
-            PlayerItemSnapshot(
-                stackKey: $0.stackKey,
-                itemId: $0.itemId,
-                quantity: Int($0.quantity),
-                socketItemId: $0.socketItemId
-            )
+        try await withContext { context in
+            let descriptor = self.fetchDescriptor(for: .playerItem)
+            let records = try context.fetch(descriptor)
+            let filtered: [InventoryItemRecord]
+            if let stackKeys, !stackKeys.isEmpty {
+                filtered = records.filter { stackKeys.contains($0.stackKey) }
+            } else {
+                filtered = records
+            }
+            guard !filtered.isEmpty else { return [] }
+            return filtered.map {
+                PlayerItemSnapshot(
+                    stackKey: $0.stackKey,
+                    itemId: $0.itemId,
+                    quantity: Int($0.quantity),
+                    socketItemId: $0.socketItemId
+                )
+            }
         }
     }
 
@@ -130,73 +132,74 @@ actor InventoryProgressService {
         guard quantity > 0 else {
             throw ProgressError.invalidInput(description: "追加数量は1以上である必要があります")
         }
-
-        let context = contextProvider.makeContext()
-        let record = try fetchOrCreateRecord(
-            superRareTitleId: enhancements.superRareTitleId,
-            normalTitleId: enhancements.normalTitleId,
-            itemId: itemId,
-            socketSuperRareTitleId: enhancements.socketSuperRareTitleId,
-            socketNormalTitleId: enhancements.socketNormalTitleId,
-            socketItemId: enhancements.socketItemId,
-            storage: storage,
-            context: context
-        )
-        _ = applyIncrement(to: record, amount: quantity)
-        try context.save()
-        postInventoryChange(upserted: [record])
-        return record.stackKey
+        return try await withContext { context in
+            let record = try self.fetchOrCreateRecord(
+                superRareTitleId: enhancements.superRareTitleId,
+                normalTitleId: enhancements.normalTitleId,
+                itemId: itemId,
+                socketSuperRareTitleId: enhancements.socketSuperRareTitleId,
+                socketNormalTitleId: enhancements.socketNormalTitleId,
+                socketItemId: enhancements.socketItemId,
+                storage: storage,
+                context: context
+            )
+            _ = self.applyIncrement(to: record, amount: quantity)
+            try context.save()
+            self.postInventoryChange(upserted: [record])
+            return record.stackKey
+        }
     }
 
     /// バッチ追加してstackKeyを返す（ドロップ報酬用）
     func addItemsBatch(_ seeds: [BatchSeed]) async throws -> [String] {
         guard !seeds.isEmpty else { return [] }
+        return try await withContext { context in
+            let aggregated = self.aggregate(seeds)
+            var records: [InventoryItemRecord] = []
 
-        let context = contextProvider.makeContext()
-        let aggregated = aggregate(seeds)
-        var records: [InventoryItemRecord] = []
-
-        for (storage, entries) in aggregated {
-            for entry in entries {
-                let record = try fetchOrCreateRecord(
-                    superRareTitleId: entry.seed.enhancements.superRareTitleId,
-                    normalTitleId: entry.seed.enhancements.normalTitleId,
-                    itemId: entry.seed.itemId,
-                    socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
-                    socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
-                    socketItemId: entry.seed.enhancements.socketItemId,
-                    storage: storage,
-                    context: context
-                )
-                _ = applyIncrement(to: record, amount: entry.totalQuantity)
-                records.append(record)
+            for (storage, entries) in aggregated {
+                for entry in entries {
+                    let record = try self.fetchOrCreateRecord(
+                        superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                        normalTitleId: entry.seed.enhancements.normalTitleId,
+                        itemId: entry.seed.itemId,
+                        socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                        socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
+                        socketItemId: entry.seed.enhancements.socketItemId,
+                        storage: storage,
+                        context: context
+                    )
+                    _ = self.applyIncrement(to: record, amount: entry.totalQuantity)
+                    records.append(record)
+                }
             }
-        }
 
-        try context.save()
-        postInventoryChange(upserted: records)
-        return records.map { $0.stackKey }
+            try context.save()
+            self.postInventoryChange(upserted: records)
+            return records.map { $0.stackKey }
+        }
     }
 
     /// stackKey重複レコードを数量が多いものだけ残して除去
     /// TODO(Build 16): ビルド16で重複レコードが自然消滅したらこの処理を削除する
     @discardableResult
     func repairDuplicateStackKeys() async throws -> Int {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<InventoryItemRecord>()
-        let allRecords = try context.fetch(descriptor)
-        guard !allRecords.isEmpty else { return 0 }
+        try await withContext { context in
+            let descriptor = FetchDescriptor<InventoryItemRecord>()
+            let allRecords = try context.fetch(descriptor)
+            guard !allRecords.isEmpty else { return 0 }
 
-        var totalRemoved = 0
-        let groupedByStorage = Dictionary(grouping: allRecords, by: { $0.storageType })
-        for recordsInStorage in groupedByStorage.values {
-            let result = deduplicateRecords(recordsInStorage, context: context)
-            totalRemoved += result.removedCount
+            var totalRemoved = 0
+            let groupedByStorage = Dictionary(grouping: allRecords, by: { $0.storageType })
+            for recordsInStorage in groupedByStorage.values {
+                let result = self.deduplicateRecords(recordsInStorage, context: context)
+                totalRemoved += result.removedCount
+            }
+
+            guard totalRemoved > 0 else { return 0 }
+            try context.save()
+            return totalRemoved
         }
-
-        guard totalRemoved > 0 else { return 0 }
-        try context.save()
-        return totalRemoved
     }
 
     func addItems(_ seeds: [BatchSeed], chunkSize: Int = 1_000) async throws {
@@ -221,32 +224,32 @@ actor InventoryProgressService {
             let chunk = Array(seeds[index..<end])
             chunkNumber += 1
             let localIndex = chunkNumber
-            let context = contextProvider.makeContext()
-            let aggregated = aggregate(chunk)
-            var chunkRecords: [InventoryItemRecord] = []
+            try await withContext { context in
+                let aggregated = self.aggregate(chunk)
+                var chunkRecords: [InventoryItemRecord] = []
 
-            for (storage, entries) in aggregated {
-                try Task.checkCancellation()
-                for entry in entries {
-                    let record = try fetchOrCreateRecord(
-                        superRareTitleId: entry.seed.enhancements.superRareTitleId,
-                        normalTitleId: entry.seed.enhancements.normalTitleId,
-                        itemId: entry.seed.itemId,
-                        socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
-                        socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
-                        socketItemId: entry.seed.enhancements.socketItemId,
-                        storage: storage,
-                        context: context
-                    )
-                    _ = applyIncrement(to: record, amount: entry.totalQuantity)
-                    chunkRecords.append(record)
+                for (storage, entries) in aggregated {
+                    for entry in entries {
+                        let record = try self.fetchOrCreateRecord(
+                            superRareTitleId: entry.seed.enhancements.superRareTitleId,
+                            normalTitleId: entry.seed.enhancements.normalTitleId,
+                            itemId: entry.seed.itemId,
+                            socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
+                            socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
+                            socketItemId: entry.seed.enhancements.socketItemId,
+                            storage: storage,
+                            context: context
+                        )
+                        _ = self.applyIncrement(to: record, amount: entry.totalQuantity)
+                        chunkRecords.append(record)
+                    }
                 }
-            }
 #if DEBUG
-            print("[Inventory] inserted chunk #\(localIndex) size=\(chunk.count)")
+                print("[Inventory] inserted chunk #\(localIndex) size=\(chunk.count)")
 #endif
-            try context.save()
-            postInventoryChange(upserted: chunkRecords)
+                try context.save()
+                self.postInventoryChange(upserted: chunkRecords)
+            }
             index = end
         }
     }
@@ -264,22 +267,24 @@ actor InventoryProgressService {
             #if DEBUG
             chunkNumber += 1
             #endif
-            let context = contextProvider.makeContext()
-            for i in index..<end {
-                let seed = seeds[i]
-                let record = InventoryItemRecord(
-                    superRareTitleId: seed.enhancements.superRareTitleId,
-                    normalTitleId: seed.enhancements.normalTitleId,
-                    itemId: seed.itemId,
-                    socketSuperRareTitleId: seed.enhancements.socketSuperRareTitleId,
-                    socketNormalTitleId: seed.enhancements.socketNormalTitleId,
-                    socketItemId: seed.enhancements.socketItemId,
-                    quantity: UInt16(clamping: seed.quantity),
-                    storage: seed.storage
-                )
-                context.insert(record)
+            let startIndex = index
+            try await withContext { context in
+                for i in startIndex..<end {
+                    let seed = seeds[i]
+                    let record = InventoryItemRecord(
+                        superRareTitleId: seed.enhancements.superRareTitleId,
+                        normalTitleId: seed.enhancements.normalTitleId,
+                        itemId: seed.itemId,
+                        socketSuperRareTitleId: seed.enhancements.socketSuperRareTitleId,
+                        socketNormalTitleId: seed.enhancements.socketNormalTitleId,
+                        socketItemId: seed.enhancements.socketItemId,
+                        quantity: UInt16(clamping: seed.quantity),
+                        storage: seed.storage
+                    )
+                    context.insert(record)
+                }
+                try context.save()
             }
-            try context.save()
             #if DEBUG
             print("[Inventory] unchecked insert chunk #\(chunkNumber) size=\(end - index)")
             #endif
@@ -298,7 +303,7 @@ actor InventoryProgressService {
         var totalQuantity: Int
     }
 
-    private func aggregate(_ seeds: [BatchSeed]) -> [ItemStorage: [AggregatedEntry]] {
+    nonisolated private func aggregate(_ seeds: [BatchSeed]) -> [ItemStorage: [AggregatedEntry]] {
         var grouped: [SeedKey: AggregatedEntry] = [:]
         grouped.reserveCapacity(seeds.count)
         for seed in seeds {
@@ -332,33 +337,34 @@ actor InventoryProgressService {
 
     @discardableResult
     func updateItem(stackKey: String,
-                    mutate: (InventoryItemRecord) throws -> Void) async throws -> String {
+                    mutate: @Sendable @escaping (InventoryItemRecord) throws -> Void) async throws -> String {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
-        let context = contextProvider.makeContext()
-        let superRare = components.superRareTitleId
-        let normal = components.normalTitleId
-        let master = components.itemId
-        let socketSuperRare = components.socketSuperRareTitleId
-        let socketNormal = components.socketNormalTitleId
-        let socketMaster = components.socketItemId
-        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == superRare &&
-            $0.normalTitleId == normal &&
-            $0.itemId == master &&
-            $0.socketSuperRareTitleId == socketSuperRare &&
-            $0.socketNormalTitleId == socketNormal &&
-            $0.socketItemId == socketMaster
-        })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
+        return try await withContext { context in
+            let superRare = components.superRareTitleId
+            let normal = components.normalTitleId
+            let master = components.itemId
+            let socketSuperRare = components.socketSuperRareTitleId
+            let socketNormal = components.socketNormalTitleId
+            let socketMaster = components.socketItemId
+            var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == superRare &&
+                $0.normalTitleId == normal &&
+                $0.itemId == master &&
+                $0.socketSuperRareTitleId == socketSuperRare &&
+                $0.socketNormalTitleId == socketNormal &&
+                $0.socketItemId == socketMaster
+            })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
+            }
+            try mutate(record)
+            try context.save()
+            self.postInventoryChange(upserted: [record])
+            return record.stackKey
         }
-        try mutate(record)
-        try context.save()
-        postInventoryChange(upserted: [record])
-        return record.stackKey
     }
 
     func decrementItem(stackKey: String, quantity: Int) async throws {
@@ -366,38 +372,39 @@ actor InventoryProgressService {
         guard let components = StackKeyComponents(stackKey: stackKey) else {
             throw ProgressError.invalidInput(description: "不正なstackKeyです")
         }
-        let context = contextProvider.makeContext()
-        let superRare = components.superRareTitleId
-        let normal = components.normalTitleId
-        let master = components.itemId
-        let socketSuperRare = components.socketSuperRareTitleId
-        let socketNormal = components.socketNormalTitleId
-        let socketMaster = components.socketItemId
-        var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == superRare &&
-            $0.normalTitleId == normal &&
-            $0.itemId == master &&
-            $0.socketSuperRareTitleId == socketSuperRare &&
-            $0.socketNormalTitleId == socketNormal &&
-            $0.socketItemId == socketMaster
-        })
-        descriptor.fetchLimit = 1
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
-        }
-        guard Int(record.quantity) >= quantity else {
-            throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
-        }
-        record.quantity -= UInt16(quantity)
-        let wasDeleted = record.quantity <= 0
-        if wasDeleted {
-            context.delete(record)
-        }
-        try context.save()
-        if wasDeleted {
-            postInventoryChange(removed: [stackKey])
-        } else {
-            postInventoryChange(upserted: [record])
+        try await withContext { context in
+            let superRare = components.superRareTitleId
+            let normal = components.normalTitleId
+            let master = components.itemId
+            let socketSuperRare = components.socketSuperRareTitleId
+            let socketNormal = components.socketNormalTitleId
+            let socketMaster = components.socketItemId
+            var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == superRare &&
+                $0.normalTitleId == normal &&
+                $0.itemId == master &&
+                $0.socketSuperRareTitleId == socketSuperRare &&
+                $0.socketNormalTitleId == socketNormal &&
+                $0.socketItemId == socketMaster
+            })
+            descriptor.fetchLimit = 1
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressError.invalidInput(description: "指定したアイテムが見つかりません")
+            }
+            guard Int(record.quantity) >= quantity else {
+                throw ProgressError.invalidInput(description: "アイテム数量が不足しています")
+            }
+            record.quantity -= UInt16(quantity)
+            let wasDeleted = record.quantity <= 0
+            if wasDeleted {
+                context.delete(record)
+            }
+            try context.save()
+            if wasDeleted {
+                self.postInventoryChange(removed: [stackKey])
+            } else {
+                self.postInventoryChange(upserted: [record])
+            }
         }
     }
 
@@ -413,125 +420,125 @@ actor InventoryProgressService {
         guard let sourceComponents = StackKeyComponents(stackKey: sourceStackKey) else {
             throw ProgressError.invalidInput(description: "不正な提供stackKeyです")
         }
-        let context = contextProvider.makeContext()
-
-        // target fetch with individual field comparison
-        let tSuperRare = targetComponents.superRareTitleId
-        let tNormal = targetComponents.normalTitleId
-        let tMaster = targetComponents.itemId
-        let tSocketSuperRare = targetComponents.socketSuperRareTitleId
-        let tSocketNormal = targetComponents.socketNormalTitleId
-        let tSocketMaster = targetComponents.socketItemId
-        var targetFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == tSuperRare &&
-            $0.normalTitleId == tNormal &&
-            $0.itemId == tMaster &&
-            $0.socketSuperRareTitleId == tSocketSuperRare &&
-            $0.socketNormalTitleId == tSocketNormal &&
-            $0.socketItemId == tSocketMaster
-        })
-        targetFetch.fetchLimit = 1
-        guard let targetRecord = try context.fetch(targetFetch).first else {
-            throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
-        }
-
-        // source fetch with individual field comparison
-        let sSuperRare = sourceComponents.superRareTitleId
-        let sNormal = sourceComponents.normalTitleId
-        let sMaster = sourceComponents.itemId
-        let sSocketSuperRare = sourceComponents.socketSuperRareTitleId
-        let sSocketNormal = sourceComponents.socketNormalTitleId
-        let sSocketMaster = sourceComponents.socketItemId
-        var sourceFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == sSuperRare &&
-            $0.normalTitleId == sNormal &&
-            $0.itemId == sMaster &&
-            $0.socketSuperRareTitleId == sSocketSuperRare &&
-            $0.socketNormalTitleId == sSocketNormal &&
-            $0.socketItemId == sSocketMaster
-        })
-        sourceFetch.fetchLimit = 1
-        guard let sourceRecord = try context.fetch(sourceFetch).first else {
-            throw ProgressError.invalidInput(description: "提供アイテムが見つかりません")
-        }
-        guard targetRecord.storage == .playerItem else {
-            throw ProgressError.invalidInput(description: "対象アイテムは所持品から選択してください")
-        }
-        guard sourceRecord.storage == .playerItem else {
-            throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
-        }
-
-        // 通知用の追跡
-        var upsertedRecords: [InventoryItemRecord] = []
-        var removedKeys: [String] = []
-
-        let inheritedRecord: InventoryItemRecord
-        if targetRecord.quantity > 1 {
-            // 数量2以上：1個減らし、新しい称号付きレコードを作成/追加
-            targetRecord.quantity -= 1
-            upsertedRecords.append(targetRecord)
-
-            // 既存の同一称号レコードを検索（同じstorageのみ）
-            let newSuperRare = newEnhancement.superRareTitleId
-            let newNormal = newEnhancement.normalTitleId
-            let newSocketSuperRare = newEnhancement.socketSuperRareTitleId
-            let newSocketNormal = newEnhancement.socketNormalTitleId
-            let newSocketItem = newEnhancement.socketItemId
-            let targetStorage = targetRecord.storage
-            var inheritedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-                $0.superRareTitleId == newSuperRare &&
-                $0.normalTitleId == newNormal &&
+        return try await withContext { context in
+            // target fetch with individual field comparison
+            let tSuperRare = targetComponents.superRareTitleId
+            let tNormal = targetComponents.normalTitleId
+            let tMaster = targetComponents.itemId
+            let tSocketSuperRare = targetComponents.socketSuperRareTitleId
+            let tSocketNormal = targetComponents.socketNormalTitleId
+            let tSocketMaster = targetComponents.socketItemId
+            var targetFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == tSuperRare &&
+                $0.normalTitleId == tNormal &&
                 $0.itemId == tMaster &&
-                $0.socketSuperRareTitleId == newSocketSuperRare &&
-                $0.socketNormalTitleId == newSocketNormal &&
-                $0.socketItemId == newSocketItem &&
-                $0.storage == targetStorage
+                $0.socketSuperRareTitleId == tSocketSuperRare &&
+                $0.socketNormalTitleId == tSocketNormal &&
+                $0.socketItemId == tSocketMaster
             })
-            inheritedDescriptor.fetchLimit = 1
-            if let existingInherited = try context.fetch(inheritedDescriptor).first {
-                existingInherited.quantity += 1
-                inheritedRecord = existingInherited
-            } else {
-                let newRecord = InventoryItemRecord(
-                    superRareTitleId: newEnhancement.superRareTitleId,
-                    normalTitleId: newEnhancement.normalTitleId,
-                    itemId: tMaster,
-                    socketSuperRareTitleId: newEnhancement.socketSuperRareTitleId,
-                    socketNormalTitleId: newEnhancement.socketNormalTitleId,
-                    socketItemId: newEnhancement.socketItemId,
-                    quantity: 1,
-                    storage: targetRecord.storage
-                )
-                context.insert(newRecord)
-                inheritedRecord = newRecord
+            targetFetch.fetchLimit = 1
+            guard let targetRecord = try context.fetch(targetFetch).first else {
+                throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
             }
-        } else {
-            // 数量1：称号情報を直接更新（stackKeyが変わる）
-            removedKeys.append(targetStackKey)
-            targetRecord.superRareTitleId = newEnhancement.superRareTitleId
-            targetRecord.normalTitleId = newEnhancement.normalTitleId
-            targetRecord.socketSuperRareTitleId = newEnhancement.socketSuperRareTitleId
-            targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
-            targetRecord.socketItemId = newEnhancement.socketItemId
-            inheritedRecord = targetRecord
+
+            // source fetch with individual field comparison
+            let sSuperRare = sourceComponents.superRareTitleId
+            let sNormal = sourceComponents.normalTitleId
+            let sMaster = sourceComponents.itemId
+            let sSocketSuperRare = sourceComponents.socketSuperRareTitleId
+            let sSocketNormal = sourceComponents.socketNormalTitleId
+            let sSocketMaster = sourceComponents.socketItemId
+            var sourceFetch = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == sSuperRare &&
+                $0.normalTitleId == sNormal &&
+                $0.itemId == sMaster &&
+                $0.socketSuperRareTitleId == sSocketSuperRare &&
+                $0.socketNormalTitleId == sSocketNormal &&
+                $0.socketItemId == sSocketMaster
+            })
+            sourceFetch.fetchLimit = 1
+            guard let sourceRecord = try context.fetch(sourceFetch).first else {
+                throw ProgressError.invalidInput(description: "提供アイテムが見つかりません")
+            }
+            guard targetRecord.storage == .playerItem else {
+                throw ProgressError.invalidInput(description: "対象アイテムは所持品から選択してください")
+            }
+            guard sourceRecord.storage == .playerItem else {
+                throw ProgressError.invalidInput(description: "提供アイテムは所持品から選択してください")
+            }
+
+            // 通知用の追跡
+            var upsertedRecords: [InventoryItemRecord] = []
+            var removedKeys: [String] = []
+
+            let inheritedRecord: InventoryItemRecord
+            if targetRecord.quantity > 1 {
+                // 数量2以上：1個減らし、新しい称号付きレコードを作成/追加
+                targetRecord.quantity -= 1
+                upsertedRecords.append(targetRecord)
+
+                // 既存の同一称号レコードを検索（同じstorageのみ）
+                let newSuperRare = newEnhancement.superRareTitleId
+                let newNormal = newEnhancement.normalTitleId
+                let newSocketSuperRare = newEnhancement.socketSuperRareTitleId
+                let newSocketNormal = newEnhancement.socketNormalTitleId
+                let newSocketItem = newEnhancement.socketItemId
+                let targetStorage = targetRecord.storage
+                var inheritedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                    $0.superRareTitleId == newSuperRare &&
+                    $0.normalTitleId == newNormal &&
+                    $0.itemId == tMaster &&
+                    $0.socketSuperRareTitleId == newSocketSuperRare &&
+                    $0.socketNormalTitleId == newSocketNormal &&
+                    $0.socketItemId == newSocketItem &&
+                    $0.storage == targetStorage
+                })
+                inheritedDescriptor.fetchLimit = 1
+                if let existingInherited = try context.fetch(inheritedDescriptor).first {
+                    existingInherited.quantity += 1
+                    inheritedRecord = existingInherited
+                } else {
+                    let newRecord = InventoryItemRecord(
+                        superRareTitleId: newEnhancement.superRareTitleId,
+                        normalTitleId: newEnhancement.normalTitleId,
+                        itemId: tMaster,
+                        socketSuperRareTitleId: newEnhancement.socketSuperRareTitleId,
+                        socketNormalTitleId: newEnhancement.socketNormalTitleId,
+                        socketItemId: newEnhancement.socketItemId,
+                        quantity: 1,
+                        storage: targetRecord.storage
+                    )
+                    context.insert(newRecord)
+                    inheritedRecord = newRecord
+                }
+            } else {
+                // 数量1：称号情報を直接更新（stackKeyが変わる）
+                removedKeys.append(targetStackKey)
+                targetRecord.superRareTitleId = newEnhancement.superRareTitleId
+                targetRecord.normalTitleId = newEnhancement.normalTitleId
+                targetRecord.socketSuperRareTitleId = newEnhancement.socketSuperRareTitleId
+                targetRecord.socketNormalTitleId = newEnhancement.socketNormalTitleId
+                targetRecord.socketItemId = newEnhancement.socketItemId
+                inheritedRecord = targetRecord
+            }
+
+            // 提供元を1個減算
+            let sourceWasDeleted = sourceRecord.quantity <= 1
+            if sourceWasDeleted {
+                context.delete(sourceRecord)
+                removedKeys.append(sourceStackKey)
+            } else {
+                sourceRecord.quantity -= 1
+                upsertedRecords.append(sourceRecord)
+            }
+
+            upsertedRecords.append(inheritedRecord)
+
+            try context.save()
+            self.postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
+
+            return inheritedRecord.stackKey
         }
-
-        // 提供元を1個減算
-        let sourceWasDeleted = sourceRecord.quantity <= 1
-        if sourceWasDeleted {
-            context.delete(sourceRecord)
-            removedKeys.append(sourceStackKey)
-        } else {
-            sourceRecord.quantity -= 1
-            upsertedRecords.append(sourceRecord)
-        }
-
-        upsertedRecords.append(inheritedRecord)
-
-        try context.save()
-        postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
-
-        return inheritedRecord.stackKey
     }
 
     /// 宝石をアイテムにソケットとして装着
@@ -548,125 +555,128 @@ actor InventoryProgressService {
         guard let targetComponents = StackKeyComponents(stackKey: targetStackKey) else {
             throw ProgressError.invalidInput(description: "不正な対象stackKeyです")
         }
+        return try await withContext { context in
+            // 宝石レコードの取得
+            let gSuperRare = gemComponents.superRareTitleId
+            let gNormal = gemComponents.normalTitleId
+            let gItem = gemComponents.itemId
+            let gSocketSuperRare = gemComponents.socketSuperRareTitleId
+            let gSocketNormal = gemComponents.socketNormalTitleId
+            let gSocketItem = gemComponents.socketItemId
+            var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.superRareTitleId == gSuperRare &&
+                $0.normalTitleId == gNormal &&
+                $0.itemId == gItem &&
+                $0.socketSuperRareTitleId == gSocketSuperRare &&
+                $0.socketNormalTitleId == gSocketNormal &&
+                $0.socketItemId == gSocketItem
+            })
+            gemDescriptor.fetchLimit = 1
+            guard let gemRecord = try context.fetch(gemDescriptor).first else {
+                throw ProgressError.invalidInput(description: "宝石が見つかりません")
+            }
 
-        let context = contextProvider.makeContext()
-
-        // 宝石レコードの取得
-        let gSuperRare = gemComponents.superRareTitleId
-        let gNormal = gemComponents.normalTitleId
-        let gItem = gemComponents.itemId
-        let gSocketSuperRare = gemComponents.socketSuperRareTitleId
-        let gSocketNormal = gemComponents.socketNormalTitleId
-        let gSocketItem = gemComponents.socketItemId
-        var gemDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == gSuperRare &&
-            $0.normalTitleId == gNormal &&
-            $0.itemId == gItem &&
-            $0.socketSuperRareTitleId == gSocketSuperRare &&
-            $0.socketNormalTitleId == gSocketNormal &&
-            $0.socketItemId == gSocketItem
-        })
-        gemDescriptor.fetchLimit = 1
-        guard let gemRecord = try context.fetch(gemDescriptor).first else {
-            throw ProgressError.invalidInput(description: "宝石が見つかりません")
-        }
-
-        // 対象アイテムレコードの取得
-        let tSuperRare = targetComponents.superRareTitleId
-        let tNormal = targetComponents.normalTitleId
-        let tItem = targetComponents.itemId
-        let tSocketSuperRare = targetComponents.socketSuperRareTitleId
-        let tSocketNormal = targetComponents.socketNormalTitleId
-        let tSocketItem = targetComponents.socketItemId
-        var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.superRareTitleId == tSuperRare &&
-            $0.normalTitleId == tNormal &&
-            $0.itemId == tItem &&
-            $0.socketSuperRareTitleId == tSocketSuperRare &&
-            $0.socketNormalTitleId == tSocketNormal &&
-            $0.socketItemId == tSocketItem
-        })
-        targetDescriptor.fetchLimit = 1
-        guard let targetRecord = try context.fetch(targetDescriptor).first else {
-            throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
-        }
-
-        // 既にソケットが装着されていないか確認
-        guard targetRecord.socketItemId == 0 else {
-            throw ProgressError.invalidInput(description: "このアイテムには既に宝石改造が施されています")
-        }
-
-        let socketItemId = gemRecord.itemId
-        let socketSuperRareId = gemRecord.superRareTitleId
-        let socketNormalId = gemRecord.normalTitleId
-
-        // 通知用の追跡
-        var upsertedRecords: [InventoryItemRecord] = []
-        var removedKeys: [String] = []
-
-        let socketedRecord: InventoryItemRecord
-        if targetRecord.quantity > 1 {
-            // 数量2以上：1個減らし、新しいソケット付きレコードを作成/追加
-            targetRecord.quantity -= 1
-            upsertedRecords.append(targetRecord)
-
-            // 既存のソケット付きレコードを検索
-            var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+            // 対象アイテムレコードの取得
+            let tSuperRare = targetComponents.superRareTitleId
+            let tNormal = targetComponents.normalTitleId
+            let tItem = targetComponents.itemId
+            let tSocketSuperRare = targetComponents.socketSuperRareTitleId
+            let tSocketNormal = targetComponents.socketNormalTitleId
+            let tSocketItem = targetComponents.socketItemId
+            var targetDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
                 $0.superRareTitleId == tSuperRare &&
                 $0.normalTitleId == tNormal &&
                 $0.itemId == tItem &&
-                $0.socketSuperRareTitleId == socketSuperRareId &&
-                $0.socketNormalTitleId == socketNormalId &&
-                $0.socketItemId == socketItemId
+                $0.socketSuperRareTitleId == tSocketSuperRare &&
+                $0.socketNormalTitleId == tSocketNormal &&
+                $0.socketItemId == tSocketItem
             })
-            socketedDescriptor.fetchLimit = 1
-            if let existingSocketed = try context.fetch(socketedDescriptor).first {
-                existingSocketed.quantity += 1
-                socketedRecord = existingSocketed
-            } else {
-                let newRecord = InventoryItemRecord(
-                    superRareTitleId: tSuperRare,
-                    normalTitleId: tNormal,
-                    itemId: tItem,
-                    socketSuperRareTitleId: socketSuperRareId,
-                    socketNormalTitleId: socketNormalId,
-                    socketItemId: socketItemId,
-                    quantity: 1,
-                    storage: targetRecord.storage
-                )
-                context.insert(newRecord)
-                socketedRecord = newRecord
+            targetDescriptor.fetchLimit = 1
+            guard let targetRecord = try context.fetch(targetDescriptor).first else {
+                throw ProgressError.invalidInput(description: "対象アイテムが見つかりません")
             }
-        } else {
-            // 数量1：ソケット情報を直接更新（stackKeyが変わる）
-            removedKeys.append(targetStackKey)
-            targetRecord.socketItemId = socketItemId
-            targetRecord.socketSuperRareTitleId = socketSuperRareId
-            targetRecord.socketNormalTitleId = socketNormalId
-            socketedRecord = targetRecord
+
+            // 既にソケットが装着されていないか確認
+            guard targetRecord.socketItemId == 0 else {
+                throw ProgressError.invalidInput(description: "このアイテムには既に宝石改造が施されています")
+            }
+
+            let socketItemId = gemRecord.itemId
+            let socketSuperRareId = gemRecord.superRareTitleId
+            let socketNormalId = gemRecord.normalTitleId
+
+            // 通知用の追跡
+            var upsertedRecords: [InventoryItemRecord] = []
+            var removedKeys: [String] = []
+
+            let socketedRecord: InventoryItemRecord
+            if targetRecord.quantity > 1 {
+                // 数量2以上：1個減らし、新しいソケット付きレコードを作成/追加
+                targetRecord.quantity -= 1
+                upsertedRecords.append(targetRecord)
+
+                // 既存のソケット付きレコードを検索
+                var socketedDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                    $0.superRareTitleId == tSuperRare &&
+                    $0.normalTitleId == tNormal &&
+                    $0.itemId == tItem &&
+                    $0.socketSuperRareTitleId == socketSuperRareId &&
+                    $0.socketNormalTitleId == socketNormalId &&
+                    $0.socketItemId == socketItemId
+                })
+                socketedDescriptor.fetchLimit = 1
+                if let existingSocketed = try context.fetch(socketedDescriptor).first {
+                    existingSocketed.quantity += 1
+                    socketedRecord = existingSocketed
+                } else {
+                    let newRecord = InventoryItemRecord(
+                        superRareTitleId: tSuperRare,
+                        normalTitleId: tNormal,
+                        itemId: tItem,
+                        socketSuperRareTitleId: socketSuperRareId,
+                        socketNormalTitleId: socketNormalId,
+                        socketItemId: socketItemId,
+                        quantity: 1,
+                        storage: targetRecord.storage
+                    )
+                    context.insert(newRecord)
+                    socketedRecord = newRecord
+                }
+            } else {
+                // 数量1：ソケット情報を直接更新（stackKeyが変わる）
+                removedKeys.append(targetStackKey)
+                targetRecord.socketItemId = socketItemId
+                targetRecord.socketSuperRareTitleId = socketSuperRareId
+                targetRecord.socketNormalTitleId = socketNormalId
+                socketedRecord = targetRecord
+            }
+
+            // 宝石を1個減算
+            let gemWasDeleted = gemRecord.quantity <= 1
+            if gemWasDeleted {
+                context.delete(gemRecord)
+                removedKeys.append(gemStackKey)
+            } else {
+                gemRecord.quantity -= 1
+                upsertedRecords.append(gemRecord)
+            }
+
+            upsertedRecords.append(socketedRecord)
+
+            try context.save()
+            self.postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
+
+            return socketedRecord.stackKey
         }
-
-        // 宝石を1個減算
-        let gemWasDeleted = gemRecord.quantity <= 1
-        if gemWasDeleted {
-            context.delete(gemRecord)
-            removedKeys.append(gemStackKey)
-        } else {
-            gemRecord.quantity -= 1
-            upsertedRecords.append(gemRecord)
-        }
-
-        upsertedRecords.append(socketedRecord)
-
-        try context.save()
-        postInventoryChange(upserted: upsertedRecords, removed: removedKeys)
-
-        return socketedRecord.stackKey
     }
 
     // MARK: - Private Helpers
 
-    private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
+    nonisolated private func fetchDescriptor(for storage: ItemStorage) -> FetchDescriptor<InventoryItemRecord> {
         let storageTypeValue = storage.rawValue
         var descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
             $0.storageType == storageTypeValue
@@ -681,7 +691,7 @@ actor InventoryProgressService {
         return descriptor
     }
 
-    private func fetchOrCreateRecord(
+    nonisolated private func fetchOrCreateRecord(
         superRareTitleId: UInt8,
         normalTitleId: UInt8,
         itemId: UInt16,
@@ -729,7 +739,7 @@ actor InventoryProgressService {
         return record
     }
 
-    private func makeStackKey(
+    nonisolated private func makeStackKey(
         superRareTitleId: UInt8,
         normalTitleId: UInt8,
         itemId: UInt16,
@@ -741,7 +751,7 @@ actor InventoryProgressService {
     }
 
     @discardableResult
-    private func applyIncrement(to record: InventoryItemRecord, amount: Int) -> Int {
+    nonisolated private func applyIncrement(to record: InventoryItemRecord, amount: Int) -> Int {
         guard amount > 0 else { return 0 }
 
         let clampedCurrent = min(record.quantity, maxStackSize)
@@ -757,52 +767,53 @@ actor InventoryProgressService {
     /// 全キャラクターの装備をインベントリに戻す（デバッグ復旧用）
     /// - Returns: (装備を外したキャラクター数, 戻した装備数)
     func restoreAllEquippedItemsToInventory() async throws -> (Int, Int) {
-        let context = contextProvider.makeContext()
-        context.autosaveEnabled = false
+        try await withContext { context in
+            context.autosaveEnabled = false
 
-        let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>()
-        let allEquipment = try context.fetch(equipmentDescriptor)
-        guard !allEquipment.isEmpty else { return (0, 0) }
+            let equipmentDescriptor = FetchDescriptor<CharacterEquipmentRecord>()
+            let allEquipment = try context.fetch(equipmentDescriptor)
+            guard !allEquipment.isEmpty else { return (0, 0) }
 
-        let storage = ItemStorage.playerItem
-        let storageTypeValue = storage.rawValue
-        let inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue
-        })
-        let inventoryRecords = try context.fetch(inventoryDescriptor)
-        var inventoryByStackKey: [String: InventoryItemRecord] = Dictionary(
-            uniqueKeysWithValues: inventoryRecords.map { ($0.stackKey, $0) }
-        )
+            let storage = ItemStorage.playerItem
+            let storageTypeValue = storage.rawValue
+            let inventoryDescriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
+                $0.storageType == storageTypeValue
+            })
+            let inventoryRecords = try context.fetch(inventoryDescriptor)
+            var inventoryByStackKey: [String: InventoryItemRecord] = Dictionary(
+                uniqueKeysWithValues: inventoryRecords.map { ($0.stackKey, $0) }
+            )
 
-        var updatedRecords: [String: InventoryItemRecord] = [:]
-        let characterIds = Set(allEquipment.map(\.characterId))
+            var updatedRecords: [String: InventoryItemRecord] = [:]
+            let characterIds = Set(allEquipment.map(\.characterId))
 
-        for equip in allEquipment {
-            if let existing = inventoryByStackKey[equip.stackKey] {
-                _ = applyIncrement(to: existing, amount: 1)
-                updatedRecords[equip.stackKey] = existing
-            } else {
-                let record = InventoryItemRecord(
-                    superRareTitleId: equip.superRareTitleId,
-                    normalTitleId: equip.normalTitleId,
-                    itemId: equip.itemId,
-                    socketSuperRareTitleId: equip.socketSuperRareTitleId,
-                    socketNormalTitleId: equip.socketNormalTitleId,
-                    socketItemId: equip.socketItemId,
-                    quantity: 1,
-                    storage: storage
-                )
-                context.insert(record)
-                inventoryByStackKey[equip.stackKey] = record
-                updatedRecords[equip.stackKey] = record
+            for equip in allEquipment {
+                if let existing = inventoryByStackKey[equip.stackKey] {
+                    _ = self.applyIncrement(to: existing, amount: 1)
+                    updatedRecords[equip.stackKey] = existing
+                } else {
+                    let record = InventoryItemRecord(
+                        superRareTitleId: equip.superRareTitleId,
+                        normalTitleId: equip.normalTitleId,
+                        itemId: equip.itemId,
+                        socketSuperRareTitleId: equip.socketSuperRareTitleId,
+                        socketNormalTitleId: equip.socketNormalTitleId,
+                        socketItemId: equip.socketItemId,
+                        quantity: 1,
+                        storage: storage
+                    )
+                    context.insert(record)
+                    inventoryByStackKey[equip.stackKey] = record
+                    updatedRecords[equip.stackKey] = record
+                }
+                context.delete(equip)
             }
-            context.delete(equip)
+
+            try context.save()
+            self.postInventoryChange(upserted: Array(updatedRecords.values))
+
+            return (characterIds.count, allEquipment.count)
         }
-
-        try context.save()
-        postInventoryChange(upserted: Array(updatedRecords.values))
-
-        return (characterIds.count, allEquipment.count)
     }
 
     /// TODO(Build 16): repairDuplicateStackKeys削除時に一緒に破棄予定
@@ -812,7 +823,7 @@ actor InventoryProgressService {
     }
 
     /// TODO(Build 16): repairDuplicateStackKeys削除時に一緒に破棄予定
-    private func deduplicateRecords(_ records: [InventoryItemRecord], context: ModelContext) -> DeduplicationResult {
+    nonisolated private func deduplicateRecords(_ records: [InventoryItemRecord], context: ModelContext) -> DeduplicationResult {
         guard !records.isEmpty else {
             return DeduplicationResult(recordsByStackKey: [:], removedCount: 0)
         }
@@ -837,7 +848,7 @@ actor InventoryProgressService {
     // MARK: - Inventory Change Notification
 
     /// インベントリ変更通知を送信（stackKeyと数量のみ）
-    private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
+    nonisolated private func postInventoryChange(upserted: [InventoryItemRecord] = [], removed: [String] = []) {
         guard !upserted.isEmpty || !removed.isEmpty else { return }
         let upsertedItems = upserted.map { record in
             UserDataLoadService.InventoryChange.UpsertedItem(

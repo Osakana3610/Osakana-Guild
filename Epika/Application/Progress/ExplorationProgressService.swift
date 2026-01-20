@@ -42,104 +42,113 @@ private enum CachedExplorationBuildError: Error {
 
 actor CachedExplorationQueryActor {
     private let contextProvider: SwiftDataContextProvider
-    private let masterDataCache: MasterDataCache
+    nonisolated private let masterDataCache: MasterDataCache
 
     init(contextProvider: SwiftDataContextProvider, masterDataCache: MasterDataCache) {
         self.contextProvider = contextProvider
         self.masterDataCache = masterDataCache
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     func allExplorations() async throws -> [CachedExploration] {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
-        let runs = try context.fetch(descriptor)
-        return try await makeSnapshots(runs: runs, context: context)
+        try await withContext { context in
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(sortBy: [SortDescriptor(\.endedAt, order: .reverse)])
+            let runs = try context.fetch(descriptor)
+            return try self.makeSnapshots(runs: runs, context: context)
+        }
     }
 
     func recentExplorations(forPartyId partyId: UInt8, limit: Int) async throws -> [CachedExploration] {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId },
-            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-        let runs = try context.fetch(descriptor)
-        return try await makeSnapshots(runs: runs, context: context)
-    }
-
-    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int) async throws -> [CachedExploration] {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId },
-            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-        let runs = try context.fetch(descriptor)
-        return try await makeSummarySnapshots(runs: runs, context: context)
-    }
-
-    func recentExplorationSummaries(limitPerParty: Int) async throws -> [CachedExploration] {
-        let context = contextProvider.makeContext()
-        let partyDescriptor = FetchDescriptor<PartyRecord>()
-        let parties = try context.fetch(partyDescriptor)
-        var snapshots: [CachedExploration] = []
-        snapshots.reserveCapacity(parties.count * limitPerParty)
-        for party in parties {
-            let partyId = party.id
+        try await withContext { context in
             var descriptor = FetchDescriptor<ExplorationRunRecord>(
                 predicate: #Predicate { $0.partyId == partyId },
                 sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
             )
-            descriptor.fetchLimit = limitPerParty
+            descriptor.fetchLimit = limit
             let runs = try context.fetch(descriptor)
-            let partySnapshots = try await makeSummarySnapshots(runs: runs, context: context)
-            snapshots.append(contentsOf: partySnapshots)
+            return try self.makeSnapshots(runs: runs, context: context)
         }
-        return snapshots
+    }
+
+    func recentExplorationSummaries(forPartyId partyId: UInt8, limit: Int) async throws -> [CachedExploration] {
+        try await withContext { context in
+            var descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId },
+                sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+            )
+            descriptor.fetchLimit = limit
+            let runs = try context.fetch(descriptor)
+            return try self.makeSummarySnapshots(runs: runs, context: context)
+        }
+    }
+
+    func recentExplorationSummaries(limitPerParty: Int) async throws -> [CachedExploration] {
+        try await withContext { context in
+            let partyDescriptor = FetchDescriptor<PartyRecord>()
+            let parties = try context.fetch(partyDescriptor)
+            var snapshots: [CachedExploration] = []
+            snapshots.reserveCapacity(parties.count * limitPerParty)
+            for party in parties {
+                let partyId = party.id
+                var descriptor = FetchDescriptor<ExplorationRunRecord>(
+                    predicate: #Predicate { $0.partyId == partyId },
+                    sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+                )
+                descriptor.fetchLimit = limitPerParty
+                let runs = try context.fetch(descriptor)
+                let partySnapshots = try self.makeSummarySnapshots(runs: runs, context: context)
+                snapshots.append(contentsOf: partySnapshots)
+            }
+            return snapshots
+        }
     }
 
     func explorationSnapshot(partyId: UInt8, startedAt: Date) async throws -> CachedExploration? {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        descriptor.fetchLimit = 1
-        guard let run = try context.fetch(descriptor).first else { return nil }
-        return try await makeSnapshot(for: run, context: context)
+        try await withContext { context in
+            var descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+            )
+            descriptor.fetchLimit = 1
+            guard let run = try context.fetch(descriptor).first else { return nil }
+            return try self.makeSnapshot(for: run, context: context)
+        }
     }
 
     // MARK: - Snapshot Builders
 
-    private func makeSummarySnapshots(runs: [ExplorationRunRecord],
-                                      context: ModelContext) async throws -> [CachedExploration] {
+    nonisolated private func makeSummarySnapshots(runs: [ExplorationRunRecord],
+                                                  context: ModelContext) throws -> [CachedExploration] {
         var snapshots: [CachedExploration] = []
         snapshots.reserveCapacity(runs.count)
         for run in runs {
             // 探索中の場合はログを含めてロード（再開時に既存ログが表示されるように）
             let snapshot: CachedExploration
             if run.result == ExplorationResult.running.rawValue {
-                snapshot = try await makeSnapshot(for: run, context: context)
+                snapshot = try self.makeSnapshot(for: run, context: context)
             } else {
-                snapshot = try await makeSnapshotSummary(for: run, context: context)
+                snapshot = try makeSnapshotSummary(for: run, context: context)
             }
             snapshots.append(snapshot)
         }
         return snapshots
     }
 
-    private func makeSnapshots(runs: [ExplorationRunRecord],
-                               context: ModelContext) async throws -> [CachedExploration] {
+    nonisolated private func makeSnapshots(runs: [ExplorationRunRecord],
+                                           context: ModelContext) throws -> [CachedExploration] {
         var snapshots: [CachedExploration] = []
         snapshots.reserveCapacity(runs.count)
         for run in runs {
-            let snapshot = try await makeSnapshot(for: run, context: context)
+            let snapshot = try self.makeSnapshot(for: run, context: context)
             snapshots.append(snapshot)
         }
         return snapshots
     }
 
-    private func makeSnapshotSummary(for run: ExplorationRunRecord,
-                                     context: ModelContext) async throws -> CachedExploration {
+    nonisolated private func makeSnapshotSummary(for run: ExplorationRunRecord,
+                                                 context: ModelContext) throws -> CachedExploration {
         guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
             throw CachedExplorationBuildError.dungeonNotFound(run.dungeonId)
         }
@@ -197,8 +206,8 @@ actor CachedExplorationQueryActor {
         )
     }
 
-    private func makeSnapshot(for run: ExplorationRunRecord,
-                              context: ModelContext) async throws -> CachedExploration {
+    nonisolated private func makeSnapshot(for run: ExplorationRunRecord,
+                                          context: ModelContext) throws -> CachedExploration {
         let eventRecords = run.events.sorted { $0.occurredAt < $1.occurredAt }
 
         guard let dungeonDefinition = masterDataCache.dungeon(run.dungeonId) else {
@@ -220,7 +229,7 @@ actor CachedExplorationQueryActor {
         encounterLogs.reserveCapacity(eventRecords.count)
 
         for (index, eventRecord) in eventRecords.enumerated() {
-            let log = try await buildEncounterLog(from: eventRecord, index: index)
+            let log = try buildEncounterLog(from: eventRecord, index: index)
             encounterLogs.append(log)
         }
 
@@ -267,7 +276,7 @@ actor CachedExplorationQueryActor {
         )
     }
 
-    private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.AutoSellEntry] {
+    nonisolated private func makeAutoSellEntries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.AutoSellEntry] {
         guard !run.autoSellItems.isEmpty else { return [] }
         let entries = run.autoSellItems.map { record in
             CachedExploration.Rewards.AutoSellEntry(
@@ -285,7 +294,7 @@ actor CachedExplorationQueryActor {
         }
     }
 
-    private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.ItemDropSummary] {
+    nonisolated private func makeItemDropSummaries(from run: ExplorationRunRecord) -> [CachedExploration.Rewards.ItemDropSummary] {
         guard !run.events.isEmpty else { return [] }
 
         // 自動売却された数量をキーごとに集計
@@ -337,8 +346,8 @@ actor CachedExplorationQueryActor {
         let normalTitleId: UInt8
     }
 
-    private func buildEncounterLog(from eventRecord: ExplorationEventRecord,
-                                   index: Int) async throws -> CachedExploration.EncounterLog {
+    nonisolated private func buildEncounterLog(from eventRecord: ExplorationEventRecord,
+                                               index: Int) throws -> CachedExploration.EncounterLog {
         let kind: CachedExploration.EncounterLog.Kind
         var referenceId: String?
         var combatSummary: CachedExploration.EncounterLog.CombatSummary?
@@ -407,7 +416,7 @@ actor CachedExplorationQueryActor {
         )
     }
 
-    private func battleResultString(_ value: UInt8) -> String {
+    nonisolated private func battleResultString(_ value: UInt8) -> String {
         switch BattleResult(rawValue: value) {
         case .victory: return "victory"
         case .defeat: return "defeat"
@@ -416,7 +425,7 @@ actor CachedExplorationQueryActor {
         }
     }
 
-    private func runStatus(from value: UInt8) -> CachedExploration.Status {
+    nonisolated private func runStatus(from value: UInt8) -> CachedExploration.Status {
         switch ExplorationResult(rawValue: value) {
         case .running: return .running
         case .completed: return .completed
@@ -441,6 +450,10 @@ actor ExplorationProgressService {
                                                            masterDataCache: masterDataCache)
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     /// キャッシュを無効化する
     func invalidateCache() {
         cachedExplorations = nil
@@ -450,15 +463,20 @@ actor ExplorationProgressService {
     /// フォアグラウンド復帰時などUIをブロックせずにパージを実行する
     func purgeOldRecordsInBackground() {
         // actor内で実行することで同時実行を防ぐ（Task.detachedは使わない）
-        Task {
-            let startTime = CFAbsoluteTimeGetCurrent()
-            let context = contextProvider.makeContext()
+        Task { [weak self] in
+            guard let self else { return }
+            await self.purgeOldRecords()
+        }
+    }
 
+    private func purgeOldRecords() async {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        let result = (try? await withContext { context in
             var countDescriptor = FetchDescriptor<ExplorationRunRecord>()
             countDescriptor.propertiesToFetch = []
             let count = (try? context.fetchCount(countDescriptor)) ?? 0
 
-            guard count >= 200 else { return }
+            guard count >= 200 else { return (didPurge: false, removedCount: 0) }
 
             let deleteCount = count - 200 + 1
             print("[ExplorationPurge] 削除開始: 現在\(count)件 → \(deleteCount)件削除予定")
@@ -470,37 +488,44 @@ actor ExplorationProgressService {
             )
             oldestDescriptor.fetchLimit = deleteCount
 
-            guard let oldRecords = try? context.fetch(oldestDescriptor) else { return }
+            guard let oldRecords = try? context.fetch(oldestDescriptor) else {
+                return (didPurge: false, removedCount: 0)
+            }
             for record in oldRecords {
                 context.delete(record)
             }
             try? context.save()
 
-            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-            print("[ExplorationPurge] 削除完了: \(oldRecords.count)件削除, 所要時間: \(String(format: "%.3f", elapsed))秒")
-        }
+            return (didPurge: true, removedCount: oldRecords.count)
+        }) ?? (didPurge: false, removedCount: 0)
+
+        guard result.didPurge else { return }
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+        print("[ExplorationPurge] 削除完了: \(result.removedCount)件削除, 所要時間: \(String(format: "%.3f", elapsed))秒")
     }
 
     /// 全探索ログを削除（Debug/復旧用）。削除件数を返す。
     func purgeAllExplorationLogs() async throws -> (runCount: Int, eventCount: Int) {
-        let context = contextProvider.makeContext()
-        context.autosaveEnabled = false
+        let result = try await withContext { context in
+            context.autosaveEnabled = false
 
-        let eventDescriptor = FetchDescriptor<ExplorationEventRecord>()
-        let events = try context.fetch(eventDescriptor)
-        for event in events {
-            context.delete(event)
+            let eventDescriptor = FetchDescriptor<ExplorationEventRecord>()
+            let events = try context.fetch(eventDescriptor)
+            for event in events {
+                context.delete(event)
+            }
+
+            let runDescriptor = FetchDescriptor<ExplorationRunRecord>()
+            let runs = try context.fetch(runDescriptor)
+            for run in runs {
+                context.delete(run)
+            }
+
+            try context.save()
+            return (runs.count, events.count)
         }
-
-        let runDescriptor = FetchDescriptor<ExplorationRunRecord>()
-        let runs = try context.fetch(runDescriptor)
-        for run in runs {
-            context.delete(run)
-        }
-
-        try context.save()
         cachedExplorations = nil
-        return (runs.count, events.count)
+        return result
     }
 
     // MARK: - Binary Format Helpers
@@ -873,65 +898,67 @@ actor ExplorationProgressService {
                   difficulty: Int,
                   targetFloor: Int,
                   startedAt: Date,
-                  seed: UInt64) throws -> RunIdentifier {
-        let context = contextProvider.makeContext()
-
-        let runRecord = ExplorationRunRecord(
-            partyId: party.id,
-            dungeonId: dungeon.id,
-            difficulty: UInt8(difficulty),
-            targetFloor: UInt8(targetFloor),
-            startedAt: startedAt,
-            seed: Int64(bitPattern: seed)
-        )
-        context.insert(runRecord)
-        try saveIfNeeded(context)
+                  seed: UInt64) async throws -> RunIdentifier {
+        let identifier = try await withContext { context in
+            let runRecord = ExplorationRunRecord(
+                partyId: party.id,
+                dungeonId: dungeon.id,
+                difficulty: UInt8(difficulty),
+                targetFloor: UInt8(targetFloor),
+                startedAt: startedAt,
+                seed: Int64(bitPattern: seed)
+            )
+            context.insert(runRecord)
+            try self.saveIfNeeded(context)
+            return RunIdentifier(partyId: party.id, startedAt: startedAt)
+        }
         invalidateCache()
-        return RunIdentifier(partyId: party.id, startedAt: startedAt)
+        return identifier
     }
 
     /// 複数の探索を一括で開始（1回のsaveで済ませる）
-    func beginRunsBatch(_ params: [BeginRunParams]) throws -> [UInt8: RunIdentifier] {
+    func beginRunsBatch(_ params: [BeginRunParams]) async throws -> [UInt8: RunIdentifier] {
         guard !params.isEmpty else { return [:] }
+        let results = try await withContext { context in
+            var identifiers: [(partyId: UInt8, startedAt: Date)] = []
+            for param in params {
+                let runRecord = ExplorationRunRecord(
+                    partyId: param.party.id,
+                    dungeonId: param.dungeon.id,
+                    difficulty: UInt8(param.difficulty),
+                    targetFloor: UInt8(param.targetFloor),
+                    startedAt: param.startedAt,
+                    seed: Int64(bitPattern: param.seed)
+                )
+                context.insert(runRecord)
+                identifiers.append((param.party.id, param.startedAt))
+            }
 
-        let context = contextProvider.makeContext()
+            try self.saveIfNeeded(context)
 
-        var identifiers: [(partyId: UInt8, startedAt: Date)] = []
-        for param in params {
-            let runRecord = ExplorationRunRecord(
-                partyId: param.party.id,
-                dungeonId: param.dungeon.id,
-                difficulty: UInt8(param.difficulty),
-                targetFloor: UInt8(param.targetFloor),
-                startedAt: param.startedAt,
-                seed: Int64(bitPattern: param.seed)
-            )
-            context.insert(runRecord)
-            identifiers.append((param.party.id, param.startedAt))
+            var batchResults: [UInt8: RunIdentifier] = [:]
+            for (partyId, startedAt) in identifiers {
+                batchResults[partyId] = RunIdentifier(partyId: partyId, startedAt: startedAt)
+            }
+            return batchResults
         }
-
-        try saveIfNeeded(context)
         invalidateCache()
-
-        var results: [UInt8: RunIdentifier] = [:]
-        for (partyId, startedAt) in identifiers {
-            results[partyId] = RunIdentifier(partyId: partyId, startedAt: startedAt)
-        }
         return results
     }
 
     /// partyIdとstartedAtで特定のRunをキャンセル
-    func cancelRun(partyId: UInt8, startedAt: Date, endedAt: Date = Date()) throws {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        guard let record = try context.fetch(descriptor).first else {
-            throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+    func cancelRun(partyId: UInt8, startedAt: Date, endedAt: Date = Date()) async throws {
+        try await withContext { context in
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+            )
+            guard let record = try context.fetch(descriptor).first else {
+                throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+            }
+            record.endedAt = endedAt
+            record.result = ExplorationResult.cancelled.rawValue
+            try self.saveIfNeeded(context)
         }
-        record.endedAt = endedAt
-        record.result = ExplorationResult.cancelled.rawValue
-        try saveIfNeeded(context)
         invalidateCache()
     }
 
@@ -945,35 +972,36 @@ actor ExplorationProgressService {
                      occurredAt: Date,
                      randomState: UInt64,
                      superRareState: SuperRareDailyState,
-                     droppedItemIds: Set<UInt16>) throws {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        guard let runRecord = try context.fetch(descriptor).first else {
-            throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+                     droppedItemIds: Set<UInt16>) async throws {
+        try await withContext { context in
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+            )
+            guard let runRecord = try context.fetch(descriptor).first else {
+                throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+            }
+
+            let eventRecord = self.buildBaseEventRecord(from: event, occurredAt: occurredAt)
+            eventRecord.run = runRecord
+            context.insert(eventRecord)
+
+            try self.populateEventRecordRelationships(
+                context: context,
+                eventRecord: eventRecord,
+                from: event,
+                battleLog: battleLog
+            )
+
+            runRecord.totalExp += eventRecord.exp
+            runRecord.totalGold += eventRecord.gold
+            runRecord.finalFloor = eventRecord.floor
+            runRecord.randomState = Int64(bitPattern: randomState)
+            runRecord.superRareJstDate = superRareState.jstDate
+            runRecord.superRareHasTriggered = superRareState.hasTriggered
+            runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
+
+            try self.saveIfNeeded(context)
         }
-
-        let eventRecord = buildBaseEventRecord(from: event, occurredAt: occurredAt)
-        eventRecord.run = runRecord
-        context.insert(eventRecord)
-
-        try populateEventRecordRelationships(
-            context: context,
-            eventRecord: eventRecord,
-            from: event,
-            battleLog: battleLog
-        )
-
-        runRecord.totalExp += eventRecord.exp
-        runRecord.totalGold += eventRecord.gold
-        runRecord.finalFloor = eventRecord.floor
-        runRecord.randomState = Int64(bitPattern: randomState)
-        runRecord.superRareJstDate = superRareState.jstDate
-        runRecord.superRareHasTriggered = superRareState.hasTriggered
-        runRecord.droppedItemIdsData = Self.encodeItemIds(droppedItemIds)
-
-        try saveIfNeeded(context)
     }
 
     /// 探索を終了（完了・全滅）
@@ -984,28 +1012,29 @@ actor ExplorationProgressService {
                      totalExperience: Int,
                      totalGold: Int,
                      autoSellGold: Int = 0,
-                     autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) throws {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        guard let runRecord = try context.fetch(descriptor).first else {
-            throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+                     autoSoldItems: [CachedExploration.Rewards.AutoSellEntry] = []) async throws {
+        try await withContext { context in
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+            )
+            guard let runRecord = try context.fetch(descriptor).first else {
+                throw ProgressPersistenceError.explorationRunNotFound(runId: UUID())
+            }
+
+            runRecord.endedAt = endedAt
+            runRecord.result = self.resultValue(for: endState)
+            runRecord.totalExp = UInt32(totalExperience)
+            runRecord.totalGold = UInt32(totalGold)
+            runRecord.autoSellGold = UInt32(clamping: max(0, autoSellGold))
+
+            self.updateAutoSellRecords(context: context, runRecord: runRecord, entries: autoSoldItems)
+
+            if case let .defeated(floorNumber, _, _) = endState {
+                runRecord.finalFloor = UInt8(floorNumber)
+            }
+
+            try self.saveIfNeeded(context)
         }
-
-        runRecord.endedAt = endedAt
-        runRecord.result = resultValue(for: endState)
-        runRecord.totalExp = UInt32(totalExperience)
-        runRecord.totalGold = UInt32(totalGold)
-        runRecord.autoSellGold = UInt32(clamping: max(0, autoSellGold))
-
-        updateAutoSellRecords(context: context, runRecord: runRecord, entries: autoSoldItems)
-
-        if case let .defeated(floorNumber, _, _) = endState {
-            runRecord.finalFloor = UInt8(floorNumber)
-        }
-
-        try saveIfNeeded(context)
         invalidateCache()
     }
 
@@ -1029,95 +1058,99 @@ actor ExplorationProgressService {
         let restoredPartyHPByCharacterId: [UInt8: Int]
     }
 
-    func runningExplorationSummaries() throws -> [RunningExplorationSummary] {
-        let context = contextProvider.makeContext()
-        let runningStatus = ExplorationResult.running.rawValue
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.result == runningStatus }
-        )
-        let records = try context.fetch(descriptor)
-        return records.map { RunningExplorationSummary(partyId: $0.partyId, startedAt: $0.startedAt) }
+    func runningExplorationSummaries() async throws -> [RunningExplorationSummary] {
+        try await withContext { context in
+            let runningStatus = ExplorationResult.running.rawValue
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.result == runningStatus }
+            )
+            let records = try context.fetch(descriptor)
+            return records.map { RunningExplorationSummary(partyId: $0.partyId, startedAt: $0.startedAt) }
+        }
     }
 
     /// 探索再開に必要な値をスナップショットとして取得
-    func resumeSnapshot(partyId: UInt8, startedAt: Date) throws -> ExplorationResumeSnapshot {
-        let context = contextProvider.makeContext()
-        let runningStatus = ExplorationResult.running.rawValue
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
-        )
-        guard let record = try context.fetch(descriptor).first else {
-            throw ExplorationResumeError.recordNotFound
+    func resumeSnapshot(partyId: UInt8, startedAt: Date) async throws -> ExplorationResumeSnapshot {
+        try await withContext { context in
+            let runningStatus = ExplorationResult.running.rawValue
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt && $0.result == runningStatus }
+            )
+            guard let record = try context.fetch(descriptor).first else {
+                throw ExplorationResumeError.recordNotFound
+            }
+
+            let eventRecords = record.events.sorted { $0.occurredAt < $1.occurredAt }
+            let droppedItemIds = try self.decodeDroppedItemIds(record.droppedItemIdsData)
+            let restoredHP = try self.restorePartyHP(from: eventRecords)
+
+            let superRareState = SuperRareDailyState(
+                jstDate: record.superRareJstDate,
+                hasTriggered: record.superRareHasTriggered
+            )
+
+            return ExplorationResumeSnapshot(
+                partyId: record.partyId,
+                dungeonId: record.dungeonId,
+                targetFloor: record.targetFloor,
+                difficulty: record.difficulty,
+                startedAt: record.startedAt,
+                randomState: record.randomState,
+                superRareState: superRareState,
+                droppedItemIds: droppedItemIds,
+                eventCount: eventRecords.count,
+                restoredPartyHPByCharacterId: restoredHP
+            )
         }
-
-        let eventRecords = record.events.sorted { $0.occurredAt < $1.occurredAt }
-        let droppedItemIds = try decodeDroppedItemIds(record.droppedItemIdsData)
-        let restoredHP = try restorePartyHP(from: eventRecords)
-
-        let superRareState = SuperRareDailyState(
-            jstDate: record.superRareJstDate,
-            hasTriggered: record.superRareHasTriggered
-        )
-
-        return ExplorationResumeSnapshot(
-            partyId: record.partyId,
-            dungeonId: record.dungeonId,
-            targetFloor: record.targetFloor,
-            difficulty: record.difficulty,
-            startedAt: record.startedAt,
-            randomState: record.randomState,
-            superRareState: superRareState,
-            droppedItemIds: droppedItemIds,
-            eventCount: eventRecords.count,
-            restoredPartyHPByCharacterId: restoredHP
-        )
     }
 
     /// 現在探索中の全パーティメンバーIDを取得
-    func runningPartyMemberIds() throws -> Set<UInt8> {
-        let context = contextProvider.makeContext()
-        let runningStatus = ExplorationResult.running.rawValue
-        let runDescriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.result == runningStatus }
-        )
-        let runningRecords = try context.fetch(runDescriptor)
-        let partyIds = Set(runningRecords.map { $0.partyId })
-
-        var memberIds = Set<UInt8>()
-        for partyId in partyIds {
-            let partyDescriptor = FetchDescriptor<PartyRecord>(
-                predicate: #Predicate { $0.id == partyId }
+    func runningPartyMemberIds() async throws -> Set<UInt8> {
+        try await withContext { context in
+            let runningStatus = ExplorationResult.running.rawValue
+            let runDescriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.result == runningStatus }
             )
-            if let party = try context.fetch(partyDescriptor).first {
-                memberIds.formUnion(party.memberCharacterIds)
+            let runningRecords = try context.fetch(runDescriptor)
+            let partyIds = Set(runningRecords.map { $0.partyId })
+
+            var memberIds = Set<UInt8>()
+            for partyId in partyIds {
+                let partyDescriptor = FetchDescriptor<PartyRecord>(
+                    predicate: #Predicate { $0.id == partyId }
+                )
+                if let party = try context.fetch(partyDescriptor).first {
+                    memberIds.formUnion(party.memberCharacterIds)
+                }
             }
+            return memberIds
         }
-        return memberIds
     }
 
     /// 指定した遭遇の戦闘ログを取得
-    func battleLogArchive(partyId: UInt8, startedAt: Date, occurredAt: Date) throws -> BattleLogArchive? {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<ExplorationRunRecord>(
-            predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
-        )
-        guard let runRecord = try context.fetch(descriptor).first else {
-            return nil
-        }
+    func battleLogArchive(partyId: UInt8, startedAt: Date, occurredAt: Date) async throws -> BattleLogArchive? {
+        try await withContext { context in
+            let descriptor = FetchDescriptor<ExplorationRunRecord>(
+                predicate: #Predicate { $0.partyId == partyId && $0.startedAt == startedAt }
+            )
+            guard let runRecord = try context.fetch(descriptor).first else {
+                return nil
+            }
 
-        guard let eventRecord = runRecord.events.first(where: { $0.occurredAt == occurredAt }),
-              let battleLogRecord = eventRecord.battleLog else {
-            return nil
-        }
+            guard let eventRecord = runRecord.events.first(where: { $0.occurredAt == occurredAt }),
+                  let battleLogRecord = eventRecord.battleLog else {
+                return nil
+            }
 
-        return try makeBattleLogArchive(from: battleLogRecord)
+            return try self.makeBattleLogArchive(from: battleLogRecord)
+        }
     }
 }
 
 // MARK: - Private Helpers
 
 private extension ExplorationProgressService {
-    func decodeDroppedItemIds(_ data: Data) throws -> Set<UInt16> {
+    nonisolated func decodeDroppedItemIds(_ data: Data) throws -> Set<UInt16> {
         guard !data.isEmpty else { return [] }
         guard data.count >= 2 else {
             throw ExplorationResumeError.corruptedDroppedItemIds(reason: "count bytes missing")
@@ -1140,7 +1173,7 @@ private extension ExplorationProgressService {
         return result
     }
 
-    func restorePartyHP(from eventRecords: [ExplorationEventRecord]) throws -> [UInt8: Int] {
+    nonisolated func restorePartyHP(from eventRecords: [ExplorationEventRecord]) throws -> [UInt8: Int] {
         // 戦闘ログを持つ最後のイベントを探す
         guard let lastBattleEvent = eventRecords.last(where: { $0.battleLog != nil }),
               let logRecord = lastBattleEvent.battleLog else {
@@ -1189,7 +1222,7 @@ private extension ExplorationProgressService {
         return result
     }
 
-    func makeBattleLogArchive(from record: BattleLogRecord) throws -> BattleLogArchive {
+    nonisolated func makeBattleLogArchive(from record: BattleLogRecord) throws -> BattleLogArchive {
         let decoded: ExplorationProgressService.DecodedBattleLogData
         do {
             decoded = try ExplorationProgressService.decodeBattleLogData(record.logData)
@@ -1216,14 +1249,14 @@ private extension ExplorationProgressService {
         )
     }
 
-    func saveIfNeeded(_ context: ModelContext) throws {
+    nonisolated func saveIfNeeded(_ context: ModelContext) throws {
         if context.hasChanges {
             try context.save()
         }
     }
 
-    func buildBaseEventRecord(from event: ExplorationEventLogEntry,
-                              occurredAt: Date) -> ExplorationEventRecord {
+    nonisolated func buildBaseEventRecord(from event: ExplorationEventLogEntry,
+                                          occurredAt: Date) -> ExplorationEventRecord {
         let kind: UInt8
         var enemyId: UInt16?
         let battleResult: UInt8? = nil
@@ -1254,10 +1287,10 @@ private extension ExplorationProgressService {
         )
     }
 
-    func populateEventRecordRelationships(context: ModelContext,
-                                          eventRecord: ExplorationEventRecord,
-                                          from event: ExplorationEventLogEntry,
-                                          battleLog: BattleLogArchive?) throws {
+    nonisolated func populateEventRecordRelationships(context: ModelContext,
+                                                      eventRecord: ExplorationEventRecord,
+                                                      from event: ExplorationEventLogEntry,
+                                                      battleLog: BattleLogArchive?) throws {
         for drop in event.drops {
             let dropRecord = ExplorationDropRecord(
                 superRareTitleId: drop.superRareTitleId,
@@ -1294,9 +1327,9 @@ private extension ExplorationProgressService {
         }
     }
 
-    func updateAutoSellRecords(context: ModelContext,
-                               runRecord: ExplorationRunRecord,
-                               entries: [CachedExploration.Rewards.AutoSellEntry]) {
+    nonisolated func updateAutoSellRecords(context: ModelContext,
+                                           runRecord: ExplorationRunRecord,
+                                           entries: [CachedExploration.Rewards.AutoSellEntry]) {
         if !runRecord.autoSellItems.isEmpty {
             for record in runRecord.autoSellItems {
                 context.delete(record)
@@ -1317,7 +1350,7 @@ private extension ExplorationProgressService {
         }
     }
 
-    func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
+    nonisolated func battleResultValue(_ result: BattleService.BattleResult) -> UInt8 {
         switch result {
         case .victory: return BattleResult.victory.rawValue
         case .defeat: return BattleResult.defeat.rawValue
@@ -1325,7 +1358,7 @@ private extension ExplorationProgressService {
         }
     }
 
-    func resultValue(for state: ExplorationEndState) -> UInt8 {
+    nonisolated func resultValue(for state: ExplorationEndState) -> UInt8 {
         switch state {
         case .completed: return ExplorationResult.completed.rawValue
         case .defeated: return ExplorationResult.defeated.rawValue

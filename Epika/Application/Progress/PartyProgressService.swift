@@ -31,11 +31,15 @@ actor PartyProgressService {
         self.contextProvider = contextProvider
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     /// パーティ変更通知を送信（差分更新対応）
     /// - Parameters:
     ///   - upserted: 追加・更新されたパーティのID配列
     ///   - removed: 削除されたパーティのID配列
-    private func notifyPartyChange(upserted: [UInt8] = [], removed: [UInt8] = []) {
+    nonisolated private func notifyPartyChange(upserted: [UInt8] = [], removed: [UInt8] = []) {
         let change = UserDataLoadService.PartyChange(upserted: upserted, removed: removed)
         Task { @MainActor in
             NotificationCenter.default.post(
@@ -47,49 +51,51 @@ actor PartyProgressService {
     }
 
     func allParties() async throws -> [CachedParty] {
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<PartyRecord>()
-        descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
-        let records = try context.fetch(descriptor)
-        return records.map(Self.snapshot)
+        try await withContext { context in
+            var descriptor = FetchDescriptor<PartyRecord>()
+            descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
+            let records = try context.fetch(descriptor)
+            return records.map(Self.snapshot)
+        }
     }
 
     func ensurePartySlots(atLeast desiredCount: Int,
-                          nameProvider: @Sendable (Int) -> String = PartyProgressService.defaultPartyName) async throws -> [CachedParty] {
+                          nameProvider: @Sendable @escaping (Int) -> String = PartyProgressService.defaultPartyName) async throws -> [CachedParty] {
         guard desiredCount > 0 else {
             return try await allParties()
         }
 
-        let context = contextProvider.makeContext()
-        var descriptor = FetchDescriptor<PartyRecord>()
-        descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
-        var records = try context.fetch(descriptor)
-        var createdIds: [UInt8] = []
-        let now = Date()
+        return try await withContext { context in
+            var descriptor = FetchDescriptor<PartyRecord>()
+            descriptor.sortBy = [SortDescriptor(\PartyRecord.id, order: .forward)]
+            var records = try context.fetch(descriptor)
+            var createdIds: [UInt8] = []
+            let now = Date()
 
-        if records.count < desiredCount {
-            for index in records.count..<desiredCount {
-                let partyId = UInt8(index + 1)
-                let record = PartyRecord(id: partyId,
-                                         displayName: nameProvider(index),
-                                         lastSelectedDungeonId: nil,
-                                         lastSelectedDifficulty: 0,
-                                         targetFloor: 0,
-                                         memberCharacterIds: [],
-                                         updatedAt: now)
-                context.insert(record)
-                records.append(record)
-                createdIds.append(partyId)
+            if records.count < desiredCount {
+                for index in records.count..<desiredCount {
+                    let partyId = UInt8(index + 1)
+                    let record = PartyRecord(id: partyId,
+                                             displayName: nameProvider(index),
+                                             lastSelectedDungeonId: nil,
+                                             lastSelectedDifficulty: 0,
+                                             targetFloor: 0,
+                                             memberCharacterIds: [],
+                                             updatedAt: now)
+                    context.insert(record)
+                    records.append(record)
+                    createdIds.append(partyId)
+                }
             }
-        }
 
-        if !createdIds.isEmpty {
-            try context.save()
-            notifyPartyChange(upserted: createdIds)
-        }
+            if !createdIds.isEmpty {
+                try context.save()
+                self.notifyPartyChange(upserted: createdIds)
+            }
 
-        let sortedRecords = records.sorted { $0.id < $1.id }
-        return sortedRecords.map(Self.snapshot)
+            let sortedRecords = records.sorted { $0.id < $1.id }
+            return sortedRecords.map(Self.snapshot)
+        }
     }
 
     func updatePartyName(partyId: UInt8, name: String) async throws -> CachedParty {
@@ -98,76 +104,83 @@ actor PartyProgressService {
             throw ProgressError.invalidInput(description: "パーティ名は空にできません")
         }
 
-        let context = contextProvider.makeContext()
-        let party = try fetchParty(partyId: partyId, context: context)
-        party.displayName = trimmed
-        party.updatedAt = Date()
-        try context.save()
-        notifyPartyChange(upserted: [party.id])
-        return Self.snapshot(from: party)
+        return try await withContext { context in
+            let party = try self.fetchParty(partyId: partyId, context: context)
+            party.displayName = trimmed
+            party.updatedAt = Date()
+            try context.save()
+            self.notifyPartyChange(upserted: [party.id])
+            return Self.snapshot(from: party)
+        }
     }
 
     func updatePartyMembers(partyId: UInt8, memberIds: [UInt8]) async throws -> CachedParty {
-        let context = contextProvider.makeContext()
-        let party = try fetchParty(partyId: partyId, context: context)
-        party.memberCharacterIds = memberIds
-        party.updatedAt = Date()
-        try context.save()
-        notifyPartyChange(upserted: [party.id])
-        return Self.snapshot(from: party)
+        return try await withContext { context in
+            let party = try self.fetchParty(partyId: partyId, context: context)
+            party.memberCharacterIds = memberIds
+            party.updatedAt = Date()
+            try context.save()
+            self.notifyPartyChange(upserted: [party.id])
+            return Self.snapshot(from: party)
+        }
     }
 
     func setLastSelectedDungeon(partyId: UInt8, dungeonId: UInt16) async throws -> CachedParty {
-        let context = contextProvider.makeContext()
-        let party = try fetchParty(partyId: partyId, context: context)
-        party.lastSelectedDungeonId = dungeonId
-        party.updatedAt = Date()
-        try context.save()
-        notifyPartyChange(upserted: [party.id])
-        return Self.snapshot(from: party)
+        return try await withContext { context in
+            let party = try self.fetchParty(partyId: partyId, context: context)
+            party.lastSelectedDungeonId = dungeonId
+            party.updatedAt = Date()
+            try context.save()
+            self.notifyPartyChange(upserted: [party.id])
+            return Self.snapshot(from: party)
+        }
     }
 
     func setLastSelectedDifficulty(partyId: UInt8, difficulty: UInt8) async throws -> CachedParty {
-        let context = contextProvider.makeContext()
-        let party = try fetchParty(partyId: partyId, context: context)
-        party.lastSelectedDifficulty = difficulty
-        party.updatedAt = Date()
-        try context.save()
-        notifyPartyChange(upserted: [party.id])
-        return Self.snapshot(from: party)
+        return try await withContext { context in
+            let party = try self.fetchParty(partyId: partyId, context: context)
+            party.lastSelectedDifficulty = difficulty
+            party.updatedAt = Date()
+            try context.save()
+            self.notifyPartyChange(upserted: [party.id])
+            return Self.snapshot(from: party)
+        }
     }
 
     func setTargetFloor(partyId: UInt8, floor: UInt8) async throws -> CachedParty {
-        let context = contextProvider.makeContext()
-        let party = try fetchParty(partyId: partyId, context: context)
-        party.targetFloor = floor
-        party.updatedAt = Date()
-        try context.save()
-        notifyPartyChange(upserted: [party.id])
-        return Self.snapshot(from: party)
+        return try await withContext { context in
+            let party = try self.fetchParty(partyId: partyId, context: context)
+            party.targetFloor = floor
+            party.updatedAt = Date()
+            try context.save()
+            self.notifyPartyChange(upserted: [party.id])
+            return Self.snapshot(from: party)
+        }
     }
 
     func characterIdsInOtherParties(excluding partyId: UInt8?) async throws -> Set<UInt8> {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<PartyRecord>()
-        let records = try context.fetch(descriptor)
+        try await withContext { context in
+            let descriptor = FetchDescriptor<PartyRecord>()
+            let records = try context.fetch(descriptor)
 
-        var result = Set<UInt8>()
-        for record in records {
-            if record.id != partyId {
-                result.formUnion(record.memberCharacterIds)
+            var result = Set<UInt8>()
+            for record in records {
+                if record.id != partyId {
+                    result.formUnion(record.memberCharacterIds)
+                }
             }
+            return result
         }
-        return result
     }
 
     func partySnapshot(id: UInt8) async throws -> CachedParty? {
-        let context = contextProvider.makeContext()
-        let descriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == id })
-        guard let record = try context.fetch(descriptor).first else {
-            return nil
+        try await withContext { context in
+            let descriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == id })
+            guard let record = try context.fetch(descriptor).first else {
+                return nil
+            }
+            return Self.snapshot(from: record)
         }
-        return Self.snapshot(from: record)
     }
 
     private static let defaultPartyName: @Sendable (Int) -> String = { index in
@@ -177,7 +190,7 @@ actor PartyProgressService {
 }
 
 private extension PartyProgressService {
-    func fetchParty(partyId: UInt8, context: ModelContext) throws -> PartyRecord {
+    nonisolated func fetchParty(partyId: UInt8, context: ModelContext) throws -> PartyRecord {
         let descriptor = FetchDescriptor<PartyRecord>(predicate: #Predicate { $0.id == partyId })
         guard let record = try context.fetch(descriptor).first else {
             throw ProgressError.partyNotFound

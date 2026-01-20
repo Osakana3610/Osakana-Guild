@@ -27,8 +27,12 @@ actor StoryProgressService {
         self.contextProvider = contextProvider
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     /// ストーリー進行変更通知を送信
-    private func notifyStoryChange(nodeIds: [UInt16]) {
+    nonisolated private func notifyStoryChange(nodeIds: [UInt16]) {
         Task { @MainActor in
             NotificationCenter.default.post(
                 name: .storyProgressDidChange,
@@ -39,60 +43,63 @@ actor StoryProgressService {
     }
 
     func currentStorySnapshot() async throws -> CachedStoryProgress {
-        let context = contextProvider.makeContext()
-        let nodes = try fetchAllNodeProgress(context: context)
-        let maxUpdatedAt = nodes.map(\.updatedAt).max() ?? Date()
-        return Self.snapshot(from: nodes, updatedAt: maxUpdatedAt)
+        try await withContext { context in
+            let nodes = try self.fetchAllNodeProgress(context: context)
+            let maxUpdatedAt = nodes.map(\.updatedAt).max() ?? Date()
+            return Self.snapshot(from: nodes, updatedAt: maxUpdatedAt)
+        }
     }
 
     @discardableResult
     func markNodeAsRead(_ nodeId: UInt16) async throws -> CachedStoryProgress {
-        let context = contextProvider.makeContext()
-        let node = try ensureNodeProgress(nodeId: nodeId, context: context)
-        guard node.isUnlocked else {
-            throw ProgressError.storyLocked(nodeId: String(nodeId))
+        try await withContext { context in
+            let node = try self.ensureNodeProgress(nodeId: nodeId, context: context)
+            guard node.isUnlocked else {
+                throw ProgressError.storyLocked(nodeId: String(nodeId))
+            }
+            let now = Date()
+            var didMutate = false
+            if node.isRead == false {
+                node.isRead = true
+                didMutate = true
+            }
+            if didMutate {
+                node.updatedAt = now
+            }
+            try self.saveIfNeeded(context)
+            self.notifyStoryChange(nodeIds: [nodeId])
+            let nodes = try self.fetchAllNodeProgress(context: context)
+            return Self.snapshot(from: nodes, updatedAt: now)
         }
-        let now = Date()
-        var didMutate = false
-        if node.isRead == false {
-            node.isRead = true
-            didMutate = true
-        }
-        if didMutate {
-            node.updatedAt = now
-        }
-        try saveIfNeeded(context)
-        notifyStoryChange(nodeIds: [nodeId])
-        let nodes = try fetchAllNodeProgress(context: context)
-        return Self.snapshot(from: nodes, updatedAt: now)
     }
 
     @discardableResult
     func setUnlocked(_ isUnlocked: Bool, nodeId: UInt16) async throws -> Bool {
-        let context = contextProvider.makeContext()
-        let node = try ensureNodeProgress(nodeId: nodeId, context: context)
-        var didChange = false
-        if node.isUnlocked != isUnlocked {
-            node.isUnlocked = isUnlocked
-            node.updatedAt = Date()
-            didChange = true
+        try await withContext { context in
+            let node = try self.ensureNodeProgress(nodeId: nodeId, context: context)
+            var didChange = false
+            if node.isUnlocked != isUnlocked {
+                node.isUnlocked = isUnlocked
+                node.updatedAt = Date()
+                didChange = true
+            }
+            try self.saveIfNeeded(context)
+            if didChange {
+                self.notifyStoryChange(nodeIds: [nodeId])
+            }
+            return didChange
         }
-        try saveIfNeeded(context)
-        if didChange {
-            notifyStoryChange(nodeIds: [nodeId])
-        }
-        return didChange
     }
 }
 
 private extension StoryProgressService {
-    func fetchAllNodeProgress(context: ModelContext) throws -> [StoryNodeProgressRecord] {
+    nonisolated func fetchAllNodeProgress(context: ModelContext) throws -> [StoryNodeProgressRecord] {
         let descriptor = FetchDescriptor<StoryNodeProgressRecord>()
         return try context.fetch(descriptor)
     }
 
-    func ensureNodeProgress(nodeId: UInt16,
-                            context: ModelContext) throws -> StoryNodeProgressRecord {
+    nonisolated func ensureNodeProgress(nodeId: UInt16,
+                                        context: ModelContext) throws -> StoryNodeProgressRecord {
         var descriptor = FetchDescriptor<StoryNodeProgressRecord>(predicate: #Predicate { $0.nodeId == nodeId })
         descriptor.fetchLimit = 1
         if let existing = try context.fetch(descriptor).first {
@@ -108,7 +115,7 @@ private extension StoryProgressService {
         return record
     }
 
-    func saveIfNeeded(_ context: ModelContext) throws {
+    nonisolated func saveIfNeeded(_ context: ModelContext) throws {
         guard context.hasChanges else { return }
         try context.save()
     }

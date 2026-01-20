@@ -84,6 +84,10 @@ actor ShopProgressService {
         self.gameStateService = gameStateService
     }
 
+    private func withContext<T: Sendable>(_ operation: @Sendable @escaping (ModelContext) throws -> T) async throws -> T {
+        try await contextProvider.withContext(operation)
+    }
+
     func loadItems() async throws -> [ShopItem] {
         let masterItems = masterDataCache.allShopItems
         let snapshot = try await loadShopSnapshot(masterItems: masterItems)
@@ -134,33 +138,34 @@ actor ShopProgressService {
             throw ProgressError.itemDefinitionUnavailable(ids: [String(itemId)])
         }
 
-        let context = contextProvider.makeContext()
         let now = Date()
+        let actuallyAdded = try await withContext { context in
+            // 既存の在庫を検索
+            let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
+                $0.itemId == itemId
+            })
+            let existingStock = try context.fetch(descriptor).first
 
-        // 既存の在庫を検索
-        let descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate {
-            $0.itemId == itemId
-        })
-        let existingStock = try context.fetch(descriptor).first
+            var added = quantity
+            if let stock = existingStock {
+                // 既存の在庫に加算（内部上限まで）
+                let previousRemaining = stock.remaining ?? 0
+                let newRemaining = min(previousRemaining + UInt16(quantity), Self.stockInternalLimit)
+                stock.remaining = newRemaining
+                added = Int(newRemaining - previousRemaining)
+                stock.updatedAt = now
+            } else {
+                // 新規在庫を作成
+                added = min(quantity, Int(Self.stockInternalLimit))
+                let stock = ShopStockRecord(itemId: itemId,
+                                            remaining: UInt16(added),
+                                            updatedAt: now)
+                context.insert(stock)
+            }
 
-        var actuallyAdded = quantity
-        if let stock = existingStock {
-            // 既存の在庫に加算（内部上限まで）
-            let previousRemaining = stock.remaining ?? 0
-            let newRemaining = min(previousRemaining + UInt16(quantity), Self.stockInternalLimit)
-            stock.remaining = newRemaining
-            actuallyAdded = Int(newRemaining - previousRemaining)
-            stock.updatedAt = now
-        } else {
-            // 新規在庫を作成
-            actuallyAdded = min(quantity, Int(Self.stockInternalLimit))
-            let stock = ShopStockRecord(itemId: itemId,
-                                        remaining: UInt16(actuallyAdded),
-                                        updatedAt: now)
-            context.insert(stock)
+            try self.saveIfNeeded(context)
+            return added
         }
-
-        try saveIfNeeded(context)
         notifyShopStockChange(updatedItemIds: [itemId])
 
         let overflow = quantity - actuallyAdded
@@ -197,76 +202,81 @@ actor ShopProgressService {
         for item in items where item.quantity > 0 {
             aggregated[item.itemId, default: 0] += item.quantity
         }
+        let aggregatedItems = aggregated
+        let definitionById = definitionMap
 
-        let context = contextProvider.makeContext()
         let now = Date()
-
-        // 既存在庫を一括取得
-        let relevantItemIds = Set(aggregated.keys)
-        let descriptor = FetchDescriptor<ShopStockRecord>()
-        let allStocks = try context.fetch(descriptor)
-        var stockMap: [UInt16: ShopStockRecord] = [:]
-        for stock in allStocks where relevantItemIds.contains(stock.itemId) {
-            stockMap[stock.itemId] = stock
-        }
-
-        var totalGold = 0
-        var totalTickets = 0
-        var destroyed: [(itemId: UInt16, quantity: Int)] = []
-        var soldQuantities: [UInt16: Int] = [:]
-
-        for (itemId, quantity) in aggregated {
-            guard let definition = definitionMap[itemId] else { continue }
-            var pending = quantity
-
-            while pending > 0 {
-                let stock: ShopStockRecord
-                if let existing = stockMap[itemId] {
-                    stock = existing
-                } else {
-                    stock = ShopStockRecord(itemId: itemId,
-                                            remaining: 0,
-                                            updatedAt: now)
-                    context.insert(stock)
-                    stockMap[itemId] = stock
-                }
-
-                let current = Int(stock.remaining ?? 0)
-                let capacity = max(0, Int(Self.stockInternalLimit) - current)
-                if capacity <= 0 {
-                    if definition.rarity == ItemRarity.normal.rawValue {
-                        destroyed.append((itemId: itemId, quantity: pending))
-                        pending = 0
-                        break
-                    }
-
-                    if let cleanupResult = performCleanup(stock: stock,
-                                                          definition: definition,
-                                                          targetQuantity: Self.cleanupTargetQuantity,
-                                                          timestamp: now) {
-                        totalTickets += cleanupResult.tickets
-                        continue
-                    } else {
-                        destroyed.append((itemId: itemId, quantity: pending))
-                        pending = 0
-                        break
-                    }
-                }
-
-                let toAdd = min(pending, capacity)
-                let newRemaining = current + toAdd
-                stock.remaining = UInt16(newRemaining)
-                stock.updatedAt = now
-                pending -= toAdd
-                totalGold += definition.sellValue * toAdd
-                soldQuantities[itemId, default: 0] += toAdd
+        let result = try await withContext { context in
+            // 既存在庫を一括取得
+            let relevantItemIds = Set(aggregatedItems.keys)
+            let descriptor = FetchDescriptor<ShopStockRecord>()
+            let allStocks = try context.fetch(descriptor)
+            var stockMap: [UInt16: ShopStockRecord] = [:]
+            for stock in allStocks where relevantItemIds.contains(stock.itemId) {
+                stockMap[stock.itemId] = stock
             }
+
+            var totalGold = 0
+            var totalTickets = 0
+            var destroyed: [(itemId: UInt16, quantity: Int)] = []
+            var soldQuantities: [UInt16: Int] = [:]
+
+            for (itemId, quantity) in aggregatedItems {
+                guard let definition = definitionById[itemId] else { continue }
+                var pending = quantity
+
+                while pending > 0 {
+                    let stock: ShopStockRecord
+                    if let existing = stockMap[itemId] {
+                        stock = existing
+                    } else {
+                        stock = ShopStockRecord(itemId: itemId,
+                                                remaining: 0,
+                                                updatedAt: now)
+                        context.insert(stock)
+                        stockMap[itemId] = stock
+                    }
+
+                    let current = Int(stock.remaining ?? 0)
+                    let capacity = max(0, Int(Self.stockInternalLimit) - current)
+                    if capacity <= 0 {
+                        if definition.rarity == ItemRarity.normal.rawValue {
+                            destroyed.append((itemId: itemId, quantity: pending))
+                            pending = 0
+                            break
+                        }
+
+                        if let cleanupResult = self.performCleanup(stock: stock,
+                                                                   definition: definition,
+                                                                   targetQuantity: Self.cleanupTargetQuantity,
+                                                                   timestamp: now) {
+                            totalTickets += cleanupResult.tickets
+                            continue
+                        } else {
+                            destroyed.append((itemId: itemId, quantity: pending))
+                            pending = 0
+                            break
+                        }
+                    }
+
+                    let toAdd = min(pending, capacity)
+                    let newRemaining = current + toAdd
+                    stock.remaining = UInt16(newRemaining)
+                    stock.updatedAt = now
+                    pending -= toAdd
+                    totalGold += definition.sellValue * toAdd
+                    soldQuantities[itemId, default: 0] += toAdd
+                }
+            }
+
+            try self.saveIfNeeded(context)
+
+            let updatedItemIds = Array(stockMap.keys)
+            return (updatedItemIds, totalGold, totalTickets, destroyed, soldQuantities)
         }
 
-        try saveIfNeeded(context)
+        let (updatedItemIds, totalGold, totalTickets, destroyed, soldQuantities) = result
 
-        // 変更されたアイテムIDを通知
-        let updatedItemIds = Array(stockMap.keys)
         if !updatedItemIds.isEmpty {
             notifyShopStockChange(updatedItemIds: updatedItemIds)
         }
@@ -295,27 +305,32 @@ actor ShopProgressService {
     ///   - targetQuantity: 目標数量（デフォルト5、0以上）
     /// - Returns: 獲得キャット・チケット数
     func cleanupStock(itemId: UInt16, targetQuantity: UInt16 = 5) async throws -> Int {
-        let context = contextProvider.makeContext()
-        let stock = try fetchStockRecord(itemId: itemId, context: context)
+        let masterData = masterDataCache
+        let result = try await withContext { context in
+            let stock = try self.fetchStockRecord(itemId: itemId, context: context)
 
-        guard let definition = masterDataCache.item(stock.itemId) else {
-            throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
-        }
-        guard definition.rarity != ItemRarity.normal.rawValue else {
-            throw ProgressError.invalidInput(description: "ノーマルアイテムは整理できません")
-        }
-        let now = Date()
-        guard let cleanupResult = performCleanup(stock: stock,
-                                                 definition: definition,
-                                                 targetQuantity: targetQuantity,
-                                                 timestamp: now) else {
-            try saveIfNeeded(context)
-            return 0
-        }
+            guard let definition = masterData.item(stock.itemId) else {
+                throw ProgressError.itemDefinitionUnavailable(ids: [String(stock.itemId)])
+            }
+            guard definition.rarity != ItemRarity.normal.rawValue else {
+                throw ProgressError.invalidInput(description: "ノーマルアイテムは整理できません")
+            }
+            let now = Date()
+            guard let cleanupResult = self.performCleanup(stock: stock,
+                                                          definition: definition,
+                                                          targetQuantity: targetQuantity,
+                                                          timestamp: now) else {
+                try self.saveIfNeeded(context)
+                return (tickets: 0, didCleanup: false)
+            }
 
-        try saveIfNeeded(context)
-        notifyShopStockChange(updatedItemIds: [itemId])
-        return cleanupResult.tickets
+            try self.saveIfNeeded(context)
+            return (tickets: cleanupResult.tickets, didCleanup: true)
+        }
+        if result.didCleanup {
+            notifyShopStockChange(updatedItemIds: [itemId])
+        }
+        return result.tickets
     }
 
     /// 在庫整理対象のアイテム一覧を取得（在庫99以上のノーマル以外のアイテム）
@@ -349,16 +364,17 @@ actor ShopProgressService {
         let totalCost = target.price * quantity
         let playerSnapshot = try await gameStateService.spendGold(UInt32(totalCost))
 
-        let context = contextProvider.makeContext()
-        let stockRecord = try fetchStockRecord(itemId: itemId, context: context)
-        if let remaining = stockRecord.remaining {
-            guard remaining >= quantity else {
-                throw ProgressError.insufficientStock(required: quantity, available: Int(remaining))
+        try await withContext { context in
+            let stockRecord = try self.fetchStockRecord(itemId: itemId, context: context)
+            if let remaining = stockRecord.remaining {
+                guard remaining >= quantity else {
+                    throw ProgressError.insufficientStock(required: quantity, available: Int(remaining))
+                }
+                stockRecord.remaining = remaining - UInt16(quantity)
             }
-            stockRecord.remaining = remaining - UInt16(quantity)
+            stockRecord.updatedAt = Date()
+            try self.saveIfNeeded(context)
         }
-        stockRecord.updatedAt = Date()
-        try saveIfNeeded(context)
         notifyShopStockChange(updatedItemIds: [itemId])
 
         // ショップ購入品は無称号（normalTitleId = 2）
@@ -376,10 +392,10 @@ private extension ShopProgressService {
         let tickets: Int
     }
 
-    func performCleanup(stock: ShopStockRecord,
-                        definition: ItemDefinition,
-                        targetQuantity: UInt16,
-                        timestamp: Date) -> CleanupComputation? {
+    nonisolated func performCleanup(stock: ShopStockRecord,
+                                    definition: ItemDefinition,
+                                    targetQuantity: UInt16,
+                                    timestamp: Date) -> CleanupComputation? {
         guard definition.rarity != ItemRarity.normal.rawValue else { return nil }
         guard let remaining = stock.remaining, remaining > targetQuantity else { return nil }
 
@@ -395,20 +411,21 @@ private extension ShopProgressService {
     }
 
     func loadShopSnapshot(masterItems: [MasterShopItem]) async throws -> CachedShopStock {
-        let context = contextProvider.makeContext()
-        let now = Date()
-        _ = try syncStocks(masterItems: masterItems,
-                           context: context,
-                           timestamp: now)
-        try saveIfNeeded(context)
-        let stocks = try fetchAllStocks(context: context)
-        let maxUpdatedAt = stocks.map(\.updatedAt).max() ?? now
-        return makeSnapshot(from: stocks, updatedAt: maxUpdatedAt)
+        try await withContext { context in
+            let now = Date()
+            _ = try self.syncStocks(masterItems: masterItems,
+                                    context: context,
+                                    timestamp: now)
+            try self.saveIfNeeded(context)
+            let stocks = try self.fetchAllStocks(context: context)
+            let maxUpdatedAt = stocks.map(\.updatedAt).max() ?? now
+            return self.makeSnapshot(from: stocks, updatedAt: maxUpdatedAt)
+        }
     }
 
-    func syncStocks(masterItems: [MasterShopItem],
-                    context: ModelContext,
-                    timestamp: Date) throws -> Bool {
+    nonisolated func syncStocks(masterItems: [MasterShopItem],
+                                context: ModelContext,
+                                timestamp: Date) throws -> Bool {
         var changed = false
         let descriptor = FetchDescriptor<ShopStockRecord>()
         let allRecords = try context.fetch(descriptor)
@@ -432,12 +449,12 @@ private extension ShopProgressService {
         return changed
     }
 
-    func fetchAllStocks(context: ModelContext) throws -> [ShopStockRecord] {
+    nonisolated func fetchAllStocks(context: ModelContext) throws -> [ShopStockRecord] {
         let descriptor = FetchDescriptor<ShopStockRecord>()
         return try context.fetch(descriptor)
     }
 
-    func fetchStockRecord(itemId: UInt16, context: ModelContext) throws -> ShopStockRecord {
+    nonisolated func fetchStockRecord(itemId: UInt16, context: ModelContext) throws -> ShopStockRecord {
         var descriptor = FetchDescriptor<ShopStockRecord>(predicate: #Predicate { $0.itemId == itemId })
         descriptor.fetchLimit = 1
         guard let stock = try context.fetch(descriptor).first else {
@@ -446,8 +463,8 @@ private extension ShopProgressService {
         return stock
     }
 
-    func makeSnapshot(from stocks: [ShopStockRecord],
-                      updatedAt: Date) -> CachedShopStock {
+    nonisolated func makeSnapshot(from stocks: [ShopStockRecord],
+                                  updatedAt: Date) -> CachedShopStock {
         let stockSnapshots = stocks.map { stock in
             CachedShopStock.Stock(itemId: stock.itemId,
                                   remaining: stock.remaining,
@@ -457,7 +474,7 @@ private extension ShopProgressService {
                                updatedAt: updatedAt)
     }
 
-    func saveIfNeeded(_ context: ModelContext) throws {
+    nonisolated func saveIfNeeded(_ context: ModelContext) throws {
         guard context.hasChanges else { return }
         try context.save()
     }
