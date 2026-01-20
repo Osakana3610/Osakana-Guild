@@ -42,11 +42,19 @@ struct CharacterDetailTip: Tip {
 
 struct CachedCharacterDetailSheetView: View {
     let character: CachedCharacter
+    let onActionPreferencesChange: ((CharacterValues.ActionPreferences, @escaping (Result<Void, Error>) -> Void) -> Void)?
     @Environment(\.dismiss) private var dismiss
+
+    init(character: CachedCharacter,
+         onActionPreferencesChange: ((CharacterValues.ActionPreferences, @escaping (Result<Void, Error>) -> Void) -> Void)? = nil) {
+        self.character = character
+        self.onActionPreferencesChange = onActionPreferencesChange
+    }
 
     var body: some View {
         NavigationStack {
-            CharacterDetailContent(character: character)
+            CharacterDetailContent(character: character,
+                                   onActionPreferencesChange: onActionPreferencesChange)
                 .navigationTitle(character.name)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

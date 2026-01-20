@@ -338,7 +338,16 @@ struct EquipmentEditorView: View {
 
                     Section("行動優先度") {
                         CharacterActionPreferencesSection(character: currentCharacter,
-                                                          onActionPreferencesChange: nil)
+                                                          onActionPreferencesChange: { preferences, completion in
+                                                              Task {
+                                                                  do {
+                                                                      try await updateActionPreferences(to: preferences)
+                                                                      await MainActor.run { completion(.success(())) }
+                                                                  } catch {
+                                                                      await MainActor.run { completion(.failure(error)) }
+                                                                  }
+                                                              }
+                                                          })
                     }
 
                     if let error = equipError {
@@ -711,6 +720,19 @@ struct EquipmentEditorView: View {
         // キャラクターキャッシュを差分更新（他画面で最新状態を参照可能に）
         displayService.updateCharacter(runtime)
         // 装備中アイテムキャッシュはCharacterProgressServiceからの通知経由で自動更新される
+    }
+
+    @MainActor
+    private func updateActionPreferences(to newPreferences: CharacterValues.ActionPreferences) async throws {
+        let updated = try await characterService.updateActionPreferences(
+            characterId: currentCharacter.id,
+            attack: newPreferences.attack,
+            priestMagic: newPreferences.priestMagic,
+            mageMagic: newPreferences.mageMagic,
+            breath: newPreferences.breath
+        )
+        currentCharacter = updated
+        displayService.updateCharacter(updated)
     }
 
     /// 装備変更前後のステータス差分を計算

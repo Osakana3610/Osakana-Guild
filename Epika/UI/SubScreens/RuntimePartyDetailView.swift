@@ -445,10 +445,22 @@ private struct CharacterDetailSheetLoader: View {
     @State private var character: CachedCharacter?
     @State private var errorMessage: String?
 
+    private var characterService: CharacterProgressService { appServices.character }
+
     var body: some View {
         Group {
             if let character {
-                CachedCharacterDetailSheetView(character: character)
+                CachedCharacterDetailSheetView(character: character,
+                                               onActionPreferencesChange: { preferences, completion in
+                                                   Task {
+                                                       do {
+                                                           try await updateActionPreferences(to: preferences)
+                                                           await MainActor.run { completion(.success(())) }
+                                                       } catch {
+                                                           await MainActor.run { completion(.failure(error)) }
+                                                       }
+                                                   }
+                                               })
             } else if let errorMessage {
                 VStack {
                     Text(errorMessage)
@@ -477,6 +489,19 @@ private struct CharacterDetailSheetLoader: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    @MainActor
+    private func updateActionPreferences(to newPreferences: CharacterValues.ActionPreferences) async throws {
+        let updated = try await characterService.updateActionPreferences(
+            characterId: characterId,
+            attack: newPreferences.attack,
+            priestMagic: newPreferences.priestMagic,
+            mageMagic: newPreferences.mageMagic,
+            breath: newPreferences.breath
+        )
+        character = updated
+        appServices.userDataLoad.updateCharacter(updated)
     }
 }
 
