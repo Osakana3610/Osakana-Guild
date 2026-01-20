@@ -20,12 +20,18 @@ struct BattleLogRenderer {
         var defeated: Bool
         var attempts: Int
         var hits: Int
+        var criticalHits: Int
 
-        init(totalDamage: Int = 0, defeated: Bool = false, attempts: Int = 0, hits: Int = 0) {
+        init(totalDamage: Int = 0,
+             defeated: Bool = false,
+             attempts: Int = 0,
+             hits: Int = 0,
+             criticalHits: Int = 0) {
             self.totalDamage = totalDamage
             self.defeated = defeated
             self.attempts = attempts
             self.hits = hits
+            self.criticalHits = criticalHits
         }
     }
 
@@ -512,6 +518,18 @@ struct BattleLogRenderer {
                 summary.attempts += 1
                 summaries[target] = summary
                 continue
+            case .skillEffect:
+                guard let target = effect.target,
+                      let extra = effect.extra,
+                      extra == SkillEffectLogKind.physicalCritical.rawValue else {
+                    orderedTokens.append(.standard(effect))
+                    continue
+                }
+                ensureToken(for: target)
+                var summary = summaries[target] ?? PhysicalSummary()
+                summary.criticalHits += 1
+                summaries[target] = summary
+                continue
             default:
                 orderedTokens.append(.standard(effect))
             }
@@ -579,8 +597,11 @@ struct BattleLogRenderer {
         }
 
         let amountText = formatAmount(summary.totalDamage)
+        let templateKey = summary.criticalHits > 0
+            ? "battleLog.effect.physicalCriticalDamage"
+            : "battleLog.effect.physicalDamage"
         guard let message = renderTemplate(
-            key: "battleLog.effect.physicalDamage",
+            key: templateKey,
             placeholders: [
                 "actor": actor,
                 "target": targetName,

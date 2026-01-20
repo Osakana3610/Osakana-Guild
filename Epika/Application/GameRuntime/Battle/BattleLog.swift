@@ -319,6 +319,7 @@ enum SkillEffectLogKind: UInt16, Codable, Sendable, CaseIterable {
     case resurrectionVitalize = 28
     case runawayMagic = 29
     case runawayDamage = 30
+    case physicalCritical = 31
 
     nonisolated var termKey: String {
         switch self {
@@ -352,6 +353,7 @@ enum SkillEffectLogKind: UInt16, Codable, Sendable, CaseIterable {
         case .resurrectionVitalize: return "battleLog.term.skillEffect.resurrectionVitalize"
         case .runawayMagic: return "battleLog.term.skillEffect.runawayMagic"
         case .runawayDamage: return "battleLog.term.skillEffect.runawayDamage"
+        case .physicalCritical: return "battleLog.term.skillEffect.physicalCritical"
         }
     }
 }

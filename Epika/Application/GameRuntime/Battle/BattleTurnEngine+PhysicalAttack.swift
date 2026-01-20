@@ -480,6 +480,11 @@ extension BattleTurnEngine {
                                                defender: &defenderCopy,
                                                hitIndex: hitIndex,
                                                context: &context)
+            if result.critical {
+                entryBuilder.addEffect(kind: .skillEffect,
+                                       target: defenderIdx,
+                                       extra: SkillEffectLogKind.physicalCritical.rawValue)
+            }
 
             let guardAfter = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
             let barrierAfter = defenderCopy.barrierCharges[barrierKey] ?? 0
@@ -606,6 +611,11 @@ extension BattleTurnEngine {
         let barrierBefore = defenderCopy.barrierCharges[barrierKey] ?? 0
 
         let result = computeReverseHealingDamage(attacker: attackerCopy, defender: &defenderCopy, context: &context)
+        if result.critical {
+            entryBuilder.addEffect(kind: .skillEffect,
+                                   target: defenderIdx,
+                                   extra: SkillEffectLogKind.physicalCritical.rawValue)
+        }
 
         let guardAfter = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
         let barrierAfter = defenderCopy.barrierCharges[barrierKey] ?? 0

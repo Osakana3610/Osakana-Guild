@@ -97,6 +97,7 @@
 "battleLog.term.skillEffect.enemyActionSkip" = "敵行動スキップ";
 "battleLog.term.skillEffect.berserk" = "暴走";
 "battleLog.term.skillEffect.magicCritical" = "必殺魔法";
+"battleLog.term.skillEffect.physicalCritical" = "必殺攻撃";
 "battleLog.term.skillEffect.magicNullify" = "魔法無効化";
 "battleLog.term.skillEffect.cover" = "かばう";
 "battleLog.term.skillEffect.barrierPhysical" = "物理結界";
@@ -147,6 +148,7 @@
 "battleLog.declaration.skillEffect" = "{actor}の{label}が発動した！";
 
 "battleLog.effect.physicalDamage" = "{actor}の攻撃！{target}に{amount}のダメージ！";
+"battleLog.effect.physicalCriticalDamage" = "{actor}の必殺攻撃！{target}に{amount}のダメージ！";
 "battleLog.effect.physicalEvade" = "{actor}の攻撃！{target}は攻撃をかわした！";
 "battleLog.effect.physicalParry" = "{target}のパリィ！";
 "battleLog.effect.physicalBlock" = "{target}の盾防御！";
