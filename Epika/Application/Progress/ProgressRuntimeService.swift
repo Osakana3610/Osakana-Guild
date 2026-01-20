@@ -49,7 +49,8 @@ actor ProgressRuntimeService {
     func startExplorationRun(party: CachedParty,
                               characters: [CachedCharacter],
                               dungeonId: UInt16,
-                              targetFloorNumber: Int) async throws -> ExplorationRuntimeSession {
+                              targetFloorNumber: Int,
+                              explorationIntervalOverride: TimeInterval? = nil) async throws -> ExplorationRuntimeSession {
         let characterInputs = characters.map { CharacterInput(from: $0) }
         let pandoraBoxItems = try await gameStateService.pandoraBoxItems()
         let partyState = try await runtimeService.runtimePartyState(party: party,
@@ -61,7 +62,8 @@ actor ProgressRuntimeService {
                                                                    targetFloorNumber: targetFloorNumber,
                                                                    difficultyTitleId: party.lastSelectedDifficulty,
                                                                    party: partyState,
-                                                                   superRareState: superRareState)
+                                                                   superRareState: superRareState,
+                                                                   explorationIntervalOverride: explorationIntervalOverride)
 
         let waitClosure: @Sendable () async throws -> ExplorationRunArtifact = { [weak self] in
             let artifact = try await session.waitForCompletion()

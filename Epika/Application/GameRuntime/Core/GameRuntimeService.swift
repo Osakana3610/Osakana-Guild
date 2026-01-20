@@ -64,7 +64,8 @@ actor GameRuntimeService {
                              targetFloorNumber: Int,
                              difficultyTitleId: UInt8,
                              party: RuntimePartyState,
-                             superRareState: SuperRareDailyState) async throws -> ExplorationRunSession {
+                             superRareState: SuperRareDailyState,
+                             explorationIntervalOverride: TimeInterval? = nil) async throws -> ExplorationRunSession {
         // 決定論的乱数のシードを生成
         let seed = UInt64.random(in: UInt64.min...UInt64.max)
         let preparationData = try await prepareExplorationRun(dungeonId: dungeonId,
@@ -72,7 +73,8 @@ actor GameRuntimeService {
                                                               difficultyTitleId: difficultyTitleId,
                                                               party: party,
                                                               superRareState: superRareState,
-                                                              seed: seed)
+                                                              seed: seed,
+                                                              explorationIntervalOverride: explorationIntervalOverride)
         let runId = UUID()
         let startedAt = Date()
         let (stream, continuation) = AsyncStream.makeStream(of: ExplorationEngine.StepOutcome.self)
@@ -209,7 +211,8 @@ actor GameRuntimeService {
                                difficultyTitleId: UInt8,
                                party: RuntimePartyState,
                                superRareState: SuperRareDailyState,
-                               seed: UInt64) async throws -> ExplorationRunPreparationData {
+                               seed: UInt64,
+                               explorationIntervalOverride: TimeInterval? = nil) async throws -> ExplorationRunPreparationData {
         let provider = makeExplorationProvider()
         let scheduler = makeEventScheduler()
         // 難易度の称号からstatMultiplierを取得（無称号=id:2は1.0倍）
@@ -227,7 +230,8 @@ actor GameRuntimeService {
                                                                        seed: seed)
         let timeScale = party.explorationTimeMultiplier(forDungeon: preparation.dungeon)
         let scaledInterval = max(0.0, Double(preparation.dungeon.explorationTime) * timeScale)
-        let interval = TimeInterval(scaledInterval)
+        let baseInterval = TimeInterval(scaledInterval)
+        let interval = explorationIntervalOverride.map { max(0.0, $0) } ?? baseInterval
         return ExplorationRunPreparationData(preparation: preparation,
                                              state: state,
                                              explorationInterval: interval)

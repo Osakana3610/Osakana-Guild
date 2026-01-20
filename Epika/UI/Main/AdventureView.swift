@@ -33,6 +33,8 @@ struct AdventureView: View {
 
     @State private var partyDetailContext: PartyDetailContext?
     @State private var logsPartyId: UInt8?
+    @State private var repeatSettingsByPartyId: [UInt8: RepeatDepartureSettings] = [:]
+    @State private var bulkRepeatSettings: RepeatDepartureSettings?
 
     private var parties: [CachedParty] {
         partyState.parties.sorted { $0.id < $1.id }
@@ -65,6 +67,7 @@ struct AdventureView: View {
                         Task { await startAllExplorations() }
                     }
                     .disabled(!canMassDepart)
+                    .contextMenu { bulkDepartureMenu }
                 }
             }
             .onAppear { Task { await loadOnce() } }
@@ -128,6 +131,9 @@ struct AdventureView: View {
                         handleDeparture(for: party)
                     }
                 },
+                primaryActionMenu: {
+                    AnyView(repeatDepartureMenu(for: party))
+                },
                 onMembersTap: {
                     adventureState.selectParty(at: index)
                     showPartyDetail(for: party)
@@ -147,7 +153,8 @@ struct AdventureView: View {
             showPartyDetail(for: party)
             return
         }
-        Task { _ = await startExploration(for: party) }
+        let settings = repeatSettingsByPartyId[party.id]
+        Task { _ = await startExploration(for: party, settings: settings) }
     }
 
     private var loadingState: some View {
@@ -245,14 +252,21 @@ struct AdventureView: View {
     }
 
     @MainActor
-    private func startExploration(for party: CachedParty) async -> Bool {
+    private func startExploration(for party: CachedParty,
+                                  settings: RepeatDepartureSettings?) async -> Bool {
         errorMessage = nil
         guard let dungeon = selectedDungeon(for: party) else {
             errorMessage = "ダンジョンを選択してください"
             return false
         }
+        let repeatCount = settings?.repeatCount ?? 1
+        let isImmediateReturn = settings?.isImmediateReturn ?? false
         do {
-            try await adventureState.startExploration(party: party, dungeon: dungeon, using: appServices)
+            try await adventureState.startExploration(party: party,
+                                                      dungeon: dungeon,
+                                                      repeatCount: repeatCount,
+                                                      isImmediateReturn: isImmediateReturn,
+                                                      using: appServices)
             return true
         } catch {
             errorMessage = error.localizedDescription
@@ -273,6 +287,27 @@ struct AdventureView: View {
                                                 initialLastSelectedDungeonId: party.lastSelectedDungeonId,
                                                 initialLastSelectedDifficulty: party.lastSelectedDifficulty,
                                                 selectedDungeonId: selected?.dungeonId)
+    }
+
+    private func repeatSettings(for partyId: UInt8) -> RepeatDepartureSettings {
+        repeatSettingsByPartyId[partyId] ?? RepeatDepartureSettings.defaultSettings
+    }
+
+    private func updateRepeatSettings(for partyId: UInt8,
+                                      repeatCount: Int? = nil,
+                                      isImmediateReturn: Bool? = nil) {
+        let current = repeatSettings(for: partyId)
+        let updated = RepeatDepartureSettings(repeatCount: repeatCount ?? current.repeatCount,
+                                              isImmediateReturn: isImmediateReturn ?? current.isImmediateReturn)
+        repeatSettingsByPartyId[partyId] = updated
+    }
+
+    private func updateBulkRepeatSettings(repeatCount: Int? = nil,
+                                          isImmediateReturn: Bool? = nil) {
+        let current = bulkRepeatSettings ?? RepeatDepartureSettings.defaultSettings
+        let updated = RepeatDepartureSettings(repeatCount: repeatCount ?? current.repeatCount,
+                                              isImmediateReturn: isImmediateReturn ?? current.isImmediateReturn)
+        bulkRepeatSettings = updated
     }
 
     private var logsPartySheetItem: Binding<CachedParty?> {
@@ -302,6 +337,78 @@ struct AdventureView: View {
         partyDetailContext = current
     }
 
+    @ViewBuilder
+    private func repeatDepartureMenu(for party: CachedParty) -> some View {
+        let settings = repeatSettings(for: party.id)
+        Menu("出撃回数") {
+            ForEach(Array(RepeatDepartureSettings.repeatCountRange), id: \.self) { value in
+                Button {
+                    updateRepeatSettings(for: party.id, repeatCount: value)
+                } label: {
+                    if value == settings.repeatCount {
+                        Label("\(value)回", systemImage: "checkmark")
+                    } else {
+                        Text("\(value)回")
+                    }
+                }
+            }
+        }
+
+        Button {
+            updateRepeatSettings(for: party.id, isImmediateReturn: !settings.isImmediateReturn)
+        } label: {
+            if settings.isImmediateReturn {
+                Label("即時帰還", systemImage: "checkmark")
+            } else {
+                Text("即時帰還")
+            }
+        }
+
+        Button("この設定で出撃") {
+            updateRepeatSettings(for: party.id,
+                                 repeatCount: settings.repeatCount,
+                                 isImmediateReturn: settings.isImmediateReturn)
+            selectParty(party)
+            handleDeparture(for: party)
+        }
+        .disabled(!canStartExploration(for: party) || adventureState.isExploring(partyId: party.id))
+    }
+
+    @ViewBuilder
+    private var bulkDepartureMenu: some View {
+        let settings = bulkRepeatSettings ?? RepeatDepartureSettings.defaultSettings
+        Menu("出撃回数") {
+            ForEach(Array(RepeatDepartureSettings.repeatCountRange), id: \.self) { value in
+                Button {
+                    updateBulkRepeatSettings(repeatCount: value)
+                } label: {
+                    if value == settings.repeatCount {
+                        Label("\(value)回", systemImage: "checkmark")
+                    } else {
+                        Text("\(value)回")
+                    }
+                }
+            }
+        }
+
+        Button {
+            updateBulkRepeatSettings(isImmediateReturn: !settings.isImmediateReturn)
+        } label: {
+            if settings.isImmediateReturn {
+                Label("即時帰還", systemImage: "checkmark")
+            } else {
+                Text("即時帰還")
+            }
+        }
+
+        Button("この設定で一斉出撃") {
+            updateBulkRepeatSettings(repeatCount: settings.repeatCount,
+                                     isImmediateReturn: settings.isImmediateReturn)
+            Task { await startAllExplorations() }
+        }
+        .disabled(!canMassDepart)
+    }
+
     @MainActor
     private func startAllExplorations() async {
         if isBulkDepartureInProgress { return }
@@ -318,8 +425,12 @@ struct AdventureView: View {
 
         guard !batchParams.isEmpty else { return }
 
+        let settings = bulkRepeatSettings ?? RepeatDepartureSettings.defaultSettings
         do {
-            let failures = try await adventureState.startExplorationsInBatch(batchParams, using: appServices)
+            let failures = try await adventureState.startExplorationsInBatch(batchParams,
+                                                                             repeatCount: settings.repeatCount,
+                                                                             isImmediateReturn: settings.isImmediateReturn,
+                                                                             using: appServices)
             if !failures.isEmpty {
                 errorMessage = failures.joined(separator: ", ") + " の探索開始に失敗しました"
             }
@@ -327,6 +438,7 @@ struct AdventureView: View {
             errorMessage = error.localizedDescription
         }
     }
+
 }
 
 private struct PartyDetailContext: Identifiable {
@@ -337,4 +449,12 @@ private struct PartyDetailContext: Identifiable {
     var selectedDungeonId: UInt16?
 
     var id: UInt8 { partyId }
+}
+
+private struct RepeatDepartureSettings: Hashable {
+    let repeatCount: Int
+    let isImmediateReturn: Bool
+
+    static let repeatCountRange = 1...100
+    static let defaultSettings = RepeatDepartureSettings(repeatCount: 1, isImmediateReturn: false)
 }

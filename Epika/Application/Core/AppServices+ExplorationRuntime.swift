@@ -199,24 +199,40 @@ extension AppServices {
             continuation.finish()
 
             // バックグラウンドでDB書き込みを実行（帰還通知後）
-            let appServices = self
             let capturedDungeonId = artifact.dungeon.id
             let capturedDifficulty = UInt8(runDifficulty)
             let capturedFloorCount = UInt8(artifact.floorCount)
-            Task {
+            let dungeonDefinition = isFullClear ? masterDataCache.dungeon(capturedDungeonId) : nil
+            let dungeonService = dungeon
+            let shopService = shop
+            let inventoryService = inventory
+            if isFullClear {
+                Task { @MainActor [capturedDungeonId] in
+                    do {
+                        try await self.unlockStoryForDungeonClear(capturedDungeonId)
+                    } catch {
+                        print("[ExplorationRuntime] Story unlock error: \(error)")
+                    }
+                }
+            }
+            Task.detached(priority: .utility) { [capturedDungeonId, capturedDifficulty, capturedFloorCount, calculatedDropRewards, isFullClear, dungeonDefinition, dungeonService, shopService, inventoryService] in
                 do {
                     if isFullClear,
-                       let dungeonDef = appServices.masterDataCache.dungeon(capturedDungeonId) {
-                        _ = try await appServices.dungeon.markClearedAndUnlockNext(
+                       let dungeonDef = dungeonDefinition {
+                        _ = try await dungeonService.markClearedAndUnlockNext(
                             dungeonId: capturedDungeonId,
                             difficulty: capturedDifficulty,
                             totalFloors: capturedFloorCount,
                             definition: dungeonDef
                         )
-                        try await appServices.unlockStoryForDungeonClear(capturedDungeonId)
                     }
                     if let calculated = calculatedDropRewards {
-                        _ = try await appServices.persistCalculatedDropRewards(calculated)
+                        if !calculated.autoSellItems.isEmpty {
+                            _ = try await shopService.addPlayerSoldItemsBatch(calculated.autoSellItems)
+                        }
+                        if !calculated.inventorySeeds.isEmpty {
+                            _ = try await inventoryService.addItemsBatch(calculated.inventorySeeds)
+                        }
                     }
                 } catch {
                     print("[ExplorationRuntime] Background persist error: \(error)")

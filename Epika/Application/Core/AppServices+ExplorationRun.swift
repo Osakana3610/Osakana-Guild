@@ -8,7 +8,7 @@
 //   - パーティ出撃準備（HP全回復、難易度チェック）
 //
 // 【公開API】
-//   - startExplorationRun(for:dungeonId:targetFloor:) → ExplorationRunHandle
+//   - startExplorationRun(for:dungeonId:targetFloor:explorationIntervalOverride:) → ExplorationRunHandle
 //     探索を開始し、AsyncThrowingStreamでイベントを配信
 //   - cancelExplorationRun(runId:)
 //     実行中の探索をキャンセル
@@ -30,7 +30,8 @@ import Foundation
 extension AppServices {
     func startExplorationRun(for partyId: UInt8,
                               dungeonId: UInt16,
-                              targetFloor: Int) async throws -> ExplorationRunHandle {
+                              targetFloor: Int,
+                              explorationIntervalOverride: TimeInterval? = nil) async throws -> ExplorationRunHandle {
         guard var partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ProgressError.partyNotFound
         }
@@ -55,7 +56,8 @@ extension AppServices {
         let session = try await runtime.startExplorationRun(party: partySnapshot,
                                                             characters: characters,
                                                             dungeonId: dungeonId,
-                                                            targetFloorNumber: targetFloor)
+                                                            targetFloorNumber: targetFloor,
+                                                            explorationIntervalOverride: explorationIntervalOverride)
 
         let runId: ExplorationProgressService.RunIdentifier
         do {
@@ -124,7 +126,8 @@ extension AppServices {
     }
 
     /// 複数の探索を一括で開始（1回のDB保存で済ませる）
-    func startExplorationRunsBatch(_ params: [BatchExplorationParams]) async throws -> [UInt8: ExplorationRunHandle] {
+    func startExplorationRunsBatch(_ params: [BatchExplorationParams],
+                                   explorationIntervalOverride: TimeInterval? = nil) async throws -> [UInt8: ExplorationRunHandle] {
         guard !params.isEmpty else { return [:] }
 
         // 1. 各パーティの準備処理を順番に実行（並列だとsave()のロック競合が発生）
@@ -139,7 +142,8 @@ extension AppServices {
             let result = try await prepareExplorationRun(
                 partyId: param.partyId,
                 dungeonId: param.dungeonId,
-                targetFloor: param.targetFloor
+                targetFloor: param.targetFloor,
+                explorationIntervalOverride: explorationIntervalOverride
             )
             preparations.append(result)
         }
@@ -213,7 +217,8 @@ extension AppServices {
     private func prepareExplorationRun(
         partyId: UInt8,
         dungeonId: UInt16,
-        targetFloor: Int
+        targetFloor: Int,
+        explorationIntervalOverride: TimeInterval?
     ) async throws -> (CachedParty, ExplorationRuntimeSession, Int, UInt16) {
         guard var partySnapshot = try await party.partySnapshot(id: partyId) else {
             throw ProgressError.partyNotFound
@@ -242,7 +247,8 @@ extension AppServices {
             party: partySnapshot,
             characters: characters,
             dungeonId: dungeonId,
-            targetFloorNumber: targetFloor
+            targetFloorNumber: targetFloor,
+            explorationIntervalOverride: explorationIntervalOverride
         )
 
         return (partySnapshot, session, runDifficulty, dungeonId)

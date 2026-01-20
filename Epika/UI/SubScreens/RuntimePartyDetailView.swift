@@ -376,7 +376,11 @@ struct RuntimePartyDetailView: View {
             return
         }
         do {
-            try await adventureState.startExploration(party: party, dungeon: dungeon, using: appServices)
+            try await adventureState.startExploration(party: party,
+                                                      dungeon: dungeon,
+                                                      repeatCount: 1,
+                                                      isImmediateReturn: false,
+                                                      using: appServices)
         } catch {
             await MainActor.run { errorMessage = error.localizedDescription }
         }

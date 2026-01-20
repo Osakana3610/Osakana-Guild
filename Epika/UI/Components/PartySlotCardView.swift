@@ -43,6 +43,7 @@ struct PartySlotCardView<Footer: View>: View {
     let isExploring: Bool
     let canStartExploration: Bool
     let onPrimaryAction: () -> Void
+    private let primaryActionMenuBuilder: (() -> AnyView)?
     let onMemberTap: ((UInt8) -> Void)?
     let onMembersTap: (() -> Void)?
     private let footerBuilder: (() -> Footer)?
@@ -52,6 +53,7 @@ struct PartySlotCardView<Footer: View>: View {
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
+         primaryActionMenu: (() -> AnyView)? = nil,
          onMemberTap: ((UInt8) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil,
          @ViewBuilder footer: @escaping () -> Footer) {
@@ -61,6 +63,7 @@ struct PartySlotCardView<Footer: View>: View {
         self.isExploring = isExploring
         self.canStartExploration = canStartExploration
         self.onPrimaryAction = onPrimaryAction
+        self.primaryActionMenuBuilder = primaryActionMenu
         self.onMemberTap = onMemberTap
         self.onMembersTap = onMembersTap
         self.footerBuilder = footer
@@ -72,6 +75,7 @@ struct PartySlotCardView<Footer: View>: View {
          isExploring: Bool,
          canStartExploration: Bool,
          onPrimaryAction: @escaping () -> Void,
+         primaryActionMenu: (() -> AnyView)? = nil,
          onMemberTap: ((UInt8) -> Void)? = nil,
          onMembersTap: (() -> Void)? = nil)
     where Footer == EmptyView {
@@ -81,6 +85,7 @@ struct PartySlotCardView<Footer: View>: View {
         self.isExploring = isExploring
         self.canStartExploration = canStartExploration
         self.onPrimaryAction = onPrimaryAction
+        self.primaryActionMenuBuilder = primaryActionMenu
         self.onMemberTap = onMemberTap
         self.onMembersTap = onMembersTap
         self.footerBuilder = nil
@@ -125,21 +130,38 @@ struct PartySlotCardView<Footer: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer(minLength: 12)
+            primaryActionButton
+        }
+    }
 
+    @ViewBuilder
+    private var primaryActionButton: some View {
+        if let primaryActionMenuBuilder {
             Button(action: onPrimaryAction) {
-                Text(isExploring ? "帰還" : "出撃")
-                    .font(.headline)
-                    .foregroundColor((isExploring || canStartExploration) ? .white : .secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(isExploring ? Color.red : (canStartExploration ? Color.blue : Color.gray))
-                    )
+                actionLabel
+            }
+            .buttonStyle(.plain)
+            .disabled(!isExploring && !canStartExploration)
+            .contextMenu { primaryActionMenuBuilder() }
+        } else {
+            Button(action: onPrimaryAction) {
+                actionLabel
             }
             .buttonStyle(.plain)
             .disabled(!isExploring && !canStartExploration)
         }
+    }
+
+    private var actionLabel: some View {
+        Text(isExploring ? "帰還" : "出撃")
+            .font(.headline)
+            .foregroundColor((isExploring || canStartExploration) ? .white : .secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(isExploring ? Color.red : (canStartExploration ? Color.blue : Color.gray))
+            )
     }
 
     @ViewBuilder

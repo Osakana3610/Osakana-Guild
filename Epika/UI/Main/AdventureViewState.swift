@@ -144,21 +144,33 @@ final class AdventureViewState {
         }
     }
 
-    func startExploration(party: CachedParty, dungeon: CachedDungeonProgress, using appServices: AppServices) async throws {
+    func startExploration(party: CachedParty,
+                          dungeon: CachedDungeonProgress,
+                          repeatCount: Int,
+                          isImmediateReturn: Bool,
+                          using appServices: AppServices) async throws {
+        guard repeatCount > 0 else { return }
         guard activeExplorationTasks[party.id] == nil else {
             throw RuntimeError.explorationAlreadyActive(dungeonId: dungeon.id)
         }
 
-        let handle = try await appServices.startExplorationRun(for: party.id,
-                                                                   dungeonId: dungeon.id,
-                                                                   targetFloor: Int(party.targetFloor))
         let partyId = party.id
+        let intervalOverride: TimeInterval? = isImmediateReturn ? 0 : nil
+        let handle = try await appServices.startExplorationRun(for: partyId,
+                                                               dungeonId: dungeon.id,
+                                                               targetFloor: Int(party.targetFloor),
+                                                               explorationIntervalOverride: intervalOverride)
         activeExplorationHandles[partyId] = handle
-        // スナップショットをロードしてからイベント処理を開始（1階ログが欠落しないように）
+        // スナップショットをロードしてからイベント処理を開始
         await updateExplorationProgress(forPartyId: partyId, using: appServices)
         activeExplorationTasks[partyId] = Task { [weak self, appServices] in
             guard let self else { return }
-            await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
+            await self.runExplorationLoop(party: party,
+                                          dungeon: dungeon,
+                                          repeatCount: repeatCount,
+                                          isImmediateReturn: isImmediateReturn,
+                                          using: appServices,
+                                          initialHandle: handle)
         }
     }
 
@@ -169,10 +181,16 @@ final class AdventureViewState {
     }
 
     /// 複数の探索を一括で開始（並列準備 + 1回のDB保存 + 1回の進捗更新）
-    func startExplorationsInBatch(_ params: [BatchStartParams], using appServices: AppServices) async throws -> [String] {
+    func startExplorationsInBatch(_ params: [BatchStartParams],
+                                  repeatCount: Int,
+                                  isImmediateReturn: Bool,
+                                  using appServices: AppServices) async throws -> [String] {
+        guard repeatCount > 0 else { return [] }
         // 既に探索中のパーティを除外
         let validParams = params.filter { activeExplorationTasks[$0.party.id] == nil }
         guard !validParams.isEmpty else { return [] }
+
+        let paramsByPartyId = Dictionary(uniqueKeysWithValues: validParams.map { ($0.party.id, $0) })
 
         // バッチパラメータを作成
         let batchParams = validParams.map { param in
@@ -184,7 +202,9 @@ final class AdventureViewState {
         }
 
         // 一括で探索を開始
-        let handles = try await appServices.startExplorationRunsBatch(batchParams)
+        let intervalOverride: TimeInterval? = isImmediateReturn ? 0 : nil
+        let handles = try await appServices.startExplorationRunsBatch(batchParams,
+                                                                      explorationIntervalOverride: intervalOverride)
 
         // 失敗したパーティを追跡
         var failures: [String] = []
@@ -210,9 +230,21 @@ final class AdventureViewState {
         // イベント処理タスクを開始
         for partyId in startedPartyIds {
             guard let handle = activeExplorationHandles[partyId] else { continue }
-            activeExplorationTasks[partyId] = Task { [weak self, appServices] in
-                guard let self else { return }
-                await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
+            if repeatCount == 1 {
+                activeExplorationTasks[partyId] = Task { [weak self, appServices] in
+                    guard let self else { return }
+                    _ = await self.runExplorationStream(handle: handle, partyId: partyId, using: appServices)
+                }
+            } else if let param = paramsByPartyId[partyId] {
+                activeExplorationTasks[partyId] = Task { [weak self, appServices] in
+                    guard let self else { return }
+                    await self.runExplorationLoop(party: param.party,
+                                                  dungeon: param.dungeon,
+                                                  repeatCount: repeatCount,
+                                                  isImmediateReturn: isImmediateReturn,
+                                                  using: appServices,
+                                                  initialHandle: handle)
+                }
             }
         }
 
@@ -230,6 +262,14 @@ final class AdventureViewState {
             return
         }
 
+        if activeExplorationTasks[partyId] != nil {
+            activeExplorationTasks[partyId]?.cancel()
+            activeExplorationTasks[partyId] = nil
+            activeExplorationHandles[partyId] = nil
+            await updateExplorationProgress(forPartyId: partyId, using: appServices)
+            return
+        }
+
         await cancelPersistedExploration(for: party, using: appServices)
     }
 
@@ -238,7 +278,11 @@ final class AdventureViewState {
         return explorationProgress.contains { $0.party.partyId == partyId && $0.status == .running }
     }
 
-    private func runExplorationStream(handle: AppServices.ExplorationRunHandle, partyId: UInt8, using appServices: AppServices) async {
+    private func runExplorationStream(handle: AppServices.ExplorationRunHandle,
+                                      partyId: UInt8,
+                                      using appServices: AppServices,
+                                      clearTaskAfterCompletion: Bool = true) async -> Bool {
+        var completedNormally = true
         do {
             for try await update in handle.updates {
                 try Task.checkCancellation()
@@ -256,12 +300,67 @@ final class AdventureViewState {
             if !(error is CancellationError) {
                 present(error: error)
             }
+            completedNormally = false
         }
 
-        // タスク参照をクリアしてからUIを更新（isExploringが正しくfalseを返すように）
-        clearExplorationTask(partyId: partyId)
+        if clearTaskAfterCompletion {
+            // タスク参照をクリアしてからUIを更新（isExploringが正しくfalseを返すように）
+            clearExplorationTask(partyId: partyId)
+        } else {
+            clearExplorationHandle(partyId: partyId)
+        }
         // 帰還時も該当パーティの最新2件だけ取得
         await updateExplorationProgress(forPartyId: partyId, using: appServices)
+        return completedNormally
+    }
+
+    private func runExplorationLoop(party: CachedParty,
+                                    dungeon: CachedDungeonProgress,
+                                    repeatCount: Int,
+                                    isImmediateReturn: Bool,
+                                    using appServices: AppServices,
+                                    initialHandle: AppServices.ExplorationRunHandle?) async {
+        let partyId = party.id
+        let dungeonId = dungeon.id
+        let targetFloor = Int(party.targetFloor)
+        let intervalOverride: TimeInterval? = isImmediateReturn ? 0 : nil
+        var remainingCount = repeatCount
+        var pendingHandle = initialHandle
+
+        while remainingCount > 0 {
+            if Task.isCancelled { break }
+            do {
+                let handle: AppServices.ExplorationRunHandle
+                let needsProgressUpdate: Bool
+                if let existingHandle = pendingHandle {
+                    handle = existingHandle
+                    needsProgressUpdate = false
+                    pendingHandle = nil
+                } else {
+                    handle = try await appServices.startExplorationRun(for: partyId,
+                                                                       dungeonId: dungeonId,
+                                                                       targetFloor: targetFloor,
+                                                                       explorationIntervalOverride: intervalOverride)
+                    activeExplorationHandles[partyId] = handle
+                    needsProgressUpdate = true
+                }
+                if needsProgressUpdate {
+                    // スナップショットをロードしてからイベント処理を開始
+                    await updateExplorationProgress(forPartyId: partyId, using: appServices)
+                }
+                let completed = await runExplorationStream(handle: handle,
+                                                           partyId: partyId,
+                                                           using: appServices,
+                                                           clearTaskAfterCompletion: false)
+                remainingCount -= 1
+                if !completed { break }
+            } catch {
+                present(error: error)
+                break
+            }
+        }
+
+        clearExplorationTask(partyId: partyId)
     }
 
     /// 差分更新: 新しいイベントログを既存のスナップショットに追加（UserDataLoadServiceに委譲）
@@ -281,6 +380,10 @@ final class AdventureViewState {
 
     private func clearExplorationTask(partyId: UInt8) {
         activeExplorationTasks[partyId] = nil
+        activeExplorationHandles[partyId] = nil
+    }
+
+    private func clearExplorationHandle(partyId: UInt8) {
         activeExplorationHandles[partyId] = nil
     }
 
