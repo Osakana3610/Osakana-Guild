@@ -299,7 +299,7 @@ private extension SkillRuntimeExpectationTests {
             try verifyDegradationRepair(effectType, segment: segment, skill: skill, rawData: &rawData)
 
         case .magicNullifyChancePercent,
-             .magicCriticalChancePercent:
+             .magicCriticalEnable:
             try verifyMagicModifiers(effectType, segment: segment, skill: skill, rawData: &rawData)
 
         case .statDebuff:
@@ -3120,27 +3120,42 @@ private extension SkillRuntimeExpectationTests {
             if !expected && damage == 0 {
                 throw VerificationError.failed("magicNullify applied unexpectedly")
             }
-        case .magicCriticalChancePercent:
-            let chance = try payload.resolvedChancePercent(stats: defaultActorStats(), skillId: skill.id, effectIndex: 0) ?? 0.0
-            let base = withFixedMedianRandomMode {
-                BattleTurnEngine.computeMagicalDamage(attacker: TestActorBuilder.makeAttacker(luck: 18),
-                                                      defender: &defender,
+        case .magicCriticalEnable:
+            rawData["magicCriticalEnabled"] = skillEffects.spell.magicCriticalEnabled ? 1 : 0
+            if !skillEffects.spell.magicCriticalEnabled {
+                throw VerificationError.failed("magicCriticalEnable not applied")
+            }
+
+            let critAttacker = TestActorBuilder.makeAttacker(luck: 1,
+                                                             criticalChancePercent: 100,
+                                                             skillEffects: skillEffects)
+            var critDefender = TestActorBuilder.makeDefender(luck: 1)
+            var critContext = makeContext(players: [critAttacker], enemies: [critDefender], statusDefinitions: [:])
+            let critResult = withFixedMedianRandomMode {
+                BattleTurnEngine.computeMagicalDamage(attacker: critAttacker,
+                                                      defender: &critDefender,
                                                       spellId: nil,
-                                                      context: &context).damage
+                                                      allowMagicCritical: skillEffects.spell.magicCriticalEnabled,
+                                                      context: &critContext)
             }
-            let crit = withFixedMedianRandomMode {
-                BattleTurnEngine.computeMagicalDamage(attacker: attacker,
-                                                      defender: &defender,
+            rawData["magicCriticalTriggered"] = critResult.wasCritical ? 1 : 0
+            if !critResult.wasCritical {
+                throw VerificationError.failed("magicCritical not triggered")
+            }
+
+            let baseAttacker = TestActorBuilder.makeAttacker(luck: 1,
+                                                             criticalChancePercent: 100)
+            var baseDefender = TestActorBuilder.makeDefender(luck: 1)
+            var baseContext = makeContext(players: [baseAttacker], enemies: [baseDefender], statusDefinitions: [:])
+            let baseResult = withFixedMedianRandomMode {
+                BattleTurnEngine.computeMagicalDamage(attacker: baseAttacker,
+                                                      defender: &baseDefender,
                                                       spellId: nil,
-                                                      context: &context).damage
+                                                      allowMagicCritical: false,
+                                                      context: &baseContext)
             }
-            rawData["magicCriticalChance"] = chance
-            let expected = expectedBoolFromChancePercent(chance)
-            if expected && crit <= base {
-                throw VerificationError.failed("magicCritical not applied")
-            }
-            if !expected && crit > base {
-                throw VerificationError.failed("magicCritical applied unexpectedly")
+            if baseResult.wasCritical {
+                throw VerificationError.failed("magicCritical triggered unexpectedly")
             }
         default:
             break

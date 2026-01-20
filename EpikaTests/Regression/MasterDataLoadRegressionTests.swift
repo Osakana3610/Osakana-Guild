@@ -1117,7 +1117,6 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
         .berserk,
         .statusInflict,
         .magicNullifyChancePercent,
-        .magicCriticalChancePercent,
         .spellChargeRecoveryChance,
         .specialAttack,
         .enemyActionDebuffChance,
@@ -1802,64 +1801,6 @@ nonisolated final class SkillFamilyExpectationAlignmentTests: XCTestCase {
             let damage = BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &context).damage
             let actual = (damage == 0)
             return [probe(label: "magicNullify", expected: expected, actual: actual)]
-
-        case .magicCriticalChancePercent:
-            let chance = max(0.0, min(100.0, try resolvedChancePercent(from: segment, stats: actorStats) ?? 0.0))
-            let cappedChance = max(0, min(100, Int(chance.rounded())))
-            let expected = expectedBool(percentChance: cappedChance)
-
-            let attackerSnapshot = makeSnapshot(magicalAttackScore: 2000)
-            let attacker = makeActor(
-                identifier: "crit.attacker",
-                displayName: "Crit Attacker",
-                kind: .player,
-                formationSlot: 1,
-                stats: actorStats,
-                snapshot: attackerSnapshot,
-                skillEffects: actualEffects,
-                partyMemberId: 1
-            )
-            let defenderSnapshot = makeSnapshot(magicalDefenseScore: 200)
-            var defender = makeActor(
-                identifier: "crit.defender",
-                displayName: "Crit Defender",
-                kind: .enemy,
-                formationSlot: 1,
-                stats: actorStats,
-                snapshot: defenderSnapshot,
-                skillEffects: .neutral,
-                enemyMasterIndex: 0
-            )
-            var contextWithCrit = makeContext(players: [attacker], enemies: [defender], statusDefinitions: statusDefinitions)
-            let damageWithCrit = BattleTurnEngine.computeMagicalDamage(attacker: attacker, defender: &defender, spellId: nil, context: &contextWithCrit).damage
-
-            var noCritEffects = actualEffects
-            noCritEffects.spell.magicCriticalChancePercent = 0
-            let noCritAttacker = makeActor(
-                identifier: "crit.base.attacker",
-                displayName: "Crit Base Attacker",
-                kind: .player,
-                formationSlot: 1,
-                stats: actorStats,
-                snapshot: attackerSnapshot,
-                skillEffects: noCritEffects,
-                partyMemberId: 1
-            )
-            var baseDefender = makeActor(
-                identifier: "crit.base.defender",
-                displayName: "Crit Base Defender",
-                kind: .enemy,
-                formationSlot: 1,
-                stats: actorStats,
-                snapshot: defenderSnapshot,
-                skillEffects: .neutral,
-                enemyMasterIndex: 0
-            )
-            var contextBase = makeContext(players: [noCritAttacker], enemies: [baseDefender], statusDefinitions: statusDefinitions)
-            let damageWithoutCrit = BattleTurnEngine.computeMagicalDamage(attacker: noCritAttacker, defender: &baseDefender, spellId: nil, context: &contextBase).damage
-
-            let actual = damageWithCrit > damageWithoutCrit
-            return [probe(label: "magicCritical", expected: expected, actual: actual)]
 
         case .spellChargeRecoveryChance:
             let chance = max(0.0, min(100.0, try resolvedChancePercent(from: segment, stats: actorStats) ?? 0.0))
