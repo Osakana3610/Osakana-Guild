@@ -1334,6 +1334,76 @@ nonisolated final class ReactionSkillTests: XCTestCase {
         }
     }
 
+    /// 追加行動が通常行動の後に発動することを検証
+    @MainActor func testExtraActionTriggersAfterNormalAction() {
+        withFixedMedianRandom {
+            var playerEffects = BattleActor.SkillEffects.neutral
+            playerEffects.combat.extraActions = [
+                BattleActor.SkillEffects.ExtraAction(chancePercent: 100, count: 1)
+            ]
+
+            let player = TestActorBuilder.makePlayer(
+                maxHP: 50000,
+                physicalAttackScore: 100,
+                physicalDefenseScore: 1000,
+                hitScore: 100,
+                evasionScore: 0,
+                luck: 35,
+                agility: 50,
+                skillEffects: playerEffects
+            )
+            let enemy = TestActorBuilder.makeEnemy(
+                maxHP: 50000,
+                physicalAttackScore: 10,
+                physicalDefenseScore: 1000,
+                hitScore: 50,
+                evasionScore: 0,
+                luck: 35,
+                agility: 1
+            )
+
+            var players = [player]
+            var enemies = [enemy]
+            var random = GameRandomSource(seed: 42)
+
+            let result = BattleTurnEngine.runBattle(
+                players: &players,
+                enemies: &enemies,
+                statusEffects: [:],
+                skillDefinitions: [:],
+                random: &random
+            )
+
+            let entries = result.battleLog.entries
+            let playerPhysicalCount = entries.filter { entry in
+                guard entry.turn == 1,
+                      let actorId = entry.actor,
+                      isPlayerActor(actorId) else { return false }
+                return entry.declaration.kind == .physicalAttack
+            }.count
+            let extraActionLogged = entries.contains { entry in
+                guard entry.declaration.kind == .skillEffect,
+                      entry.declaration.extra == SkillEffectLogKind.extraAction.rawValue,
+                      let actorId = entry.actor,
+                      isPlayerActor(actorId) else { return false }
+                return true
+            }
+            let matches = playerPhysicalCount >= 2 && extraActionLogged
+
+            ObservationRecorder.shared.record(
+                id: "BATTLE-REACTION-016",
+                expected: (min: 1, max: 1),
+                measured: matches ? 1 : 0,
+                rawData: [
+                    "playerPhysicalCount": Double(playerPhysicalCount),
+                    "extraActionLogged": extraActionLogged ? 1 : 0
+                ]
+            )
+
+            XCTAssertTrue(matches, "通常行動後に追加行動が発動し、ログが記録されるべき")
+        }
+    }
+
     /// 格闘追撃が発動することを検証
     @MainActor func testMartialFollowUpTriggers() {
         withFixedMedianRandom {

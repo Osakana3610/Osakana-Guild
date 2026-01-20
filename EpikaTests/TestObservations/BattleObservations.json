@@ -636,6 +636,23 @@
       "testMethod": "testReactionRequiresAllyBehindOnlyTriggersWhenBehind"
     },
     {
+      "id": "BATTLE-REACTION-016",
+      "category": [
+        "戦闘",
+        "スキル",
+        "追加行動"
+      ],
+      "description": "通常行動後に追加行動が発動し、ログが記録されるか",
+      "formula": "physicalCount>=2 && extraActionLogged",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（追加行動100%）",
+      "testFile": "ReactionSkillTests.swift",
+      "testMethod": "testExtraActionTriggersAfterNormalAction"
+    },
+    {
       "id": "BATTLE-ENEMY-SPECIAL-001",
       "category": [
         "戦闘",
@@ -1093,6 +1110,23 @@
       "toleranceBasis": "決定的",
       "testFile": "BattleLogTests.swift",
       "testMethod": "testRetreatOverridesVictoryWhenEnemiesWithdraw"
+    },
+    {
+      "id": "BATTLE-FLOW-010",
+      "category": [
+        "戦闘",
+        "フロー",
+        "勝敗"
+      ],
+      "description": "victory/defeat/retreat の終端ログが相互排他的か",
+      "formula": "victory=1/defeat=0/retreat=0 など",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（各シナリオ）",
+      "testFile": "BattleLogTests.swift",
+      "testMethod": "testOutcomeLogsAreMutuallyExclusive"
     },
     {
       "id": "BATTLE-RESCUE-001",
@@ -12175,6 +12209,108 @@
       "toleranceBasis": "決定的",
       "testFile": "TargetingTests.swift",
       "testMethod": "testSelectHealingTargetChoosesLowestHP"
+    },
+    {
+      "id": "BATTLE-TARGET-006",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "供儀"
+      ],
+      "description": "供儀対象が指定されている場合に強制選択されるか",
+      "formula": "forcedTarget == selected",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectOffensiveTargetUsesSacrificeTargetWhenAvailable"
+    },
+    {
+      "id": "BATTLE-TARGET-007",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "かばう"
+      ],
+      "description": "coverRowsBehindConditionが満たされない場合にかばうしないか",
+      "formula": "selectedIndex==back && coverLogなし",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testCoverRowsBehindConditionSkipsWhenTargetHealthy"
+    },
+    {
+      "id": "BATTLE-TARGET-008",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "かばう"
+      ],
+      "description": "coverRowsBehindConditionが満たされる場合にかばうが発動するか",
+      "formula": "selectedIndex==cover && coverLogあり",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testCoverRowsBehindConditionTriggersWhenTargetLow"
+    },
+    {
+      "id": "BATTLE-TARGET-009",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "かばう"
+      ],
+      "description": "複数かばう候補がいる場合に重み付きで選択されるか",
+      "formula": "weightedCover == selected",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testCoverRowsBehindSelectsWeightedCoverCandidate"
+    },
+    {
+      "id": "BATTLE-TARGET-010",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "回復"
+      ],
+      "description": "requireHalfHP=trueの場合にHP50%以下から選ぶか",
+      "formula": "halfHPOnly == selected",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectHealingTargetRespectsRequireHalfHP"
+    },
+    {
+      "id": "BATTLE-TARGET-011",
+      "category": [
+        "戦闘",
+        "ターゲット",
+        "状態異常"
+      ],
+      "description": "状態異常対象が敵味方合算となりmaxTargetsで制限されるか",
+      "formula": "combinedTargets && maxTargets",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（固定乱数モード）",
+      "testFile": "TargetingTests.swift",
+      "testMethod": "testSelectStatusTargetsCombinesSidesAndRespectsMaxTargets"
     },
     {
       "id": "BATTLE-TURNEND-001",

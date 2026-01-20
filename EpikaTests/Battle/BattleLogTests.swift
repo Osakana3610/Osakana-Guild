@@ -313,4 +313,95 @@ nonisolated final class BattleLogTests: XCTestCase {
 
         XCTAssertTrue(defeatValid, "defeat は最後に記録され、actorなし、logOnlyのみ(または空)であるべき")
     }
+
+    @MainActor func testOutcomeLogsAreMutuallyExclusive() {
+        func outcomeMatches(result: BattleTurnEngine.Result,
+                            expected: ActionKind) -> (matches: Bool, victory: Int, defeat: Int, retreat: Int, outcome: UInt8) {
+            let entries = result.battleLog.entries
+            let victoryCount = entries.filter { $0.declaration.kind == .victory }.count
+            let defeatCount = entries.filter { $0.declaration.kind == .defeat }.count
+            let retreatCount = entries.filter { $0.declaration.kind == .retreat }.count
+            let matches = (expected == .victory && victoryCount == 1 && defeatCount == 0 && retreatCount == 0 && result.outcome == BattleLog.outcomeVictory)
+                || (expected == .defeat && victoryCount == 0 && defeatCount == 1 && retreatCount == 0 && result.outcome == BattleLog.outcomeDefeat)
+                || (expected == .retreat && victoryCount == 0 && defeatCount == 0 && retreatCount == 1 && result.outcome == BattleLog.outcomeRetreat)
+            return (matches, victoryCount, defeatCount, retreatCount, result.outcome)
+        }
+
+        let victoryOutcome: (matches: Bool, victory: Int, defeat: Int, retreat: Int, outcome: UInt8)
+        let defeatOutcome: (matches: Bool, victory: Int, defeat: Int, retreat: Int, outcome: UInt8)
+        let retreatOutcome: (matches: Bool, victory: Int, defeat: Int, retreat: Int, outcome: UInt8)
+
+        // victory
+        do {
+            let player = TestActorBuilder.makeStrongPlayer()
+            let enemy = TestActorBuilder.makeWeakEnemy()
+            var players = [player]
+            var enemies = [enemy]
+            var random = GameRandomSource(seed: 42)
+
+            let result = BattleTurnEngine.runBattle(
+                players: &players,
+                enemies: &enemies,
+                statusEffects: [:],
+                skillDefinitions: [:],
+                random: &random
+            )
+            victoryOutcome = outcomeMatches(result: result, expected: .victory)
+            XCTAssertTrue(victoryOutcome.matches, "victory時はvictoryのみが記録されるべき")
+        }
+
+        // defeat
+        do {
+            let player = TestActorBuilder.makeWeakPlayer()
+            let enemy = TestActorBuilder.makeStrongEnemy()
+            var players = [player]
+            var enemies = [enemy]
+            var random = GameRandomSource(seed: 42)
+
+            let result = BattleTurnEngine.runBattle(
+                players: &players,
+                enemies: &enemies,
+                statusEffects: [:],
+                skillDefinitions: [:],
+                random: &random
+            )
+            defeatOutcome = outcomeMatches(result: result, expected: .defeat)
+            XCTAssertTrue(defeatOutcome.matches, "defeat時はdefeatのみが記録されるべき")
+        }
+
+        // retreat
+        do {
+            let player = TestActorBuilder.makeImmortalPlayer()
+            let enemy = TestActorBuilder.makeImmortalEnemy()
+            var players = [player]
+            var enemies = [enemy]
+            var random = GameRandomSource(seed: 42)
+
+            let result = BattleTurnEngine.runBattle(
+                players: &players,
+                enemies: &enemies,
+                statusEffects: [:],
+                skillDefinitions: [:],
+                random: &random
+            )
+            retreatOutcome = outcomeMatches(result: result, expected: .retreat)
+            XCTAssertTrue(retreatOutcome.matches, "retreat時はretreatのみが記録されるべき")
+        }
+
+        let matches = victoryOutcome.matches && defeatOutcome.matches && retreatOutcome.matches
+        ObservationRecorder.shared.record(
+            id: "BATTLE-FLOW-010",
+            expected: (min: 1, max: 1),
+            measured: matches ? 1 : 0,
+            rawData: [
+                "victoryCount": Double(victoryOutcome.victory),
+                "defeatCount": Double(defeatOutcome.defeat),
+                "retreatCount": Double(retreatOutcome.retreat),
+                "victoryOutcome": Double(victoryOutcome.outcome),
+                "defeatOutcome": Double(defeatOutcome.outcome),
+                "retreatOutcome": Double(retreatOutcome.outcome)
+            ]
+        )
+        XCTAssertTrue(matches, "victory/defeat/retreatは相互排他的であるべき")
+    }
 }
