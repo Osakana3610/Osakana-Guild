@@ -155,36 +155,21 @@ actor InventoryProgressService {
         guard !seeds.isEmpty else { return [] }
         return try await withContext { context in
             let aggregated = self.aggregate(seeds)
-            let totalEntries = aggregated.values.reduce(0) { $0 + $1.count }
             var records: [InventoryItemRecord] = []
-            records.reserveCapacity(totalEntries)
 
             for (storage, entries) in aggregated {
-                var recordsByStackKey = try self.fetchExistingRecords(
-                    for: entries,
-                    storage: storage,
-                    context: context
-                )
-                recordsByStackKey.reserveCapacity(recordsByStackKey.count + entries.count)
                 for entry in entries {
-                    if let record = recordsByStackKey[entry.key.stackKey] {
-                        _ = self.applyIncrement(to: record, amount: entry.totalQuantity)
-                        records.append(record)
-                        continue
-                    }
-                    let record = InventoryItemRecord(
+                    let record = try self.fetchOrCreateRecord(
                         superRareTitleId: entry.seed.enhancements.superRareTitleId,
                         normalTitleId: entry.seed.enhancements.normalTitleId,
                         itemId: entry.seed.itemId,
                         socketSuperRareTitleId: entry.seed.enhancements.socketSuperRareTitleId,
                         socketNormalTitleId: entry.seed.enhancements.socketNormalTitleId,
                         socketItemId: entry.seed.enhancements.socketItemId,
-                        quantity: 0,
-                        storage: storage
+                        storage: storage,
+                        context: context
                     )
-                    context.insert(record)
                     _ = self.applyIncrement(to: record, amount: entry.totalQuantity)
-                    recordsByStackKey[entry.key.stackKey] = record
                     records.append(record)
                 }
             }
@@ -763,59 +748,6 @@ actor InventoryProgressService {
         socketItemId: UInt16
     ) -> String {
         "\(superRareTitleId)|\(normalTitleId)|\(itemId)|\(socketSuperRareTitleId)|\(socketNormalTitleId)|\(socketItemId)"
-    }
-
-    nonisolated private func fetchExistingRecords(
-        for entries: [AggregatedEntry],
-        storage: ItemStorage,
-        context: ModelContext
-    ) throws -> [String: InventoryItemRecord] {
-        guard !entries.isEmpty else { return [:] }
-        let storageTypeValue = storage.rawValue
-        var itemIds = Set<UInt16>()
-        itemIds.reserveCapacity(entries.count)
-        var usesSocket = false
-        for entry in entries {
-            itemIds.insert(entry.seed.itemId)
-            if entry.seed.enhancements.socketItemId != 0 ||
-                entry.seed.enhancements.socketNormalTitleId != 0 ||
-                entry.seed.enhancements.socketSuperRareTitleId != 0 {
-                usesSocket = true
-            }
-        }
-        guard !itemIds.isEmpty else { return [:] }
-
-        let records: [InventoryItemRecord]
-        let descriptor = FetchDescriptor<InventoryItemRecord>(predicate: #Predicate {
-            $0.storageType == storageTypeValue &&
-            itemIds.contains($0.itemId)
-        })
-        records = try context.fetch(descriptor)
-        guard !records.isEmpty else { return [:] }
-
-        var recordsByStackKey: [String: InventoryItemRecord] = [:]
-        recordsByStackKey.reserveCapacity(records.count)
-        for record in records {
-            if !usesSocket {
-                if record.socketItemId != 0 ||
-                    record.socketNormalTitleId != 0 ||
-                    record.socketSuperRareTitleId != 0 {
-                    continue
-                }
-            }
-            let key = makeStackKey(
-                superRareTitleId: record.superRareTitleId,
-                normalTitleId: record.normalTitleId,
-                itemId: record.itemId,
-                socketSuperRareTitleId: record.socketSuperRareTitleId,
-                socketNormalTitleId: record.socketNormalTitleId,
-                socketItemId: record.socketItemId
-            )
-            if recordsByStackKey[key] == nil {
-                recordsByStackKey[key] = record
-            }
-        }
-        return recordsByStackKey
     }
 
     @discardableResult
