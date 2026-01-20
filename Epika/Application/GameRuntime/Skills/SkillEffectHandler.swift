@@ -144,7 +144,7 @@ enum SkillEffectHandlerRegistry {
             SpellAccessHandler.self,
             SpellTierUnlockHandler.self,
             TacticSpellAmplifyHandler.self,
-            MagicCriticalChancePercentHandler.self,
+            MagicCriticalEnableHandler.self,
             SpellChargeRecoveryChanceHandler.self,
 
             // MARK: Combat Handlers (20)

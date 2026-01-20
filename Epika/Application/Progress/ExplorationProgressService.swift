@@ -1237,10 +1237,17 @@ private extension ExplorationProgressService {
             turns: decoded.turns
         )
 
+        let result: BattleService.BattleResult
+        switch BattleResult(rawValue: record.result) {
+        case .victory: result = .victory
+        case .defeat: result = .defeat
+        case .retreat: result = .retreat
+        case .none: result = .victory
+        }
         return BattleLogArchive(
             enemyId: record.enemyId,
             enemyName: record.enemyName,
-            result: BattleService.BattleResult(rawValue: record.result) ?? .victory,
+            result: result,
             turns: Int(record.turns),
             timestamp: record.timestamp,
             battleLog: battleLog,

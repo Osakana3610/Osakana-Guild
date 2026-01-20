@@ -503,7 +503,7 @@ enum EnumMappings {
         "spellAccess": 86,
         "spellTierUnlock": 87,
         "tacticSpellAmplify": 88,
-        "magicCriticalChancePercent": 89,
+        "magicCriticalEnable": 89,
         "timedMagicPowerAmplify": 90,
         "timedBreathPowerAmplify": 91,
 

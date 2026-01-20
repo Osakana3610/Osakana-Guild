@@ -582,6 +582,7 @@ extension BattleTurnEngine {
                 let result = computeMagicalDamage(attacker: attackerCopy,
                                                   defender: &targetCopy,
                                                   spellId: nil,
+                                                  allowMagicCritical: false,
                                                   context: &context)
                 if result.wasNullified {
                     pendingSkillEffectLogs.append((kind: .magicNullify,

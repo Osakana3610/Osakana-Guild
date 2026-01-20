@@ -139,6 +139,7 @@ extension BattleTurnEngine {
     nonisolated static func computeMagicalDamage(attacker: BattleActor,
                                      defender: inout BattleActor,
                                      spellId: UInt8?,
+                                     allowMagicCritical: Bool = false,
                                      context: inout BattleContext) -> MagicalDamageResult {
         // 魔法無効化判定
         let nullifyChance = defender.skillEffects.damage.magicNullifyChancePercent
@@ -164,15 +165,14 @@ extension BattleTurnEngine {
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
         damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId, attacker: attacker)
 
-        // 必殺魔法（魔法必殺）判定
-        var didCritical = false
-        let criticalChance = attacker.skillEffects.spell.magicCriticalChancePercent
-        if criticalChance > 0 {
-            let cappedChance = max(0, min(100, Int(criticalChance.rounded())))
-            if BattleRandomSystem.percentChance(cappedChance, random: &context.random) {
-                didCritical = true
-                damage *= attacker.skillEffects.spell.magicCriticalMultiplier
-            }
+        // 必殺判定（必殺魔法有効時のみ、倍率は物理と共用。防御半減は物理/逆回復のみ）
+        let didCritical = allowMagicCritical && shouldTriggerCritical(attacker: attacker,
+                                                                      defender: defender,
+                                                                      context: &context)
+        if didCritical {
+            damage *= criticalDamageBonus(for: attacker)
+            damage *= defender.skillEffects.damage.criticalTakenMultiplier
+            damage *= defender.innateResistances.critical
         }
 
         // 個別魔法耐性を適用

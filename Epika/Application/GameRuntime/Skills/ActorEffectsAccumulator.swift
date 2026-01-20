@@ -73,8 +73,7 @@ struct ActorEffectsAccumulator {
             chargeModifiers: spell.spellChargeModifiers,
             defaultChargeModifier: spell.defaultSpellChargeModifier,
             breathExtraCharges: spell.breathExtraCharges,
-            magicCriticalChancePercent: spell.magicCriticalChancePercent,
-            magicCriticalMultiplier: spell.magicCriticalMultiplier,
+            magicCriticalEnabled: spell.magicCriticalEnabled,
             chargeRecoveries: spell.chargeRecoveries
         )
 
@@ -226,8 +225,7 @@ struct SpellAccumulator {
     var defaultSpellChargeModifier: BattleActor.SkillEffects.SpellChargeModifier?
     var spellChargeModifiers: [UInt8: BattleActor.SkillEffects.SpellChargeModifier] = [:]
     var breathExtraCharges: Int = 0
-    var magicCriticalChancePercent: Double = 0.0
-    var magicCriticalMultiplier: Double = 1.5
+    var magicCriticalEnabled: Bool = false
     var chargeRecoveries: [BattleActor.SkillEffects.SpellChargeRecovery] = []
 }
 

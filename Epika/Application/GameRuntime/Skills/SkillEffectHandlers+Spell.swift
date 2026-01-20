@@ -16,7 +16,7 @@
 //   - SpellAccessHandler: 呪文の習得・忘却（Actor.swiftではスキップ）
 //   - SpellTierUnlockHandler: 呪文ティアの解放（Actor.swiftではスキップ）
 //   - TacticSpellAmplifyHandler: タクティク呪文増幅
-//   - MagicCriticalChancePercentHandler: 魔法必殺率
+//   - MagicCriticalEnableHandler: 必殺魔法の有効化
 //   - SpellChargeRecoveryChanceHandler: 呪文チャージ回復率
 //
 // 【本体ファイルとの関係】
@@ -27,7 +27,7 @@
 
 import Foundation
 
-// MARK: - Spell Handlers (8)
+// MARK: - Spell Handlers (9)
 
 enum SpellPowerPercentHandler: SkillEffectHandler {
     nonisolated static let effectType = SkillEffectType.spellPowerPercent
@@ -207,23 +207,15 @@ enum TacticSpellAmplifyHandler: SkillEffectHandler {
     }
 }
 
-enum MagicCriticalChancePercentHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.magicCriticalChancePercent
+enum MagicCriticalEnableHandler: SkillEffectHandler {
+    nonisolated static let effectType = SkillEffectType.magicCriticalEnable
 
     nonisolated static func apply(
         payload: DecodedSkillEffectPayload,
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        let chance = try payload.resolvedChancePercent(
-            stats: context.actorStats,
-            skillId: context.skillId,
-            effectIndex: context.effectIndex
-        ) ?? 0.0
-        accumulator.spell.magicCriticalChancePercent = max(accumulator.spell.magicCriticalChancePercent, chance)
-        if let multiplier = payload.value[.multiplier] {
-            accumulator.spell.magicCriticalMultiplier = max(accumulator.spell.magicCriticalMultiplier, multiplier)
-        }
+        accumulator.spell.magicCriticalEnabled = true
     }
 }
 

@@ -711,8 +711,7 @@ nonisolated struct BattleActor: Sendable {
             var chargeModifiers: [UInt8: SpellChargeModifier]
             var defaultChargeModifier: SpellChargeModifier?
             var breathExtraCharges: Int
-            var magicCriticalChancePercent: Double  // 必殺魔法発動率
-            var magicCriticalMultiplier: Double     // 必殺魔法倍率
+            var magicCriticalEnabled: Bool  // 必殺魔法有効化
             var chargeRecoveries: [SpellChargeRecovery]  // ターン開始時呪文回復
 
             nonisolated func chargeModifier(for spellId: UInt8) -> SpellChargeModifier? {
@@ -726,8 +725,7 @@ nonisolated struct BattleActor: Sendable {
                 chargeModifiers: [:],
                 defaultChargeModifier: nil,
                 breathExtraCharges: 0,
-                magicCriticalChancePercent: 0.0,
-                magicCriticalMultiplier: 1.5,
+                magicCriticalEnabled: false,
                 chargeRecoveries: []
             )
         }

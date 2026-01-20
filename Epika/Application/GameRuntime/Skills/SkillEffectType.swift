@@ -95,7 +95,7 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
     case spellAccess = 86
     case spellTierUnlock = 87
     case tacticSpellAmplify = 88
-    case magicCriticalChancePercent = 89
+    case magicCriticalEnable = 89
     case timedMagicPowerAmplify = 90
     case timedBreathPowerAmplify = 91
 
@@ -218,7 +218,7 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case "spellAccess": self = .spellAccess
         case "spellTierUnlock": self = .spellTierUnlock
         case "tacticSpellAmplify": self = .tacticSpellAmplify
-        case "magicCriticalChancePercent": self = .magicCriticalChancePercent
+        case "magicCriticalEnable": self = .magicCriticalEnable
         case "timedMagicPowerAmplify": self = .timedMagicPowerAmplify
         case "timedBreathPowerAmplify": self = .timedBreathPowerAmplify
         // Resurrection系
@@ -338,7 +338,7 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         case .spellAccess: return "spellAccess"
         case .spellTierUnlock: return "spellTierUnlock"
         case .tacticSpellAmplify: return "tacticSpellAmplify"
-        case .magicCriticalChancePercent: return "magicCriticalChancePercent"
+        case .magicCriticalEnable: return "magicCriticalEnable"
         case .timedMagicPowerAmplify: return "timedMagicPowerAmplify"
         case .timedBreathPowerAmplify: return "timedBreathPowerAmplify"
         // Resurrection系

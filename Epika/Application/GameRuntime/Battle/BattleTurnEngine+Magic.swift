@@ -166,6 +166,7 @@ extension BattleTurnEngine {
                 let result = computeMagicalDamage(attacker: refreshedAttacker,
                                                   defender: &target,
                                                   spellId: spell.id,
+                                                  allowMagicCritical: refreshedAttacker.skillEffects.spell.magicCriticalEnabled,
                                                   context: &context)
                 if result.wasNullified {
                     pendingSkillEffectLogs.append((kind: .magicNullify,

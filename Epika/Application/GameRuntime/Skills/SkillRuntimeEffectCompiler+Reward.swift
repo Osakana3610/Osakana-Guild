@@ -132,7 +132,7 @@ extension SkillRuntimeEffectCompiler {
                      .targetingWeight,
                      .coverRowsBehind,
                      .magicNullifyChancePercent,
-                     .magicCriticalChancePercent,
+                     .magicCriticalEnable,
                      .levelComparisonDamageTaken,
                      .spellChargeRecoveryChance,
                      .enemyActionDebuffChance,

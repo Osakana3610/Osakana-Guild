@@ -14958,22 +14958,14 @@
       },
       {
         "familyId": "race.psychic.magicCrit",
-        "effectType": "magicCriticalChancePercent",
-        "parameters": {
-          "scalingStat": "wisdom"
-        },
+        "effectType": "magicCriticalEnable",
+        "parameters": {},
         "variants": [
           {
             "id": 64072,
-            "label": "[種族:サイキックLv99] 知恵依存で魔法必殺率増",
-            "value": {
-              "baseChancePercent": 0.3
-            },
-            "statScale": {
-              "stat": "wisdom",
-              "percent": 0.3
-            },
-            "description": "知恵1につき0.3%の確率で魔法攻撃が必殺になる。"
+            "label": "[種族:サイキックLv99] 必殺魔法",
+            "value": {},
+            "description": "魔法攻撃でも必殺が発動するようになる。"
           }
         ]
       },

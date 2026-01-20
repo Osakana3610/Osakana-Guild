@@ -24,16 +24,14 @@ import Foundation
 nonisolated struct BattleRandomSystem {
     /// 乱数A: (40 + 運)% 〜 100%
     nonisolated static func statMultiplier(luck: Int, random: inout GameRandomSource) -> Double {
-        let validLuck = clampLuck(luck)
-        let lowerPercent = min(100, max(40 + validLuck, 0))
+        let lowerPercent = min(100, max(40 + luck, 0))
         let percent = random.nextInt(in: lowerPercent...100)
         return Double(percent) / 100.0
     }
 
     /// 乱数B: (運 - 10) × 2% 〜 100%
     nonisolated static func speedMultiplier(luck: Int, random: inout GameRandomSource) -> Double {
-        let validLuck = clampLuck(luck)
-        let lowerPercent = min(100, max((validLuck - 10) * 2, 0))
+        let lowerPercent = min(100, max((luck - 10) * 2, 0))
         let percent = random.nextInt(in: lowerPercent...100)
         return Double(percent) / 100.0
     }
@@ -51,9 +49,5 @@ nonisolated struct BattleRandomSystem {
         guard probability > 0 else { return false }
         guard probability < 1 else { return true }
         return random.nextBool(probability: probability)
-    }
-
-    private nonisolated static func clampLuck(_ value: Int) -> Int {
-        return max(0, min(99, value))
     }
 }
