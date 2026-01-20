@@ -4,8 +4,8 @@
 // ==============================================================================
 //
 // 【責務】
-//   - 不具合報告をDiscord Webhookに送信
-//   - ユーザーデータ・ログを添付
+//   - 不具合報告をサポートAPI（Cloudflare R2）へ送信
+//   - ユーザーデータ・ログ・スクリーンショットを添付
 //
 // 【使用箇所】
 //   - BugReportView から呼び出し
@@ -48,157 +48,276 @@ struct BugReport: Sendable {
 actor BugReportService {
     static let shared = BugReportService()
 
-    private let webhookURL = URL(string: "https://discord.com/api/webhooks/1457674193347936364/pFmoYJNnk5CoXdqtzuX7H_vltgZTYtMLfw7GBEAYyMsBcrRU9mwqxTYe8wd8iZakF6no")!
+    private struct ReportFile {
+        let name: String
+        let contentType: String
+        let data: Data
+
+        var size: Int {
+            data.count
+        }
+    }
+
+    private struct SupportInitPayload: Encodable {
+        let files: [SupportInitFile]
+    }
+
+    private struct SupportInitFile: Encodable {
+        let name: String
+        let type: String
+        let size: Int
+    }
+
+    private struct SupportUpload: Decodable {
+        let key: String
+        let url: String
+        let method: String?
+    }
+
+    private struct SupportInitResponse: Decodable {
+        let ok: Bool
+        let ticketId: String
+        let date: String
+        let uploads: [SupportUpload]
+        let error: String?
+    }
+
+    private struct SupportSubmitPayload: Encodable {
+        let ticketId: String
+        let date: String
+        let message: String
+        let name: String?
+        let email: String?
+        let files: [SupportSubmitFile]
+    }
+
+    private struct SupportSubmitFile: Encodable {
+        let key: String
+        let name: String
+        let type: String
+        let size: Int
+    }
+
+    private struct SupportSubmitResponse: Decodable {
+        let ok: Bool
+        let ticketId: String
+        let error: String?
+    }
+
+    private struct SupportErrorResponse: Decodable {
+        let ok: Bool?
+        let error: String?
+    }
+
+    private let supportBaseURL = URL(string: "https://support.osakana.app")!
+    private let maxAttachments = 5
+    private let maxAttachmentBytes = 50 * 1024 * 1024
+    private let maxTotalBytes = 50 * 1024 * 1024
 
     private init() {}
 
     // MARK: - Public API
 
-    /// 不具合報告を送信（multipart/form-dataで添付ファイル付き）
+    /// 不具合報告を送信（R2に添付ファイル付き）
     func send(_ report: BugReport) async throws {
-        let boundary = UUID().uuidString
-        var request = URLRequest(url: webhookURL)
-        request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.httpBody = buildMultipartBody(report, boundary: boundary)
+        let files = try buildReportFiles(from: report)
+        let initResponse = try await initializeTicket(files: files)
+        try await uploadFiles(files: files, uploads: initResponse.uploads)
+        try await submitReport(report, files: files, initResponse: initResponse)
+    }
 
-        let (_, response) = try await URLSession.shared.data(for: request)
+    // MARK: - Support API
 
-        guard let httpResponse = response as? HTTPURLResponse else {
+    private var supportInitURL: URL {
+        supportBaseURL.appendingPathComponent("api/support/init")
+    }
+
+    private var supportSubmitURL: URL {
+        supportBaseURL.appendingPathComponent("api/support/submit")
+    }
+
+    private func initializeTicket(files: [ReportFile]) async throws -> SupportInitResponse {
+        let payload = SupportInitPayload(files: files.map { file in
+            SupportInitFile(name: file.name, type: file.contentType, size: file.size)
+        })
+        let data = try await postJSON(to: supportInitURL, payload: payload)
+        let response = try decodeResponse(SupportInitResponse.self, from: data)
+        guard response.ok else {
+            throw BugReportError.serverMessage(response.error ?? "初期化に失敗しました。")
+        }
+        guard response.uploads.count == files.count else {
+            throw BugReportError.invalidResponse
+        }
+        return response
+    }
+
+    private func uploadFiles(files: [ReportFile], uploads: [SupportUpload]) async throws {
+        guard !files.isEmpty else { return }
+        guard files.count == uploads.count else {
             throw BugReportError.invalidResponse
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw BugReportError.serverError(statusCode: httpResponse.statusCode)
+        for (file, upload) in zip(files, uploads) {
+            guard let url = URL(string: upload.url) else {
+                throw BugReportError.invalidResponse
+            }
+            var request = URLRequest(url: url)
+            request.httpMethod = upload.method ?? "PUT"
+            if !file.contentType.isEmpty {
+                request.setValue(file.contentType, forHTTPHeaderField: "Content-Type")
+            }
+            let (_, response) = try await URLSession.shared.upload(for: request, from: file.data)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw BugReportError.invalidResponse
+            }
+            guard (200...299).contains(httpResponse.statusCode) else {
+                throw BugReportError.serverError(statusCode: httpResponse.statusCode)
+            }
         }
     }
 
-    // MARK: - Private
+    private func submitReport(
+        _ report: BugReport,
+        files: [ReportFile],
+        initResponse: SupportInitResponse
+    ) async throws {
+        let message = buildMessage(report)
+        let submitFiles = zip(files, initResponse.uploads).map { file, upload in
+            SupportSubmitFile(
+                key: upload.key,
+                name: file.name,
+                type: file.contentType,
+                size: file.size
+            )
+        }
+        let payload = SupportSubmitPayload(
+            ticketId: initResponse.ticketId,
+            date: initResponse.date,
+            message: message,
+            name: report.reporterName,
+            email: nil,
+            files: submitFiles
+        )
+        let data = try await postJSON(to: supportSubmitURL, payload: payload)
+        let response = try decodeResponse(SupportSubmitResponse.self, from: data)
+        guard response.ok else {
+            throw BugReportError.serverMessage(response.error ?? "送信に失敗しました。")
+        }
+    }
 
-    private func buildMultipartBody(_ report: BugReport, boundary: String) -> Data {
-        var body = Data()
+    // MARK: - Report Building
 
-        // payload_json パート（embed情報）
-        let payload = buildPayload(report)
-        if let payloadData = try? JSONSerialization.data(withJSONObject: payload) {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"payload_json\"\r\n")
-            body.append("Content-Type: application/json\r\n\r\n")
-            body.append(payloadData)
-            body.append("\r\n")
+    private func buildReportFiles(from report: BugReport) throws -> [ReportFile] {
+        var files: [ReportFile] = []
+
+        if !report.logs.isEmpty {
+            guard let logsData = report.logs.data(using: .utf8) else {
+                throw BugReportError.invalidPayload
+            }
+            files.append(ReportFile(
+                name: "operation_logs.txt",
+                contentType: "text/plain",
+                data: logsData
+            ))
         }
 
-        // 添付ファイル1: 操作ログ
-        if let logsData = report.logs.data(using: .utf8), !report.logs.isEmpty {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[0]\"; filename=\"operation_logs.txt\"\r\n")
-            body.append("Content-Type: text/plain; charset=utf-8\r\n\r\n")
-            body.append(logsData)
-            body.append("\r\n")
-        }
-
-        // 添付ファイル2: SwiftDataデータベース（SQLite、戦闘ログ含む）
-        var fileIndex = 2
         if let databaseData = report.databaseData {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[1]\"; filename=\"user_data.sqlite.gz\"\r\n")
-            body.append("Content-Type: application/gzip\r\n\r\n")
-            body.append(databaseData)
-            body.append("\r\n")
+            files.append(ReportFile(
+                name: "user_data.sqlite.gz",
+                contentType: "application/gzip",
+                data: databaseData
+            ))
         }
 
-        // 添付ファイル4以降: スクリーンショット
         for (index, imageData) in report.screenshots.enumerated() {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"files[\(fileIndex)]\"; filename=\"screenshot_\(index + 1).png\"\r\n")
-            body.append("Content-Type: image/png\r\n\r\n")
-            body.append(imageData)
-            body.append("\r\n")
-            fileIndex += 1
+            files.append(ReportFile(
+                name: "screenshot_\(index + 1).png",
+                contentType: "image/png",
+                data: imageData
+            ))
         }
 
-        body.append("--\(boundary)--\r\n")
-        return body
+        try validateFiles(files)
+        return files
     }
 
-    private func buildPayload(_ report: BugReport) -> [String: Any] {
-        let formatter = ISO8601DateFormatter()
-        let timestamp = formatter.string(from: Date())
+    private func buildMessage(_ report: BugReport) -> String {
+        let description = report.description.trimmingCharacters(in: .whitespacesAndNewlines)
+        let body = description.isEmpty ? "(説明なし)" : description
 
-        var fields: [[String: Any]] = []
-
-        // 報告者名（あれば）
-        if let name = report.reporterName, !name.isEmpty {
-            fields.append([
-                "name": "報告者",
-                "value": name,
-                "inline": true
-            ])
-        }
-
-        fields.append(contentsOf: [
-            [
-                "name": "報告内容",
-                "value": report.description.isEmpty ? "(説明なし)" : String(report.description.prefix(1024)),
-                "inline": false
-            ],
-            [
-                "name": "プレイヤーID",
-                "value": report.playerData.playerId,
-                "inline": true
-            ],
-            [
-                "name": "ゴールド",
-                "value": formatNumber(report.playerData.gold),
-                "inline": true
-            ],
-            [
-                "name": "パーティ数",
-                "value": String(report.playerData.partyCount),
-                "inline": true
-            ],
-            [
-                "name": "キャラクター数",
-                "value": String(report.playerData.characterCount),
-                "inline": true
-            ],
-            [
-                "name": "アイテム数",
-                "value": String(report.playerData.inventoryCount),
-                "inline": true
-            ],
-            [
-                "name": "アプリ情報",
-                "value": "\(report.appInfo.appVersion) (\(report.appInfo.buildNumber))",
-                "inline": true
-            ],
-            [
-                "name": "端末情報",
-                "value": "\(report.appInfo.deviceModel) / iOS \(report.appInfo.osVersion)",
-                "inline": true
-            ]
-        ])
-
-        // スクショ添付数
-        if !report.screenshots.isEmpty {
-            fields.append([
-                "name": "添付画像",
-                "value": "\(report.screenshots.count)枚",
-                "inline": true
-            ])
-        }
-
-        let embed: [String: Any] = [
-            "title": "不具合報告",
-            "color": 16711680,
-            "timestamp": timestamp,
-            "fields": fields,
-            "footer": [
-                "text": "Epika Bug Report"
-            ]
+        var details: [String] = [
+            "アプリ情報: \(report.appInfo.appVersion) (\(report.appInfo.buildNumber))",
+            "端末情報: \(report.appInfo.deviceModel) / iOS \(report.appInfo.osVersion)"
         ]
 
-        return ["embeds": [embed]]
+        if report.playerData.currentScreen != nil {
+            details.append("プレイヤーID: \(report.playerData.playerId)")
+            details.append("ゴールド: \(formatNumber(report.playerData.gold))")
+            details.append("パーティ数: \(report.playerData.partyCount)")
+            details.append("キャラクター数: \(report.playerData.characterCount)")
+            details.append("アイテム数: \(report.playerData.inventoryCount)")
+        }
+
+        return body + "\n\n----\n" + details.joined(separator: "\n")
+    }
+
+    private func validateFiles(_ files: [ReportFile]) throws {
+        if files.count > maxAttachments {
+            throw BugReportError.attachmentLimitExceeded(max: maxAttachments)
+        }
+
+        var totalBytes = 0
+        for file in files {
+            let size = file.size
+            if size > maxAttachmentBytes {
+                throw BugReportError.attachmentTooLarge
+            }
+            totalBytes += size
+        }
+
+        if totalBytes > maxTotalBytes {
+            throw BugReportError.attachmentTotalSizeExceeded
+        }
+    }
+
+    // MARK: - Network
+
+    private func postJSON<Payload: Encodable>(to url: URL, payload: Payload) async throws -> Data {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            request.httpBody = try JSONEncoder().encode(payload)
+        } catch {
+            throw BugReportError.invalidPayload
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw BugReportError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let message = decodeErrorMessage(from: data) {
+                throw BugReportError.serverMessage(message)
+            }
+            throw BugReportError.serverError(statusCode: httpResponse.statusCode)
+        }
+        return data
+    }
+
+    private func decodeResponse<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        do {
+            return try JSONDecoder().decode(type, from: data)
+        } catch {
+            throw BugReportError.invalidResponse
+        }
+    }
+
+    private func decodeErrorMessage(from data: Data) -> String? {
+        guard let response = try? JSONDecoder().decode(SupportErrorResponse.self, from: data) else {
+            return nil
+        }
+        return response.error
     }
 
     private func formatNumber(_ n: Int) -> String {
@@ -285,7 +404,12 @@ private enum DataCompressionError: Error {
 
 enum BugReportError: Error, LocalizedError {
     case invalidResponse
+    case invalidPayload
     case serverError(statusCode: Int)
+    case serverMessage(String)
+    case attachmentLimitExceeded(max: Int)
+    case attachmentTooLarge
+    case attachmentTotalSizeExceeded
     case databaseOpenFailed
     case databaseQueryFailed
 
@@ -293,8 +417,18 @@ enum BugReportError: Error, LocalizedError {
         switch self {
         case .invalidResponse:
             return "サーバーからの応答が不正です"
+        case .invalidPayload:
+            return "送信内容の作成に失敗しました"
         case .serverError(let code):
             return "サーバーエラー: \(code)"
+        case .serverMessage(let message):
+            return message
+        case .attachmentLimitExceeded(let max):
+            return "添付は最大\(max)件までです。スクリーンショット枚数を減らすか、ログ/ユーザーデータ送信をオフにしてください。"
+        case .attachmentTooLarge:
+            return "添付サイズが上限を超えています。"
+        case .attachmentTotalSizeExceeded:
+            return "添付の合計サイズが上限を超えています。"
         case .databaseOpenFailed:
             return "データベースを開けませんでした"
         case .databaseQueryFailed:
