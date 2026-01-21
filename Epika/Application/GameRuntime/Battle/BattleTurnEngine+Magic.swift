@@ -52,12 +52,20 @@ extension BattleTurnEngine {
         case .healing:
             // castConditionがtargetHalfHPの場合、HP半分以下の味方のみを対象にする
             let requireHalfHP = spell.castCondition.flatMap { SpellDefinition.CastCondition(rawValue: $0) } == .targetHalfHP
-            guard let targetIndex = selectHealingTargetIndex(in: allies, requireHalfHP: requireHalfHP) else { return true }
-            performPriestMagic(casterSide: side,
-                               casterIndex: casterIndex,
-                               targetIndex: targetIndex,
-                               spell: spell,
-                               context: &context)
+            if spell.targeting == .partyAllies {
+                performPartyHealingSpell(casterSide: side,
+                                         casterIndex: casterIndex,
+                                         spell: spell,
+                                         requireHalfHP: requireHalfHP,
+                                         context: &context)
+            } else {
+                guard let targetIndex = selectHealingTargetIndex(in: allies, requireHalfHP: requireHalfHP) else { return true }
+                performPriestMagic(casterSide: side,
+                                   casterIndex: casterIndex,
+                                   targetIndex: targetIndex,
+                                   spell: spell,
+                                   context: &context)
+            }
         case .buff:
             performBuffSpell(casterSide: side,
                              casterIndex: casterIndex,
@@ -106,6 +114,52 @@ extension BattleTurnEngine {
                                                           skillIndex: UInt16(spell.id))
         entryBuilder.addEffect(kind: .magicHeal, target: targetIdx, value: UInt32(applied))
         context.appendActionEntry(entryBuilder.build())
+    }
+
+    nonisolated static func performPartyHealingSpell(casterSide: ActorSide,
+                                         casterIndex: Int,
+                                         spell: SpellDefinition,
+                                         requireHalfHP: Bool,
+                                         context: inout BattleContext) {
+        guard let caster = context.actor(for: casterSide, index: casterIndex) else { return }
+        let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
+        let targetIndices = selectHealingTargetIndices(in: allies, requireHalfHP: requireHalfHP)
+        guard !targetIndices.isEmpty else { return }
+
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+                                                          kind: .priestMagic,
+                                                          skillIndex: UInt16(spell.id))
+        var didApply = false
+
+        for targetIndex in targetIndices {
+            guard var target = context.actor(for: casterSide, index: targetIndex) else { continue }
+
+            let healAmount: Int
+            if let percent = spell.healPercentOfMaxHP {
+                healAmount = target.snapshot.maxHP * percent / 100
+            } else {
+                let baseAmount = computeHealingAmount(caster: caster,
+                                                      target: target,
+                                                      spellId: spell.id,
+                                                      context: &context)
+                let multiplier = spell.healMultiplier ?? 1.0
+                healAmount = Int(Double(baseAmount) * multiplier)
+            }
+            let missing = target.snapshot.maxHP - target.currentHP
+            guard missing > 0 else { continue }
+            let applied = min(healAmount, missing)
+            target.currentHP += applied
+            context.updateActor(target, side: casterSide, index: targetIndex)
+
+            let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
+            entryBuilder.addEffect(kind: .magicHeal, target: targetIdx, value: UInt32(applied))
+            didApply = true
+        }
+
+        if didApply {
+            context.appendActionEntry(entryBuilder.build())
+        }
     }
 
     @discardableResult
@@ -539,7 +593,13 @@ extension BattleTurnEngine {
             if let conditionRaw = spell.castCondition,
                let condition = SpellDefinition.CastCondition(rawValue: conditionRaw),
                condition == .targetHalfHP {
+                if spell.targeting == .partyAllies {
+                    return !selectHealingTargetIndices(in: allies, requireHalfHP: true).isEmpty
+                }
                 return selectHealingTargetIndex(in: allies, requireHalfHP: true) != nil
+            }
+            if spell.targeting == .partyAllies {
+                return !selectHealingTargetIndices(in: allies).isEmpty
             }
             return selectHealingTargetIndex(in: allies) != nil
         case .cleanse:

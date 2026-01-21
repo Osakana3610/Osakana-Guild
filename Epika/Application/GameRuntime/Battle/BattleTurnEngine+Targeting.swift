@@ -249,6 +249,18 @@ extension BattleTurnEngine {
         return bestIndex
     }
 
+    nonisolated static func selectHealingTargetIndices(in actors: [BattleActor], requireHalfHP: Bool = false) -> [Int] {
+        var indices: [Int] = []
+        for (index, actor) in actors.enumerated() where actor.isAlive && actor.currentHP < actor.snapshot.maxHP {
+            let ratio = Double(actor.currentHP) / Double(actor.snapshot.maxHP)
+            if requireHalfHP && ratio > 0.5 {
+                continue
+            }
+            indices.append(index)
+        }
+        return indices
+    }
+
     nonisolated static func selectStatusTargets(attackerSide: ActorSide,
                                     context: inout BattleContext,
                                     allowFriendlyTargets: Bool,

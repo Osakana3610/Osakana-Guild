@@ -262,6 +262,23 @@
       "testMethod": "testMagicalDamageAverage"
     },
     {
+      "id": "BATTLE-MAGIC-002",
+      "category": [
+        "戦闘",
+        "回復",
+        "呪文"
+      ],
+      "description": "パーティヒールが味方全員に適用されるか",
+      "formula": "healPercent × maxHP × 対象数",
+      "expectedRange": {
+        "min": 400,
+        "max": 400
+      },
+      "toleranceBasis": "回復量が一致すること",
+      "testFile": "HealingSpellTests.swift",
+      "testMethod": "testPartyHealSpellHealsAllAllies"
+    },
+    {
       "id": "BATTLE-BREATH-001",
       "category": [
         "戦闘",
