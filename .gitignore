@@ -11,6 +11,9 @@
 # Temp files
 tmp/
 
+# Local-only specs (symlink target lives in osakana-web)
+docs/specs
+
 # Coverage
 *.xccovreport
 *.xccovarchive
