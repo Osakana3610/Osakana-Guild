@@ -208,6 +208,76 @@ extension BattleEngine {
         }
     }
 
+    nonisolated static func selectHealingTargetIndex(in actors: [BattleActor], requireHalfHP: Bool = false) -> Int? {
+        var bestIndex: Int?
+        var lowestRatio = Double.greatestFiniteMagnitude
+        for (index, actor) in actors.enumerated() where actor.isAlive && actor.currentHP < actor.snapshot.maxHP {
+            let ratio = Double(actor.currentHP) / Double(actor.snapshot.maxHP)
+            if requireHalfHP && ratio > 0.5 {
+                continue
+            }
+            if ratio < lowestRatio {
+                lowestRatio = ratio
+                bestIndex = index
+            }
+        }
+        return bestIndex
+    }
+
+    nonisolated static func selectHealingTargetIndices(in actors: [BattleActor], requireHalfHP: Bool = false) -> [Int] {
+        var indices: [Int] = []
+        for (index, actor) in actors.enumerated() where actor.isAlive && actor.currentHP < actor.snapshot.maxHP {
+            let ratio = Double(actor.currentHP) / Double(actor.snapshot.maxHP)
+            if requireHalfHP && ratio > 0.5 {
+                continue
+            }
+            indices.append(index)
+        }
+        return indices
+    }
+
+    nonisolated static func selectStatusTargets(attackerSide: ActorSide,
+                                    state: inout BattleState,
+                                    allowFriendlyTargets: Bool,
+                                    maxTargets: Int,
+                                    distinct: Bool) -> [(ActorSide, Int)] {
+        var candidates: [(ActorSide, Int)] = []
+        let enemySide: ActorSide = attackerSide == .player ? .enemy : .player
+        switch enemySide {
+        case .player:
+            candidates.append(contentsOf: state.players.indices.compactMap { state.players[$0].isAlive ? (.player, $0) : nil })
+        case .enemy:
+            candidates.append(contentsOf: state.enemies.indices.compactMap { state.enemies[$0].isAlive ? (.enemy, $0) : nil })
+        }
+
+        if allowFriendlyTargets {
+            switch attackerSide {
+            case .player:
+                candidates.append(contentsOf: state.players.indices.compactMap { state.players[$0].isAlive ? (.player, $0) : nil })
+            case .enemy:
+                candidates.append(contentsOf: state.enemies.indices.compactMap { state.enemies[$0].isAlive ? (.enemy, $0) : nil })
+            }
+        }
+
+        guard !candidates.isEmpty else { return [] }
+        var pool = candidates
+        if distinct {
+            var seen: Set<String> = Set()
+            pool = candidates.filter { entry in
+                let key = "\(entry.0)-\(entry.1)"
+                return seen.insert(key).inserted
+            }
+        }
+        for index in pool.indices {
+            let swapIndex = state.random.nextInt(in: index...pool.index(before: pool.endIndex))
+            if swapIndex != index {
+                pool.swapAt(index, swapIndex)
+            }
+        }
+        let count = min(maxTargets, pool.count)
+        return Array(pool.prefix(count))
+    }
+
     nonisolated static func clampProbability(_ value: Double, defender: BattleActor? = nil) -> Double {
         var minHit = HitProbabilityConstants.baseMinHitRate
 

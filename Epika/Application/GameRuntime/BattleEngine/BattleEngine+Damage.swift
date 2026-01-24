@@ -21,6 +21,22 @@ extension BattleEngine {
     private nonisolated static let breathDamageDealtKey = "breathDamageDealtMultiplier"
     private nonisolated static let breathDamageTakenKey = "breathDamageTakenMultiplier"
 
+    // MARK: - Damage Results
+
+    struct MagicalDamageResult {
+        let damage: Int
+        let wasCritical: Bool
+        let wasNullified: Bool
+        let guardBarrierConsumed: Int
+        let barrierConsumed: Int
+    }
+
+    struct BreathDamageResult {
+        let damage: Int
+        let guardBarrierConsumed: Int
+        let barrierConsumed: Int
+    }
+
     // MARK: - Hit / Physical Damage
 
     nonisolated static func computeHitChance(attacker: BattleActor,
@@ -99,6 +115,113 @@ extension BattleEngine {
 
         let finalDamage = max(1, Int(totalDamage.rounded()))
         return (finalDamage, isCritical)
+    }
+
+    nonisolated static func computeMagicalDamage(attacker: BattleActor,
+                                     defender: inout BattleActor,
+                                     spellId: UInt8?,
+                                     allowMagicCritical: Bool = false,
+                                     state: inout BattleState) -> MagicalDamageResult {
+        let nullifyChance = defender.skillEffects.damage.magicNullifyChancePercent
+        if nullifyChance > 0 {
+            let cappedChance = max(0, min(100, Int(nullifyChance.rounded())))
+            if BattleRandomSystem.percentChance(cappedChance, random: &state.random) {
+                return MagicalDamageResult(damage: 0,
+                                           wasCritical: false,
+                                           wasNullified: true,
+                                           guardBarrierConsumed: 0,
+                                           barrierConsumed: 0)
+            }
+        }
+
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &state.random)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &state.random)
+
+        let attackPower = Double(attacker.snapshot.magicalAttackScore) * attackRoll
+        let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
+        var damage = max(1.0, attackPower - defensePower)
+
+        damage *= spellPowerModifier(for: attacker, spellId: spellId)
+        damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
+        damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId, attacker: attacker)
+
+        let didCritical = allowMagicCritical && shouldTriggerCritical(attacker: attacker,
+                                                                      defender: defender,
+                                                                      state: &state)
+        if didCritical {
+            damage *= criticalDamageBonus(for: attacker)
+            damage *= defender.skillEffects.damage.criticalTakenMultiplier
+            damage *= defender.innateResistances.critical
+        }
+
+        if let spellId {
+            damage *= defender.innateResistances.spells[spellId, default: 1.0]
+        }
+
+        let barrierKey = barrierKey(for: .magical)
+        let guardActive = defender.guardActive
+        let guardBefore = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierBefore = defender.barrierCharges[barrierKey] ?? 0
+
+        let barrierMultiplier = applyBarrierIfAvailable(for: .magical, defender: &defender)
+        var adjusted = damage * barrierMultiplier
+        if barrierMultiplier == 1.0, defender.guardActive {
+            adjusted *= 0.5
+        }
+
+        let guardAfter = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierAfter = defender.barrierCharges[barrierKey] ?? 0
+        let guardConsumed = guardActive && guardAfter < guardBefore ? (guardBefore - guardAfter) : 0
+        let barrierConsumed = guardConsumed == 0 && barrierAfter < barrierBefore ? (barrierBefore - barrierAfter) : 0
+
+        return MagicalDamageResult(damage: max(1, Int(adjusted.rounded())),
+                                   wasCritical: didCritical,
+                                   wasNullified: false,
+                                   guardBarrierConsumed: guardConsumed,
+                                   barrierConsumed: barrierConsumed)
+    }
+
+    nonisolated static func computeBreathDamage(attacker: BattleActor,
+                                    defender: inout BattleActor,
+                                    state: inout BattleState) -> BreathDamageResult {
+        let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &state.random)
+        var damage = Double(attacker.snapshot.breathDamageScore) * variance
+
+        damage *= damageDealtModifier(for: attacker, against: defender, damageType: .breath)
+        damage *= damageTakenModifier(for: defender, damageType: .breath, attacker: attacker)
+        damage *= defender.innateResistances.breath
+
+        let barrierKey = barrierKey(for: .breath)
+        let guardActive = defender.guardActive
+        let guardBefore = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierBefore = defender.barrierCharges[barrierKey] ?? 0
+
+        let barrierMultiplier = applyBarrierIfAvailable(for: .breath, defender: &defender)
+        var adjusted = damage * barrierMultiplier
+        if barrierMultiplier == 1.0, defender.guardActive {
+            adjusted *= 0.5
+        }
+
+        let guardAfter = defender.guardBarrierCharges[barrierKey] ?? 0
+        let barrierAfter = defender.barrierCharges[barrierKey] ?? 0
+        let guardConsumed = guardActive && guardAfter < guardBefore ? (guardBefore - guardAfter) : 0
+        let barrierConsumed = guardConsumed == 0 && barrierAfter < barrierBefore ? (barrierBefore - barrierAfter) : 0
+
+        return BreathDamageResult(damage: max(1, Int(adjusted.rounded())),
+                                  guardBarrierConsumed: guardConsumed,
+                                  barrierConsumed: barrierConsumed)
+    }
+
+    nonisolated static func computeHealingAmount(caster: BattleActor,
+                                     target: BattleActor,
+                                     spellId: UInt8?,
+                                     state: inout BattleState) -> Int {
+        let multiplier = BattleRandomSystem.statMultiplier(luck: caster.luck, random: &state.random)
+        var amount = Double(caster.snapshot.magicalHealingScore) * multiplier
+        amount *= spellPowerModifier(for: caster, spellId: spellId)
+        amount *= healingDealtModifier(for: caster)
+        amount *= healingReceivedModifier(for: target)
+        return max(1, Int(amount.rounded()))
     }
 
     @discardableResult
@@ -248,6 +371,11 @@ extension BattleEngine {
         return Double(defender.snapshot.physicalDefenseScore) * factor
     }
 
+    nonisolated static func degradedMagicalDefense(for defender: BattleActor) -> Double {
+        let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
+        return Double(defender.snapshot.magicalDefenseScore) * factor
+    }
+
     nonisolated static func degradedEvasionScore(for defender: BattleActor) -> Double {
         let factor = max(0.0, 1.0 - defender.degradationPercent / 100.0)
         let bonus = aggregateAdditive(from: defender.timedBuffs, key: "evasionScoreAdditive")
@@ -265,6 +393,25 @@ extension BattleEngine {
             increment = max(0.0, (100.0 - degradation) * 0.001)
         }
         defender.degradationPercent = min(100.0, degradation + increment)
+    }
+
+    nonisolated static let magicArrowSpellId: UInt8 = 1
+
+    nonisolated static func applyMagicDegradation(to defender: inout BattleActor,
+                                      spellId: UInt8,
+                                      caster: BattleActor) {
+        let master = (caster.jobName?.contains("マスター") == true) || (caster.jobName?.lowercased().contains("master") == true)
+        let isMagicArrow = spellId == magicArrowSpellId
+        let coefficient: Double = {
+            if isMagicArrow {
+                return master ? 5.0 : 3.0
+            } else {
+                return master ? 10.0 : 6.0
+            }
+        }()
+        let remainingArmor = max(0.0, 100.0 - defender.degradationPercent)
+        let increment = remainingArmor * (coefficient / 100.0)
+        defender.degradationPercent = min(100.0, defender.degradationPercent + increment)
     }
 
     // MARK: - Buff Aggregation

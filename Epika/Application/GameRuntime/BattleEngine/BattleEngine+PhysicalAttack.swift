@@ -30,8 +30,6 @@ extension BattleEngine {
         var postEntries: [BattleActionEntry]
     }
 
-    private nonisolated static let statusTagConfusion: UInt8 = 3
-
     @discardableResult
     nonisolated static func executePhysicalAttack(for side: ActorSide,
                                       attackerIndex: Int,
@@ -185,6 +183,8 @@ extension BattleEngine {
             let applied = applyDamage(amount: pendingDamage, to: &defenderCopy)
             applyPhysicalDegradation(to: &defenderCopy)
             applySpellChargeGainOnPhysicalHit(for: &attackerCopy, damageDealt: applied)
+            attemptInflictStatuses(from: attackerCopy, to: &defenderCopy, state: &state)
+            applyAutoStatusCureIfNeeded(for: defenderSide, targetIndex: defenderIndex, state: &state)
             accumulatedAbsorptionDamage += applied
 
             attackerCopy.attackHistory.registerHit()
@@ -326,10 +326,4 @@ extension BattleEngine {
         }
     }
 
-    private nonisolated static func hasStatus(tag: UInt8, in actor: BattleActor, state: BattleState) -> Bool {
-        actor.statusEffects.contains { effect in
-            guard let definition = state.statusDefinition(for: effect) else { return false }
-            return definition.tags.contains(tag)
-        }
-    }
 }

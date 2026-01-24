@@ -192,6 +192,266 @@ nonisolated final class BattleEngineParityTests: XCTestCase {
         XCTAssertFalse(coverLogEntries(in: legacyContext.actionEntries).isEmpty,
                        "かばうログが記録されること")
     }
+
+    func testParity_MageMagicDamageMatchesLegacy() {
+        var attacker = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 1)
+        let spell = makeSpell(id: 2,
+                              school: .mage,
+                              category: .damage,
+                              targeting: .randomEnemiesDistinct,
+                              maxTargetsBase: 1,
+                              extraTargetsPerLevels: 0.0)
+        attacker.spells = .init(mage: [spell], priest: [])
+        attacker.actionResources.initializeSpellCharges(from: attacker.spells)
+
+        let enemy = TestActorBuilder.makeEnemy(luck: 18)
+
+        var legacyContext = BattleContext(
+            players: [attacker],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 9)
+        )
+
+        let legacyDidCast = BattleTurnEngine.executeMageMagic(
+            for: .player,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidCast)
+
+        var newState = BattleEngine.BattleState(
+            players: [attacker],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 9)
+        )
+
+        let newDidCast = BattleEngine.executeMageMagic(
+            for: .player,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidCast)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.enemies.first?.currentHP, newState.enemies.first?.currentHP)
+    }
+
+    func testParity_PriestMagicSingleHealMatchesLegacy() {
+        var caster = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 1)
+        var target = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 2)
+        target.currentHP = target.snapshot.maxHP / 2
+
+        let spell = makeSpell(id: 7,
+                              school: .priest,
+                              category: .healing,
+                              targeting: .singleAlly,
+                              healMultiplier: 1.0)
+        caster.spells = .init(mage: [], priest: [spell])
+        caster.actionResources.initializeSpellCharges(from: caster.spells)
+
+        let enemy = TestActorBuilder.makeEnemy(luck: 18)
+
+        var legacyContext = BattleContext(
+            players: [caster, target],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 11)
+        )
+
+        let legacyDidCast = BattleTurnEngine.executePriestMagic(
+            for: .player,
+            casterIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidCast)
+
+        var newState = BattleEngine.BattleState(
+            players: [caster, target],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 11)
+        )
+
+        let newDidCast = BattleEngine.executePriestMagic(
+            for: .player,
+            casterIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidCast)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.players[1].currentHP, newState.players[1].currentHP)
+    }
+
+    func testParity_PriestMagicPartyHealMatchesLegacy() {
+        var caster = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 1)
+        var ally1 = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 2)
+        var ally2 = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 3)
+        ally1.currentHP = max(1, ally1.snapshot.maxHP - 1000)
+        ally2.currentHP = max(1, ally2.snapshot.maxHP - 3000)
+
+        let spell = makeSpell(id: 13,
+                              school: .priest,
+                              category: .healing,
+                              targeting: .partyAllies,
+                              healPercentOfMaxHP: 20)
+        caster.spells = .init(mage: [], priest: [spell])
+        caster.actionResources.initializeSpellCharges(from: caster.spells)
+
+        let enemy = TestActorBuilder.makeEnemy(luck: 18)
+
+        var legacyContext = BattleContext(
+            players: [caster, ally1, ally2],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 13)
+        )
+
+        let legacyDidCast = BattleTurnEngine.executePriestMagic(
+            for: .player,
+            casterIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidCast)
+
+        var newState = BattleEngine.BattleState(
+            players: [caster, ally1, ally2],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 13)
+        )
+
+        let newDidCast = BattleEngine.executePriestMagic(
+            for: .player,
+            casterIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidCast)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.players[1].currentHP, newState.players[1].currentHP)
+        XCTAssertEqual(legacyContext.players[2].currentHP, newState.players[2].currentHP)
+    }
+
+    func testParity_BreathMatchesLegacy() {
+        var attacker = TestActorBuilder.makeAttacker(luck: 18, breathDamageScore: 3000, partyMemberId: 1)
+        attacker.actionResources.setCharges(for: .breath, value: 1)
+
+        let enemy1 = TestActorBuilder.makeEnemy(luck: 18)
+        let enemy2 = TestActorBuilder.makeEnemy(luck: 18)
+
+        var legacyContext = BattleContext(
+            players: [attacker],
+            enemies: [enemy1, enemy2],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 21)
+        )
+
+        let legacyDidCast = BattleTurnEngine.executeBreath(
+            for: .player,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidCast)
+
+        var newState = BattleEngine.BattleState(
+            players: [attacker],
+            enemies: [enemy1, enemy2],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 21)
+        )
+
+        let newDidCast = BattleEngine.executeBreath(
+            for: .player,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidCast)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.enemies[0].currentHP, newState.enemies[0].currentHP)
+        XCTAssertEqual(legacyContext.enemies[1].currentHP, newState.enemies[1].currentHP)
+    }
+
+    func testParity_MageStatusInflictMatchesLegacy() {
+        var attacker = TestActorBuilder.makePlayer(luck: 18, partyMemberId: 1)
+        let statusId: UInt8 = 9
+        let spell = makeSpell(id: 1,
+                              school: .mage,
+                              category: .status,
+                              targeting: .randomEnemiesDistinct,
+                              maxTargetsBase: 1,
+                              extraTargetsPerLevels: 0.0,
+                              statusId: statusId)
+        attacker.spells = .init(mage: [spell], priest: [])
+        attacker.actionResources.initializeSpellCharges(from: attacker.spells)
+
+        let enemy = TestActorBuilder.makeEnemy(luck: 18)
+        let statusDefinition = makeStatusDefinition(id: statusId)
+
+        var legacyContext = BattleContext(
+            players: [attacker],
+            enemies: [enemy],
+            statusDefinitions: [statusId: statusDefinition],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 23)
+        )
+
+        let legacyDidCast = BattleTurnEngine.executeMageMagic(
+            for: .player,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidCast)
+
+        var newState = BattleEngine.BattleState(
+            players: [attacker],
+            enemies: [enemy],
+            statusDefinitions: [statusId: statusDefinition],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 23)
+        )
+
+        let newDidCast = BattleEngine.executeMageMagic(
+            for: .player,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidCast)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.enemies.first?.statusEffects, newState.enemies.first?.statusEffects)
+    }
     
     private func assertActionEntriesEqual(_ lhs: [BattleActionEntry],
                                           _ rhs: [BattleActionEntry],
@@ -228,5 +488,55 @@ nonisolated final class BattleEngineParityTests: XCTestCase {
                 effect.kind == .skillEffect && effect.extra == SkillEffectLogKind.cover.rawValue
             }
         }
+    }
+
+    private func makeSpell(id: UInt8,
+                           school: SpellDefinition.School,
+                           category: SpellDefinition.Category,
+                           targeting: SpellDefinition.Targeting,
+                           tier: Int = 1,
+                           maxTargetsBase: Int? = nil,
+                           extraTargetsPerLevels: Double? = nil,
+                           hitsPerCast: Int? = nil,
+                           basePowerMultiplier: Double? = nil,
+                           statusId: UInt8? = nil,
+                           buffs: [SpellDefinition.Buff] = [],
+                           healMultiplier: Double? = nil,
+                           healPercentOfMaxHP: Int? = nil,
+                           castCondition: UInt8? = nil) -> SpellDefinition {
+        SpellDefinition(
+            id: id,
+            name: "TestSpell",
+            school: school,
+            tier: tier,
+            unlockLevel: 1,
+            category: category,
+            targeting: targeting,
+            maxTargetsBase: maxTargetsBase,
+            extraTargetsPerLevels: extraTargetsPerLevels,
+            hitsPerCast: hitsPerCast,
+            basePowerMultiplier: basePowerMultiplier,
+            statusId: statusId,
+            buffs: buffs,
+            healMultiplier: healMultiplier,
+            healPercentOfMaxHP: healPercentOfMaxHP,
+            castCondition: castCondition,
+            description: ""
+        )
+    }
+
+    private func makeStatusDefinition(id: UInt8, tags: [UInt8] = []) -> StatusEffectDefinition {
+        StatusEffectDefinition(
+            id: id,
+            name: "TestStatus",
+            description: "",
+            durationTurns: 3,
+            tickDamagePercent: nil,
+            actionLocked: nil,
+            applyMessage: nil,
+            expireMessage: nil,
+            tags: tags,
+            statModifiers: [:]
+        )
     }
 }
