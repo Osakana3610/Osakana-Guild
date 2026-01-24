@@ -96,4 +96,137 @@ nonisolated final class BattleEngineParityTests: XCTestCase {
             "未実装パイプラインの暫定結果は撤退とする")
         XCTAssertEqual(result.battleLog.entries.last?.declaration.kind, .retreat)
     }
+
+    func testParity_PhysicalAttackBasicMatchesLegacy() {
+        let attacker = TestActorBuilder.makeAttacker(luck: 18, partyMemberId: 1)
+        let defender = TestActorBuilder.makeDefender(luck: 18)
+
+        var legacyContext = BattleContext(
+            players: [attacker],
+            enemies: [defender],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+
+        let legacyDidAttack = BattleTurnEngine.executePhysicalAttack(
+            for: .player,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidAttack)
+
+        var newState = BattleEngine.BattleState(
+            players: [attacker],
+            enemies: [defender],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+
+        let newDidAttack = BattleEngine.executePhysicalAttack(
+            for: .player,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidAttack)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.players.first?.currentHP, newState.players.first?.currentHP)
+        XCTAssertEqual(legacyContext.enemies.first?.currentHP, newState.enemies.first?.currentHP)
+    }
+
+    func testParity_PhysicalAttackCoverMatchesLegacy() {
+        var front = TestActorBuilder.makePlayer(luck: 18, formationSlot: 1, partyMemberId: 1)
+        var back = TestActorBuilder.makePlayer(luck: 18, formationSlot: 5, partyMemberId: 2)
+        let enemy = TestActorBuilder.makeEnemy(luck: 18)
+
+        var coverEffects = BattleActor.SkillEffects.neutral
+        coverEffects.misc.coverRowsBehind = true
+        coverEffects.misc.targetingWeight = 0.01
+        front.skillEffects = coverEffects
+
+        var backEffects = BattleActor.SkillEffects.neutral
+        backEffects.misc.targetingWeight = 100.0
+        back.skillEffects = backEffects
+
+        var legacyContext = BattleContext(
+            players: [front, back],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 7)
+        )
+
+        let legacyDidAttack = BattleTurnEngine.executePhysicalAttack(
+            for: .enemy,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidAttack)
+
+        var newState = BattleEngine.BattleState(
+            players: [front, back],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 7)
+        )
+
+        let newDidAttack = BattleEngine.executePhysicalAttack(
+            for: .enemy,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidAttack)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertFalse(coverLogEntries(in: legacyContext.actionEntries).isEmpty,
+                       "かばうログが記録されること")
+    }
+    
+    private func assertActionEntriesEqual(_ lhs: [BattleActionEntry],
+                                          _ rhs: [BattleActionEntry],
+                                          file: StaticString = #filePath,
+                                          line: UInt = #line) {
+        XCTAssertEqual(lhs.count, rhs.count, "ログ数が一致すること", file: file, line: line)
+        let count = min(lhs.count, rhs.count)
+        for index in 0..<count {
+            let left = lhs[index]
+            let right = rhs[index]
+            XCTAssertEqual(left.turn, right.turn, "turnが一致すること", file: file, line: line)
+            XCTAssertEqual(left.actor, right.actor, "actorが一致すること", file: file, line: line)
+            XCTAssertEqual(left.declaration.kind, right.declaration.kind, "kindが一致すること", file: file, line: line)
+            XCTAssertEqual(left.declaration.skillIndex, right.declaration.skillIndex, "skillIndexが一致すること", file: file, line: line)
+            XCTAssertEqual(left.declaration.extra, right.declaration.extra, "extraが一致すること", file: file, line: line)
+            XCTAssertEqual(left.effects.count, right.effects.count, "effects数が一致すること", file: file, line: line)
+            let effectCount = min(left.effects.count, right.effects.count)
+            for effectIndex in 0..<effectCount {
+                let leftEffect = left.effects[effectIndex]
+                let rightEffect = right.effects[effectIndex]
+                XCTAssertEqual(leftEffect.kind, rightEffect.kind, "effect.kindが一致すること", file: file, line: line)
+                XCTAssertEqual(leftEffect.target, rightEffect.target, "effect.targetが一致すること", file: file, line: line)
+                XCTAssertEqual(leftEffect.value, rightEffect.value, "effect.valueが一致すること", file: file, line: line)
+                XCTAssertEqual(leftEffect.statusId, rightEffect.statusId, "effect.statusIdが一致すること", file: file, line: line)
+                XCTAssertEqual(leftEffect.extra, rightEffect.extra, "effect.extraが一致すること", file: file, line: line)
+            }
+        }
+    }
+
+    private func coverLogEntries(in entries: [BattleActionEntry]) -> [BattleActionEntry] {
+        entries.filter { entry in
+            guard entry.declaration.kind == .skillEffect else { return false }
+            return entry.effects.contains { effect in
+                effect.kind == .skillEffect && effect.extra == SkillEffectLogKind.cover.rawValue
+            }
+        }
+    }
 }
