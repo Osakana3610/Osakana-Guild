@@ -1,0 +1,349 @@
+// ==============================================================================
+// BattleEngine.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - 新戦闘エンジンの基盤型と最小実行経路
+//   - ActionRequest / TargetSet / EffectPlan を中核用語として定義
+//   - BattleLog 生成の最小パイプラインを提供
+//
+// 【データ構造】
+//   - BattleState: 戦闘状態（可変）
+//   - ActionRequest: 行動要求
+//   - TargetSet: 対象集合
+//   - EffectPlan: 効果計画
+//   - EffectInstruction: 効果指示
+//   - ActionOutcome: 行動結果（ログ単位）
+//
+// 【使用箇所】
+//   - EpikaTests/BattleEngine (並行検証ハーネス)
+//
+// ==============================================================================
+
+import Foundation
+
+/// 新戦闘エンジン名前空間
+/// 旧BattleTurnEngineと独立した実装として維持する
+enum BattleEngine {
+
+    // MARK: - ActorSide / ActorReference
+
+    nonisolated enum ActorSide: Sendable {
+        case player
+        case enemy
+    }
+
+    nonisolated enum ActorReference: Hashable, Sendable {
+        case player(Int)
+        case enemy(Int)
+
+        nonisolated var side: ActorSide {
+            switch self {
+            case .player: return .player
+            case .enemy: return .enemy
+            }
+        }
+
+        nonisolated var index: Int {
+            switch self {
+            case .player(let index): return index
+            case .enemy(let index): return index
+            }
+        }
+    }
+
+    // MARK: - BattleState
+
+    /// 新エンジン用の戦闘状態
+    nonisolated struct BattleState: Sendable {
+        // 参照データ（不変）
+        let statusDefinitions: [UInt8: StatusEffectDefinition]
+        let skillDefinitions: [UInt16: SkillDefinition]
+        let enemySkillDefinitions: [UInt16: EnemySkillDefinition]
+
+        // 戦闘状態（可変）
+        var players: [BattleActor]
+        var enemies: [BattleActor]
+        var actionEntries: [BattleActionEntry]
+        var initialHP: [UInt16: UInt32]
+        var turn: Int
+        var random: GameRandomSource
+
+        nonisolated init(players: [BattleActor],
+             enemies: [BattleActor],
+             statusDefinitions: [UInt8: StatusEffectDefinition],
+             skillDefinitions: [UInt16: SkillDefinition],
+             enemySkillDefinitions: [UInt16: EnemySkillDefinition] = [:],
+             random: GameRandomSource) {
+            self.players = players
+            self.enemies = enemies
+            self.statusDefinitions = statusDefinitions
+            self.skillDefinitions = skillDefinitions
+            self.enemySkillDefinitions = enemySkillDefinitions
+            self.random = random
+            self.actionEntries = []
+            self.initialHP = [:]
+            self.turn = 0
+        }
+
+        // MARK: - 初期HP記録
+
+        nonisolated mutating func buildInitialHP() {
+            for (index, player) in players.enumerated() {
+                let playerActorIndex = actorIndex(for: .player, arrayIndex: index)
+                initialHP[playerActorIndex] = UInt32(player.currentHP)
+            }
+            for (index, enemy) in enemies.enumerated() {
+                let enemyActorIndex = actorIndex(for: .enemy, arrayIndex: index)
+                initialHP[enemyActorIndex] = UInt32(enemy.currentHP)
+            }
+        }
+
+        // MARK: - actorIndex生成
+
+        nonisolated func actorIndex(for side: ActorSide, arrayIndex: Int) -> UInt16 {
+            switch side {
+            case .player:
+                return UInt16(players[arrayIndex].partyMemberId!)
+            case .enemy:
+                let suffix = arrayIndex + 1
+                let masterIndex = enemies[arrayIndex].enemyMasterIndex ?? 0
+                return UInt16(suffix) * 1000 + masterIndex
+            }
+        }
+
+        nonisolated func actorIndex(for reference: ActorReference) -> UInt16 {
+            actorIndex(for: reference.side, arrayIndex: reference.index)
+        }
+
+        // MARK: - ログ生成
+
+        nonisolated mutating func appendActionEntry(_ entry: BattleActionEntry) {
+            actionEntries.append(entry)
+        }
+
+        nonisolated mutating func appendSimpleEntry(kind: ActionKind,
+                                        actorId: UInt16? = nil,
+                                        targetId: UInt16? = nil,
+                                        value: UInt32? = nil,
+                                        statusId: UInt16? = nil,
+                                        skillIndex: UInt16? = nil,
+                                        extra: UInt16? = nil,
+                                        effectKind: BattleActionEntry.Effect.Kind = .logOnly,
+                                        turnOverride: Int? = nil) {
+            let builder = makeActionEntryBuilder(actorId: actorId,
+                                                 kind: kind,
+                                                 skillIndex: skillIndex,
+                                                 extra: extra,
+                                                 turnOverride: turnOverride)
+            if targetId != nil || value != nil || statusId != nil || effectKind != .logOnly || extra != nil {
+                builder.addEffect(kind: effectKind,
+                                  target: targetId,
+                                  value: value,
+                                  statusId: statusId,
+                                  extra: extra)
+            }
+            let entry = builder.build()
+            appendActionEntry(entry)
+        }
+
+        nonisolated func makeActionEntryBuilder(actorId: UInt16?,
+                                    kind: ActionKind,
+                                    skillIndex: UInt16? = nil,
+                                    extra: UInt16? = nil,
+                                    turnOverride: Int? = nil) -> BattleActionEntry.Builder {
+            let declaration = BattleActionEntry.Declaration(kind: kind,
+                                                            skillIndex: skillIndex,
+                                                            extra: extra)
+            return BattleActionEntry.Builder(
+                turn: turnOverride ?? turn,
+                actor: actorId,
+                declaration: declaration
+            )
+        }
+
+        // MARK: - 結果生成
+
+        nonisolated func makeBattleLog(outcome: UInt8) -> BattleLog {
+            BattleLog(initialHP: initialHP,
+                      entries: actionEntries,
+                      outcome: outcome,
+                      turns: UInt8(turn))
+        }
+
+        nonisolated func makeResult(_ outcome: UInt8) -> Engine.Result {
+            Engine.Result(
+                outcome: outcome,
+                battleLog: makeBattleLog(outcome: outcome),
+                players: players,
+                enemies: enemies
+            )
+        }
+
+        // MARK: - 勝敗判定
+
+        nonisolated var isVictory: Bool {
+            enemies.allSatisfy { !$0.isAlive }
+        }
+
+        nonisolated var isDefeat: Bool {
+            players.allSatisfy { !$0.isAlive }
+        }
+    }
+
+    // MARK: - ActionRequest
+
+    /// 行動要求（実行直前に生成）
+    nonisolated struct ActionRequest: Sendable, Hashable {
+        let turn: Int
+        let actor: ActorReference
+        let kind: ActionKind
+        let skillId: UInt16?
+        let spellId: UInt8?
+
+        nonisolated init(turn: Int,
+             actor: ActorReference,
+             kind: ActionKind,
+             skillId: UInt16? = nil,
+             spellId: UInt8? = nil) {
+            self.turn = turn
+            self.actor = actor
+            self.kind = kind
+            self.skillId = skillId
+            self.spellId = spellId
+        }
+    }
+
+    // MARK: - TargetSet
+
+    /// 対象集合（Targetingの結果）
+    nonisolated struct TargetSet: Sendable, Hashable {
+        let primary: ActorReference?
+        let targets: [ActorReference]
+
+        nonisolated init(primary: ActorReference? = nil, targets: [ActorReference] = []) {
+            self.primary = primary
+            self.targets = targets
+        }
+    }
+
+    // MARK: - EffectInstruction
+
+    /// 効果指示（EffectPlan内の1命令）
+    nonisolated struct EffectInstruction: Sendable, Hashable {
+        let kind: BattleActionEntry.Effect.Kind
+        let target: ActorReference?
+        let value: UInt32?
+        let statusId: UInt16?
+        let extra: UInt16?
+
+        nonisolated init(kind: BattleActionEntry.Effect.Kind,
+             target: ActorReference? = nil,
+             value: UInt32? = nil,
+             statusId: UInt16? = nil,
+             extra: UInt16? = nil) {
+            self.kind = kind
+            self.target = target
+            self.value = value
+            self.statusId = statusId
+            self.extra = extra
+        }
+    }
+
+    // MARK: - EffectPlan
+
+    /// 行動の効果計画（乱数消費と効果算出を完結させる）
+    nonisolated struct EffectPlan: Sendable, Hashable {
+        let request: ActionRequest
+        let targetSet: TargetSet
+        let instructions: [EffectInstruction]
+
+        nonisolated init(request: ActionRequest,
+             targetSet: TargetSet,
+             instructions: [EffectInstruction] = []) {
+            self.request = request
+            self.targetSet = targetSet
+            self.instructions = instructions
+        }
+    }
+
+    // MARK: - ActionOutcome
+
+    /// 行動結果（ログ単位での結果）
+    nonisolated struct ActionOutcome: Sendable {
+        let request: ActionRequest
+        let entry: BattleActionEntry
+
+        nonisolated init(request: ActionRequest, entry: BattleActionEntry) {
+            self.request = request
+            self.entry = entry
+        }
+    }
+
+    // MARK: - Engine
+
+    /// 新戦闘エンジン本体
+    struct Engine {
+        nonisolated struct Result: Sendable {
+            let outcome: UInt8
+            let battleLog: BattleLog
+            let players: [BattleActor]
+            let enemies: [BattleActor]
+        }
+
+        /// 戦闘を実行する（新エンジン入口）
+        nonisolated static func runBattle(players: inout [BattleActor],
+                              enemies: inout [BattleActor],
+                              statusEffects: [UInt8: StatusEffectDefinition],
+                              skillDefinitions: [UInt16: SkillDefinition],
+                              enemySkillDefinitions: [UInt16: EnemySkillDefinition] = [:],
+                              random: inout GameRandomSource) -> Result {
+            var state = BattleState(
+                players: players,
+                enemies: enemies,
+                statusDefinitions: statusEffects,
+                skillDefinitions: skillDefinitions,
+                enemySkillDefinitions: enemySkillDefinitions,
+                random: random
+            )
+
+            let result = executeBaseline(&state)
+
+            // 結果を呼び出し元に反映
+            players = state.players
+            enemies = state.enemies
+            random = state.random
+
+            return result
+        }
+
+        /// 未実装パイプラインの最小実行
+        /// - 目的: ログと結果の器を返し、並行検証の足場を用意する
+        private nonisolated static func executeBaseline(_ state: inout BattleState) -> Result {
+            state.buildInitialHP()
+
+            state.appendSimpleEntry(kind: .battleStart)
+
+            for index in state.enemies.indices {
+                let actorIndex = state.actorIndex(for: .enemy, arrayIndex: index)
+                state.appendSimpleEntry(kind: .enemyAppear,
+                                        actorId: actorIndex,
+                                        effectKind: .enemyAppear)
+            }
+
+            if state.isVictory {
+                state.appendSimpleEntry(kind: .victory)
+                return state.makeResult(BattleLog.outcomeVictory)
+            }
+
+            if state.isDefeat {
+                state.appendSimpleEntry(kind: .defeat)
+                return state.makeResult(BattleLog.outcomeDefeat)
+            }
+
+            state.appendSimpleEntry(kind: .retreat)
+            return state.makeResult(BattleLog.outcomeRetreat)
+        }
+    }
+}
