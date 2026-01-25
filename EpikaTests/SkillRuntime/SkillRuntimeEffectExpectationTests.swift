@@ -104,6 +104,28 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
             XCTAssertTrue(passed, "\(id) expected pass", file: file, line: line)
         }
 
+        func isTriggerModeAtTurn(
+            _ mode: BattleActor.SkillEffects.TimedBuffTrigger.TriggerMode?,
+            turn: Int
+        ) -> Bool {
+            guard let mode else { return false }
+            switch mode {
+            case .atTurn(let value):
+                return value == turn
+            case .everyTurn:
+                return false
+            }
+        }
+
+        func isTriggerModeEveryTurn(
+            _ mode: BattleActor.SkillEffects.TimedBuffTrigger.TriggerMode?
+        ) -> Bool {
+            if case .everyTurn = mode {
+                return true
+            }
+            return false
+        }
+
         // MARK: - Damage
 
         do {
@@ -968,12 +990,7 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
                 "damageDealtPercent": 15,
                 "hitScoreAdditive": 3
             ]
-            let triggerModeMatches: Bool
-            if case .atTurn(1) = entry?.triggerMode {
-                triggerModeMatches = true
-            } else {
-                triggerModeMatches = false
-            }
+            let triggerModeMatches = isTriggerModeAtTurn(entry?.triggerMode, turn: 1)
             let passed = triggers.count == 1
                 && entry?.id == "9000_0"
                 && entry?.displayName == "EffectExpectations"
@@ -1017,12 +1034,7 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
                 "defensePercent": 4,
                 "attackCountPercent": 5
             ]
-            let triggerModeMatches: Bool
-            if case .everyTurn = entry?.triggerMode {
-                triggerModeMatches = true
-            } else {
-                triggerModeMatches = false
-            }
+            let triggerModeMatches = isTriggerModeEveryTurn(entry?.triggerMode)
             let passed = triggers.count == 1
                 && entry?.id == "9000_1"
                 && entry?.displayName == "EffectExpectations"
@@ -1061,12 +1073,7 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
             let expectedModifiers: [String: Double] = [
                 "spellSpecific:2": 1.4
             ]
-            let triggerModeMatches: Bool
-            if case .atTurn(3) = entry?.triggerMode {
-                triggerModeMatches = true
-            } else {
-                triggerModeMatches = false
-            }
+            let triggerModeMatches = isTriggerModeAtTurn(entry?.triggerMode, turn: 3)
             let passed = triggers.count == 1
                 && entry?.id == "9000_2"
                 && entry?.displayName == "EffectExpectations"
@@ -1101,12 +1108,7 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
             let expectedModifiers: [String: Double] = [
                 "magicalDamageDealtMultiplier": 1.3
             ]
-            let triggerModeMatches: Bool
-            if case .atTurn(4) = entry?.triggerMode {
-                triggerModeMatches = true
-            } else {
-                triggerModeMatches = false
-            }
+            let triggerModeMatches = isTriggerModeAtTurn(entry?.triggerMode, turn: 4)
             let passed = triggers.count == 1
                 && entry?.id == "9000_3"
                 && entry?.displayName == "EffectExpectations"
@@ -1140,12 +1142,7 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
             let expectedModifiers: [String: Double] = [
                 "breathDamageDealtMultiplier": 1.2
             ]
-            let triggerModeMatches: Bool
-            if case .atTurn(5) = entry?.triggerMode {
-                triggerModeMatches = true
-            } else {
-                triggerModeMatches = false
-            }
+            let triggerModeMatches = isTriggerModeAtTurn(entry?.triggerMode, turn: 5)
             let passed = triggers.count == 1
                 && entry?.id == "9000_4"
                 && entry?.displayName == "EffectExpectations"
