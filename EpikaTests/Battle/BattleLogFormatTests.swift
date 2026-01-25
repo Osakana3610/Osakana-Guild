@@ -21,7 +21,7 @@ nonisolated final class BattleLogFormatTests: XCTestCase {
     @MainActor func testActorIndexMappingUsesPartyMemberIdAndEnemySuffix() {
         let player = TestActorBuilder.makePlayer(luck: 35, agility: 20, partyMemberId: 7)
         let enemy = makeEnemyActor(masterId: 42)
-        let context = BattleContext(
+        let state = BattleEngine.BattleState(
             players: [player],
             enemies: [enemy],
             statusDefinitions: [:],
@@ -30,8 +30,8 @@ nonisolated final class BattleLogFormatTests: XCTestCase {
             random: GameRandomSource(seed: 1)
         )
 
-        let playerIndex = context.actorIndex(for: .player, arrayIndex: 0)
-        let enemyIndex = context.actorIndex(for: .enemy, arrayIndex: 0)
+        let playerIndex = state.actorIndex(for: .player, arrayIndex: 0)
+        let enemyIndex = state.actorIndex(for: .enemy, arrayIndex: 0)
         let matches = playerIndex == 7 && enemyIndex == 1042
 
         ObservationRecorder.shared.record(

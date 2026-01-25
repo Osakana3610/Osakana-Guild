@@ -24,7 +24,7 @@
 import Foundation
 
 /// 新戦闘エンジン名前空間
-/// 旧BattleTurnEngineと独立した実装として維持する
+/// 旧BattleTurnEngineを削除し、本実装を正規経路として維持する
 enum BattleEngine {
 
     // MARK: - ActorSide / ActorReference

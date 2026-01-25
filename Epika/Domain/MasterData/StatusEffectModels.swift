@@ -20,8 +20,8 @@
 //     - statModifiers: ステータス倍率マップ
 //
 // 【使用箇所】
-//   - BattleTurnEngine.StatusEffects: 状態異常の付与・解除・ターン処理
-//   - BattleTurnEngine.TurnEnd: ターン終了時のスリップダメージ
+//   - BattleEngine: 状態異常の付与・解除・ターン処理
+//   - BattleEngine: ターン終了時のスリップダメージ
 //   - CombatSnapshotBuilder: 戦闘ステータスへの状態効果反映
 //
 // ==============================================================================

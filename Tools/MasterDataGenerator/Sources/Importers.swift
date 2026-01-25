@@ -155,7 +155,6 @@ private struct SkillEntry {
     struct Effect {
         let index: Int
         let kind: String
-        let familyId: String?
         let parameters: [String: String]
         let numericValues: [String: Double]
         let stringValues: [String: String]
@@ -168,28 +167,6 @@ private struct SkillEntry {
     let type: String
     let category: String
     let effects: [Effect]
-}
-
-private struct VariantEffectPayload {
-    let familyId: String?
-    let effectType: String
-    let parameters: [String: String]?
-    let numericValues: [String: Double]
-    let stringValues: [String: String]
-    let stringArrayValues: [String: [String]]
-    let statScale: StatScale?
-
-    init(familyId: String?, effectType: String, parameters: [String: String]?,
-         numericValues: [String: Double], stringValues: [String: String],
-         stringArrayValues: [String: [String]], statScale: StatScale? = nil) {
-        self.familyId = familyId
-        self.effectType = effectType
-        self.parameters = parameters
-        self.numericValues = numericValues
-        self.stringValues = stringValues
-        self.stringArrayValues = stringArrayValues
-        self.statScale = statScale
-    }
 }
 
 private struct SkillMasterRoot: Decodable {
@@ -206,8 +183,20 @@ private struct SkillMasterRoot: Decodable {
 }
 
 private struct SkillCategory: Decodable {
-    let families: [SkillFamily]?
-    let groups: [SkillGroup]?
+    let groups: [SkillGroup]
+
+    private enum CodingKeys: String, CodingKey {
+        case groups
+        case families
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if container.contains(.families) {
+            throw GeneratorError.executionFailed("SkillMaster.json は新スキーマ(groups/effectTemplate/variants)のみ対応です")
+        }
+        groups = try container.decodeIfPresent([SkillGroup].self, forKey: .groups) ?? []
+    }
 }
 
 private struct DynamicCodingKey: CodingKey, Hashable {
@@ -232,10 +221,10 @@ private struct DynamicCodingKey: CodingKey, Hashable {
 
 private struct SkillGroup: Decodable {
     let effectTemplate: SkillEffectNode?
-    let variants: [SkillVariantV2]
+    let variants: [SkillVariant]
 }
 
-private struct SkillVariantV2: Decodable {
+private struct SkillVariant: Decodable {
     let id: Int
     let label: String
     let description: String
@@ -248,8 +237,13 @@ private struct SkillVariantV2: Decodable {
         label = try container.decode(String.self, forKey: DynamicCodingKey("label"))
         description = try container.decode(String.self, forKey: DynamicCodingKey("description"))
         effects = try container.decodeIfPresent([SkillEffectNode].self, forKey: DynamicCodingKey("effects"))
-        overrides = try SkillEffectNode.parse(from: container,
-                                              excluding: ["id", "label", "description", "effects"])
+        if let nestedOverrides = try container.decodeIfPresent(SkillEffectNode.self,
+                                                               forKey: DynamicCodingKey("overrides")) {
+            overrides = nestedOverrides
+        } else {
+            overrides = try SkillEffectNode.parse(from: container,
+                                                  excluding: ["id", "label", "description", "effects", "overrides"])
+        }
     }
 }
 
@@ -363,140 +357,9 @@ private struct SkillEffectNode: Decodable {
     }
 }
 
-/// Dictionary that accepts both strings and numbers, converting numbers to strings
-private struct FlexibleStringDict: Decodable {
-    let values: [String: String]
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
-        var result: [String: String] = [:]
-        for key in container.allKeys {
-            if let stringValue = try? container.decode(String.self, forKey: key) {
-                result[key.stringValue] = stringValue
-            } else if let intValue = try? container.decode(Int.self, forKey: key) {
-                result[key.stringValue] = String(intValue)
-            } else if let doubleValue = try? container.decode(Double.self, forKey: key) {
-                result[key.stringValue] = String(doubleValue)
-            }
-        }
-        values = result
-    }
-}
-
-private struct SkillFamily: Decodable {
-    let familyId: String
-    let effectType: String
-    let parameters: [String: String]?
-    let stringArrayValues: [String: [String]]?
-    let variants: [SkillVariant]
-
-    private enum CodingKeys: String, CodingKey {
-        case familyId, effectType, parameters, stringArrayValues, variants
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        familyId = try container.decode(String.self, forKey: .familyId)
-        effectType = try container.decode(String.self, forKey: .effectType)
-        parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
-        stringArrayValues = try container.decodeIfPresent([String: [String]].self, forKey: .stringArrayValues)
-        variants = try container.decode([SkillVariant].self, forKey: .variants)
-    }
-}
-
 private struct StatScale: Decodable {
     let stat: String
     let percent: Double
-}
-
-private struct SkillVariant: Decodable {
-    struct CustomEffect: Decodable {
-        let effectType: String?
-        let parameters: [String: String]?
-        let payload: SkillEffectPayloadValues
-
-        private enum CodingKeys: String, CodingKey {
-            case effectType
-            case parameters
-            case value
-        }
-
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            effectType = try container.decodeIfPresent(String.self, forKey: .effectType)
-            parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
-            payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
-        }
-    }
-
-    let id: Int
-    let label: String?
-    let description: String?
-    let parameters: [String: String]?
-    let payload: SkillEffectPayloadValues
-    let effects: [CustomEffect]?
-    let statScale: StatScale?
-
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case label
-        case description
-        case parameters
-        case value
-        case effects
-        case statScale
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
-        label = try container.decodeIfPresent(String.self, forKey: .label)
-        description = try container.decodeIfPresent(String.self, forKey: .description)
-        parameters = try container.decodeIfPresent(FlexibleStringDict.self, forKey: .parameters)?.values
-        payload = try container.decodeIfPresent(SkillEffectPayloadValues.self, forKey: .value) ?? .empty
-        effects = try container.decodeIfPresent([CustomEffect].self, forKey: .effects)
-        statScale = try container.decodeIfPresent(StatScale.self, forKey: .statScale)
-    }
-}
-
-private struct SkillEffectPayloadValues: Decodable {
-    let numericValues: [String: Double]
-    let stringValues: [String: String]
-    let stringArrayValues: [String: [String]]
-
-    init(numericValues: [String: Double], stringValues: [String: String], stringArrayValues: [String: [String]]) {
-        self.numericValues = numericValues
-        self.stringValues = stringValues
-        self.stringArrayValues = stringArrayValues
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let raw = try container.decode([String: SkillEffectFlexibleValue].self)
-        var numeric: [String: Double] = [:]
-        var strings: [String: String] = [:]
-        var stringArrays: [String: [String]] = [:]
-
-        for (key, value) in raw {
-            if let number = value.doubleValue {
-                numeric[key] = number
-            } else if let number = value.intValue {
-                numeric[key] = Double(number)
-            } else if let array = value.stringArrayValue {
-                stringArrays[key] = array
-            } else if let array = value.intArrayValue {
-                stringArrays[key] = array.map(String.init)
-            } else if let string = value.stringValue {
-                strings[key] = string
-            }
-        }
-
-        self.numericValues = numeric
-        self.stringValues = strings
-        self.stringArrayValues = stringArrays
-    }
-
-    static let empty = SkillEffectPayloadValues(numericValues: [:], stringValues: [:], stringArrayValues: [:])
 }
 
 private struct SkillEffectFlexibleValue: Decodable {
@@ -566,158 +429,46 @@ extension Generator {
             ("job", root.job)
         ]
 
-        let mergeParameters: ([String: String]?, [String: String]?) -> [String: String]? = { defaultParams, overrides in
-            if let defaultParams = defaultParams, let overrides = overrides {
-                return defaultParams.merging(overrides) { _, new in new }
-            }
-            return defaultParams ?? overrides
-        }
-
-        let mergeStringArrayValues: ([String: [String]]?, [String: [String]]) -> [String: [String]] = { base, overrides in
-            if let base = base {
-                return base.merging(overrides) { _, new in new }
-            }
-            return overrides
-        }
-
         for (categoryKey, category) in categories {
-            if let groups = category?.groups, !groups.isEmpty {
-                for group in groups {
-                    for variant in group.variants {
-                        let effectPayloads: [VariantEffectPayload]
-                        if let effects = variant.effects, !effects.isEmpty {
-                            effectPayloads = try effects.map { node in
-                                guard let effectType = node.kind, !effectType.isEmpty else {
-                                    throw GeneratorError.executionFailed("Skill \(variant.id) の kind が指定されていません")
-                                }
-                                return VariantEffectPayload(
-                                    familyId: nil,
-                                    effectType: effectType,
-                                    parameters: node.parameters,
-                                    numericValues: node.numericValues,
-                                    stringValues: [:],
-                                    stringArrayValues: node.stringArrayValues,
-                                    statScale: node.statScale
-                                )
-                            }
-                        } else {
-                            let template = group.effectTemplate ?? .empty
-                            let merged = template.merged(with: variant.overrides)
-                            guard let effectType = merged.kind, !effectType.isEmpty else {
-                                throw GeneratorError.executionFailed("Skill \(variant.id) の kind が指定されていません")
-                            }
-                            effectPayloads = [VariantEffectPayload(
-                                familyId: nil,
-                                effectType: effectType,
-                                parameters: merged.parameters,
-                                numericValues: merged.numericValues,
-                                stringValues: [:],
-                                stringArrayValues: merged.stringArrayValues,
-                                statScale: merged.statScale
-                            )]
-                        }
+            let groups = category?.groups ?? []
+            if groups.isEmpty { continue }
 
-                        var effects: [SkillEntry.Effect] = []
-
-                        for (index, payload) in effectPayloads.enumerated() {
-                            // Merge parameters with stringValues (both are string params)
-                            var allParameters = payload.parameters ?? [:]
-                            for (key, value) in payload.stringValues {
-                                allParameters[key] = value
-                            }
-
-                            // Add statScale parameters if present
-                            var allNumericValues = payload.numericValues
-                            if let statScale = payload.statScale {
-                                allParameters["scalingStat"] = statScale.stat
-                                allNumericValues["scalingCoefficient"] = statScale.percent
-                            }
-
-                            effects.append(SkillEntry.Effect(index: index,
-                                                             kind: payload.effectType,
-                                                             familyId: payload.familyId,
-                                                             parameters: allParameters,
-                                                             numericValues: allNumericValues,
-                                                             stringValues: [:],  // Already merged into parameters
-                                                             stringArrayValues: payload.stringArrayValues))
-                        }
-
-                        entries.append(SkillEntry(id: variant.id,
-                                                  name: variant.label,
-                                                  description: variant.description,
-                                                  type: "passive",
-                                                  category: categoryKey,
-                                                  effects: effects))
-                    }
-                }
-                continue
-            }
-
-            guard let families = category?.families else { continue }
-            for family in families {
-                for variant in family.variants {
-                    let effectPayloads: [VariantEffectPayload]
-                    if let customEffects = variant.effects, !customEffects.isEmpty {
-                        effectPayloads = try customEffects.map { custom in
-                            let effectType = custom.effectType ?? family.effectType
-                            guard !effectType.isEmpty else {
-                                throw GeneratorError.executionFailed("Skill \(variant.id) の effectType が指定されていません")
-                            }
-                            let parameters = mergeParameters(mergeParameters(family.parameters, variant.parameters), custom.parameters)
-                            let stringArrays = mergeStringArrayValues(family.stringArrayValues, custom.payload.stringArrayValues)
-                            return VariantEffectPayload(familyId: family.familyId,
-                                                        effectType: effectType,
-                                                        parameters: parameters,
-                                                        numericValues: custom.payload.numericValues,
-                                                        stringValues: custom.payload.stringValues,
-                                                        stringArrayValues: stringArrays)
-                        }
+            for group in groups {
+                for variant in group.variants {
+                    let effectNodes: [SkillEffectNode]
+                    if let effects = variant.effects, !effects.isEmpty {
+                        effectNodes = effects
                     } else {
-                        guard !family.effectType.isEmpty else {
-                            throw GeneratorError.executionFailed("Skill \(variant.id) の effectType が空です")
-                        }
-                        let mergedParameters = mergeParameters(family.parameters, variant.parameters)
-                        let payload = variant.payload
-                        let mergedStringArrayValues = mergeStringArrayValues(family.stringArrayValues, payload.stringArrayValues)
-                        // effectTypeがあれば値がなくても有効なスキルとして扱う（フラグ系のスキル用）
-                        effectPayloads = [VariantEffectPayload(familyId: family.familyId,
-                                                               effectType: family.effectType,
-                                                               parameters: mergedParameters,
-                                                               numericValues: payload.numericValues,
-                                                               stringValues: payload.stringValues,
-                                                               stringArrayValues: mergedStringArrayValues,
-                                                               statScale: variant.statScale)]
+                        let template = group.effectTemplate ?? .empty
+                        let merged = template.merged(with: variant.overrides)
+                        effectNodes = [merged]
                     }
 
-                    let label = variant.label ?? String(variant.id)
                     var effects: [SkillEntry.Effect] = []
 
-                    for (index, payload) in effectPayloads.enumerated() {
-                        // Merge parameters with stringValues (both are string params)
-                        var allParameters = payload.parameters ?? [:]
-                        for (key, value) in payload.stringValues {
-                            allParameters[key] = value
+                    for (index, node) in effectNodes.enumerated() {
+                        guard let effectType = node.kind, !effectType.isEmpty else {
+                            throw GeneratorError.executionFailed("Skill \(variant.id) の kind が指定されていません")
                         }
 
-                        // Add statScale parameters if present
-                        var allNumericValues = payload.numericValues
-                        if let statScale = payload.statScale {
-                            allParameters["scalingStat"] = statScale.stat
-                            allNumericValues["scalingCoefficient"] = statScale.percent
+                        var parameters = node.parameters
+                        var numericValues = node.numericValues
+                        if let statScale = node.statScale {
+                            parameters["scalingStat"] = statScale.stat
+                            numericValues["scalingCoefficient"] = statScale.percent
                         }
 
                         effects.append(SkillEntry.Effect(index: index,
-                                                         kind: payload.effectType,
-                                                         familyId: payload.familyId,
-                                                         parameters: allParameters,
-                                                         numericValues: allNumericValues,
-                                                         stringValues: [:],  // Already merged into parameters
-                                                         stringArrayValues: payload.stringArrayValues))
+                                                         kind: effectType,
+                                                         parameters: parameters,
+                                                         numericValues: numericValues,
+                                                         stringValues: [:],
+                                                         stringArrayValues: node.stringArrayValues))
                     }
 
                     entries.append(SkillEntry(id: variant.id,
-                                              name: label,
-                                              description: variant.description ?? label,
+                                              name: variant.label,
+                                              description: variant.description,
                                               type: "passive",
                                               category: categoryKey,
                                               effects: effects))
@@ -739,8 +490,8 @@ extension Generator {
                 VALUES (?, ?, ?, ?, ?);
             """
             let insertEffectSQL = """
-                INSERT INTO skill_effects (skill_id, effect_index, kind, family_id)
-                VALUES (?, ?, ?, ?);
+                INSERT INTO skill_effects (skill_id, effect_index, kind)
+                VALUES (?, ?, ?);
             """
             let insertParamSQL = """
                 INSERT INTO skill_effect_params (skill_id, effect_index, param_type, int_value)
@@ -783,11 +534,9 @@ extension Generator {
                     }
 
                     // Insert skill_effects
-                    let familyIdInt: Int? = effect.familyId.flatMap { EnumMappings.skillEffectFamily[$0] }
                     bindInt(effectStatement, index: 1, value: entry.id)
                     bindInt(effectStatement, index: 2, value: effect.index)
                     bindInt(effectStatement, index: 3, value: kindInt)
-                    bindInt(effectStatement, index: 4, value: familyIdInt)
                     try step(effectStatement)
                     reset(effectStatement)
 

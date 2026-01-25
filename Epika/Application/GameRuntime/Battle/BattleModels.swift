@@ -25,8 +25,7 @@
 //   - backLeft/Right (row 2)
 //
 // 【使用箇所】
-//   - BattleContext: アクター管理
-//   - BattleTurnEngine: ターン処理
+//   - BattleEngine: アクター管理・ターン処理
 //   - CombatSnapshotBuilder: スナップショット生成
 //
 // ==============================================================================
