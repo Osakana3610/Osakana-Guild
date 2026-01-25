@@ -160,7 +160,7 @@ extension BattleEngine {
             entryBuilder.addEffect(kind: .damageSelf,
                                    target: actorIdx,
                                    value: UInt32(applied),
-                                   extra: UInt16(clamping: rawDamage))
+                                   extra: UInt32(clamping: rawDamage))
             state.appendActionEntry(entryBuilder.build())
         }
     }

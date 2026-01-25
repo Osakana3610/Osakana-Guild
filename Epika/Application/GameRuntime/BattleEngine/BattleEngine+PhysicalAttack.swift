@@ -77,7 +77,7 @@ extension BattleEngine {
             let targetIdx = state.actorIndex(for: target.0, arrayIndex: target.1)
             actionEntryBuilder.addEffect(kind: .skillEffect,
                                          target: targetIdx,
-                                         extra: SkillEffectLogKind.reverseHealing.rawValue)
+                                         extra: UInt32(SkillEffectLogKind.reverseHealing.rawValue))
             let attackResult = performReverseHealingAttack(attackerSide: attackerSide,
                                                         attackerIndex: attackerIndex,
                                                         attacker: attacker,
@@ -120,7 +120,7 @@ extension BattleEngine {
             let targetIdx = state.actorIndex(for: target.0, arrayIndex: target.1)
             actionEntryBuilder.addEffect(kind: .skillEffect,
                                          target: targetIdx,
-                                         extra: SkillEffectLogKind.specialAttack.rawValue)
+                                         extra: UInt32(SkillEffectLogKind.specialAttack.rawValue))
             let attackResult = performSpecialAttack(special,
                                                     attackerSide: attackerSide,
                                                     attackerIndex: attackerIndex,
@@ -321,7 +321,7 @@ extension BattleEngine {
             if result.critical {
                 entryBuilder.addEffect(kind: .skillEffect,
                                        target: defenderIdx,
-                                       extra: SkillEffectLogKind.physicalCritical.rawValue)
+                                       extra: UInt32(SkillEffectLogKind.physicalCritical.rawValue))
             }
 
             let guardAfter = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
@@ -361,7 +361,7 @@ extension BattleEngine {
             entryBuilder.addEffect(kind: .physicalDamage,
                                    target: defenderIdx,
                                    value: UInt32(applied),
-                                   extra: UInt16(clamping: rawDamage))
+                                   extra: UInt32(clamping: rawDamage))
 
             if !defenderCopy.isAlive {
                 appendDefeatLog(for: defenderCopy,
@@ -662,7 +662,7 @@ extension BattleEngine {
         if result.critical {
             entryBuilder.addEffect(kind: .skillEffect,
                                    target: defenderIdx,
-                                   extra: SkillEffectLogKind.physicalCritical.rawValue)
+                                   extra: UInt32(SkillEffectLogKind.physicalCritical.rawValue))
         }
 
         let guardAfter = defenderCopy.guardBarrierCharges[barrierKey] ?? 0
@@ -683,7 +683,7 @@ extension BattleEngine {
         entryBuilder.addEffect(kind: .physicalDamage,
                                target: defenderIdx,
                                value: UInt32(applied),
-                               extra: UInt16(clamping: result.damage))
+                               extra: UInt32(clamping: result.damage))
 
         if !defenderCopy.isAlive {
             appendDefeatLog(for: defenderCopy,

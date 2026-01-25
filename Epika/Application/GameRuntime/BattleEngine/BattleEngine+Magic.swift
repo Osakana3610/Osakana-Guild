@@ -205,7 +205,7 @@ extension BattleEngine {
                 if result.wasCritical {
                     entryBuilder.addEffect(kind: .skillEffect,
                                            target: targetIdx,
-                                           extra: SkillEffectLogKind.magicCritical.rawValue)
+                                           extra: UInt32(SkillEffectLogKind.magicCritical.rawValue))
                 }
                 if result.guardBarrierConsumed > 0 {
                     for _ in 0..<result.guardBarrierConsumed {
@@ -224,7 +224,7 @@ extension BattleEngine {
                 entryBuilder.addEffect(kind: .magicDamage,
                                        target: targetIdx,
                                        value: UInt32(applied),
-                                       extra: UInt16(clamping: result.damage))
+                                       extra: UInt32(clamping: result.damage))
 
                 if !target.isAlive {
                     appendDefeatLog(for: target,
@@ -345,7 +345,7 @@ extension BattleEngine {
             entryBuilder.addEffect(kind: .breathDamage,
                                    target: targetIdx,
                                    value: UInt32(applied),
-                                   extra: UInt16(clamping: result.damage))
+                                   extra: UInt32(clamping: result.damage))
 
             if !target.isAlive {
                 appendDefeatLog(for: target,

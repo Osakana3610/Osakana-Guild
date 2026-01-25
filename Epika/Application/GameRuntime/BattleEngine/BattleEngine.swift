@@ -231,7 +231,7 @@ enum BattleEngine {
                                   target: targetId,
                                   value: value,
                                   statusId: statusId,
-                                  extra: extra)
+                                  extra: extra.map(UInt32.init))
             }
             let entry = builder.build()
             appendActionEntry(entry)
@@ -381,13 +381,13 @@ enum BattleEngine {
         let target: ActorReference?
         let value: UInt32?
         let statusId: UInt16?
-        let extra: UInt16?
+        let extra: UInt32?
 
         nonisolated init(kind: BattleActionEntry.Effect.Kind,
              target: ActorReference? = nil,
              value: UInt32? = nil,
              statusId: UInt16? = nil,
-             extra: UInt16? = nil) {
+             extra: UInt32? = nil) {
             self.kind = kind
             self.target = target
             self.value = value

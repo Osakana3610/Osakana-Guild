@@ -138,7 +138,7 @@ extension BattleEngine {
                                            target: actorIdx,
                                            value: UInt32(applied),
                                            statusId: UInt16(effect.id),
-                                           extra: UInt16(clamping: damage))
+                                           extra: UInt32(clamping: damage))
                     state.appendActionEntry(entryBuilder.build())
                 }
             }

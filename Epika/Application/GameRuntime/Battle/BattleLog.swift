@@ -79,7 +79,7 @@ nonisolated struct BattleActionEntry: Codable, Sendable {
         var target: UInt16?
         var value: UInt32?
         var statusId: UInt16?
-        var extra: UInt16?
+        var extra: UInt32?
     }
 
     var turn: UInt8
@@ -120,7 +120,7 @@ extension BattleActionEntry {
                        target: UInt16?,
                        value: UInt32? = nil,
                        statusId: UInt16? = nil,
-                       extra: UInt16? = nil) {
+                       extra: UInt32? = nil) {
             addEffect(Effect(kind: kind, target: target, value: value, statusId: statusId, extra: extra))
         }
 

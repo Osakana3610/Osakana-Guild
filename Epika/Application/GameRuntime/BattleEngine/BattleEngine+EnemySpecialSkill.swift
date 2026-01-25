@@ -194,7 +194,7 @@ extension BattleEngine {
                 entryBuilder.addEffect(kind: .enemySpecialDamage,
                                        target: targetIdx,
                                        value: UInt32(totalDamage),
-                                       extra: UInt16(clamping: totalRawDamage))
+                                       extra: UInt32(clamping: totalRawDamage))
             }
 
             if handleEnemySkillDefeat(targetSide: targetSide,
@@ -263,7 +263,7 @@ extension BattleEngine {
                 if result.wasCritical {
                     entryBuilder.addEffect(kind: .skillEffect,
                                            target: targetIdx,
-                                           extra: SkillEffectLogKind.magicCritical.rawValue)
+                                           extra: UInt32(SkillEffectLogKind.magicCritical.rawValue))
                 }
                 if result.guardBarrierConsumed > 0 {
                     for _ in 0..<result.guardBarrierConsumed {
@@ -289,7 +289,7 @@ extension BattleEngine {
                 entryBuilder.addEffect(kind: .enemySpecialDamage,
                                        target: targetIdx,
                                        value: UInt32(totalDamage),
-                                       extra: UInt16(clamping: totalRawDamage))
+                                       extra: UInt32(clamping: totalRawDamage))
             }
 
             if handleEnemySkillDefeat(targetSide: targetSide,
@@ -345,7 +345,7 @@ extension BattleEngine {
             entryBuilder.addEffect(kind: .enemySpecialDamage,
                                    target: targetIdx,
                                    value: UInt32(applied),
-                                   extra: UInt16(clamping: result.damage))
+                                   extra: UInt32(clamping: result.damage))
 
             if handleEnemySkillDefeat(targetSide: targetSide,
                                       targetIndex: targetIndex,
@@ -454,7 +454,7 @@ extension BattleEngine {
             let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialBuff,
                                    target: targetIdx,
-                                   extra: UInt16(buffType))
+                                   extra: UInt32(buffType))
         }
     }
 

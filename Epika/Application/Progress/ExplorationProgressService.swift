@@ -794,7 +794,7 @@ actor ExplorationProgressService {
                 let statusId: UInt16? = hasStatus == 1 ? try readUInt16() : nil
 
                 let hasEffectExtra = try readUInt8()
-                let effectExtra: UInt16? = hasEffectExtra == 1 ? try readUInt16() : nil
+                let effectExtra: UInt32? = hasEffectExtra == 1 ? try readUInt32() : nil
 
                 effects.append(BattleActionEntry.Effect(kind: effectKind,
                                                         target: target,
