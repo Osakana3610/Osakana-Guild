@@ -905,7 +905,21 @@ struct BattleLogRenderer {
     }
 
     private static func displayValue(for effect: BattleActionEntry.Effect) -> Int? {
-        effect.value.map { Int($0) }
+        switch effect.kind {
+        case .physicalDamage,
+             .magicDamage,
+             .breathDamage,
+             .statusTick,
+             .statusRampage,
+             .enemySpecialDamage,
+             .damageSelf:
+            if let raw = effect.extra {
+                return Int(raw)
+            }
+        default:
+            break
+        }
+        return effect.value.map { Int($0) }
     }
 
     private static func formatAmount(_ value: Int) -> String {
