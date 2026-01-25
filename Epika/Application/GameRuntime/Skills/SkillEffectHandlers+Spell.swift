@@ -188,7 +188,7 @@ enum TacticSpellAmplifyHandler: SkillEffectHandler {
         let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         let triggerTurn = try payload.requireValue(.triggerTurn, skillId: context.skillId, effectIndex: context.effectIndex)
         let key = "spellSpecific:\(spellIdRaw)"
-        let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
+        let triggerId = payload.familyId.map { String($0) } ?? "\(context.skillId)_\(context.effectIndex)"
         // scope: 1=party, 2=self (TimedBuffScope)
         let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.party.rawValue)
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .party

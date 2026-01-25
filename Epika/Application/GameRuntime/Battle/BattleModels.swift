@@ -911,6 +911,25 @@ nonisolated struct BattleActor: Sendable {
         var status: Status
         var resurrection: Resurrection
         var misc: Misc
+        var modifierSnapshot: SkillModifierSnapshot? = nil
+
+        static func == (lhs: SkillEffects, rhs: SkillEffects) -> Bool {
+            lhs.damage == rhs.damage
+                && lhs.spell == rhs.spell
+                && lhs.combat == rhs.combat
+                && lhs.status == rhs.status
+                && lhs.resurrection == rhs.resurrection
+                && lhs.misc == rhs.misc
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(damage)
+            hasher.combine(spell)
+            hasher.combine(combat)
+            hasher.combine(status)
+            hasher.combine(resurrection)
+            hasher.combine(misc)
+        }
 
         nonisolated static let neutral = SkillEffects(
             damage: .neutral,

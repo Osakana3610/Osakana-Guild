@@ -155,7 +155,7 @@ private struct SkillEntry {
     struct Effect {
         let index: Int
         let kind: String
-        let familyId: String
+        let familyId: String?
         let parameters: [String: String]
         let numericValues: [String: Double]
         let stringValues: [String: String]
@@ -171,7 +171,7 @@ private struct SkillEntry {
 }
 
 private struct VariantEffectPayload {
-    let familyId: String
+    let familyId: String?
     let effectType: String
     let parameters: [String: String]?
     let numericValues: [String: Double]
@@ -179,7 +179,7 @@ private struct VariantEffectPayload {
     let stringArrayValues: [String: [String]]
     let statScale: StatScale?
 
-    init(familyId: String, effectType: String, parameters: [String: String]?,
+    init(familyId: String?, effectType: String, parameters: [String: String]?,
          numericValues: [String: Double], stringValues: [String: String],
          stringArrayValues: [String: [String]], statScale: StatScale? = nil) {
         self.familyId = familyId
@@ -193,6 +193,8 @@ private struct VariantEffectPayload {
 }
 
 private struct SkillMasterRoot: Decodable {
+    let version: String?
+    let lastUpdated: String?
     let attack: SkillCategory?
     let defense: SkillCategory?
     let status: SkillCategory?
@@ -204,7 +206,161 @@ private struct SkillMasterRoot: Decodable {
 }
 
 private struct SkillCategory: Decodable {
-    let families: [SkillFamily]
+    let families: [SkillFamily]?
+    let groups: [SkillGroup]?
+}
+
+private struct DynamicCodingKey: CodingKey, Hashable {
+    let stringValue: String
+    let intValue: Int?
+
+    init(_ stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+
+    init?(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+
+    init?(intValue: Int) {
+        self.stringValue = String(intValue)
+        self.intValue = intValue
+    }
+}
+
+private struct SkillGroup: Decodable {
+    let effectTemplate: SkillEffectNode?
+    let variants: [SkillVariantV2]
+}
+
+private struct SkillVariantV2: Decodable {
+    let id: Int
+    let label: String
+    let description: String
+    let effects: [SkillEffectNode]?
+    let overrides: SkillEffectNode
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
+        id = try container.decode(Int.self, forKey: DynamicCodingKey("id"))
+        label = try container.decode(String.self, forKey: DynamicCodingKey("label"))
+        description = try container.decode(String.self, forKey: DynamicCodingKey("description"))
+        effects = try container.decodeIfPresent([SkillEffectNode].self, forKey: DynamicCodingKey("effects"))
+        overrides = try SkillEffectNode.parse(from: container,
+                                              excluding: ["id", "label", "description", "effects"])
+    }
+}
+
+private struct SkillEffectNode: Decodable {
+    let kind: String?
+    let parameters: [String: String]
+    let numericValues: [String: Double]
+    let stringArrayValues: [String: [String]]
+    let statScale: StatScale?
+
+    init(kind: String?,
+         parameters: [String: String],
+         numericValues: [String: Double],
+         stringArrayValues: [String: [String]],
+         statScale: StatScale?) {
+        self.kind = kind
+        self.parameters = parameters
+        self.numericValues = numericValues
+        self.stringArrayValues = stringArrayValues
+        self.statScale = statScale
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
+        let parsed = try Self.parse(from: container, excluding: [])
+        self = parsed
+    }
+
+    static let empty = SkillEffectNode(kind: nil,
+                                       parameters: [:],
+                                       numericValues: [:],
+                                       stringArrayValues: [:],
+                                       statScale: nil)
+
+    func merged(with overrides: SkillEffectNode) -> SkillEffectNode {
+        let mergedKind = overrides.kind ?? kind
+        let mergedParameters = parameters.merging(overrides.parameters) { _, new in new }
+        let mergedNumericValues = numericValues.merging(overrides.numericValues) { _, new in new }
+        let mergedStringArrays = stringArrayValues.merging(overrides.stringArrayValues) { _, new in new }
+        let mergedScale = overrides.statScale ?? statScale
+        return SkillEffectNode(kind: mergedKind,
+                               parameters: mergedParameters,
+                               numericValues: mergedNumericValues,
+                               stringArrayValues: mergedStringArrays,
+                               statScale: mergedScale)
+    }
+
+    static func parse(from container: KeyedDecodingContainer<DynamicCodingKey>,
+                      excluding: Set<String>) throws -> SkillEffectNode {
+        var kind: String?
+        var parameters: [String: String] = [:]
+        var numericValues: [String: Double] = [:]
+        var stringArrays: [String: [String]] = [:]
+        var statScale: StatScale?
+
+        for key in container.allKeys where !excluding.contains(key.stringValue) {
+            switch key.stringValue {
+            case "kind":
+                kind = try container.decode(String.self, forKey: key)
+            case "statScale":
+                statScale = try container.decodeIfPresent(StatScale.self, forKey: key)
+            default:
+                let rawValue = try container.decode(SkillEffectFlexibleValue.self, forKey: key)
+                let keyName = key.stringValue
+                if EnumMappings.skillEffectParamType[keyName] != nil {
+                    if let stringValue = rawValue.stringValue {
+                        parameters[keyName] = stringValue
+                    } else if let intValue = rawValue.intValue {
+                        parameters[keyName] = String(intValue)
+                    } else if let doubleValue = rawValue.doubleValue {
+                        parameters[keyName] = formatNumeric(doubleValue)
+                    } else {
+                        throw GeneratorError.executionFailed("Skill effect param '\(keyName)' の値が不正です")
+                    }
+                } else if EnumMappings.skillEffectValueType[keyName] != nil {
+                    if let doubleValue = rawValue.doubleValue {
+                        numericValues[keyName] = doubleValue
+                    } else if let intValue = rawValue.intValue {
+                        numericValues[keyName] = Double(intValue)
+                    } else if let stringValue = rawValue.stringValue, let doubleValue = Double(stringValue) {
+                        numericValues[keyName] = doubleValue
+                    } else {
+                        throw GeneratorError.executionFailed("Skill effect value '\(keyName)' の値が不正です")
+                    }
+                } else if EnumMappings.skillEffectArrayType[keyName] != nil {
+                    if let arrayValue = rawValue.stringArrayValue {
+                        stringArrays[keyName] = arrayValue
+                    } else if let intArrayValue = rawValue.intArrayValue {
+                        stringArrays[keyName] = intArrayValue.map(String.init)
+                    } else {
+                        throw GeneratorError.executionFailed("Skill effect array '\(keyName)' の値が不正です")
+                    }
+                } else {
+                    throw GeneratorError.executionFailed("Skill effect key '\(keyName)' が未知です")
+                }
+            }
+        }
+
+        return SkillEffectNode(kind: kind,
+                               parameters: parameters,
+                               numericValues: numericValues,
+                               stringArrayValues: stringArrays,
+                               statScale: statScale)
+    }
+
+    private static func formatNumeric(_ value: Double) -> String {
+        if value.rounded(.towardZero) == value {
+            return String(Int(value))
+        }
+        return String(value)
+    }
 }
 
 /// Dictionary that accepts both strings and numbers, converting numbers to strings
@@ -224,21 +380,6 @@ private struct FlexibleStringDict: Decodable {
             }
         }
         values = result
-    }
-
-    private struct DynamicCodingKey: CodingKey {
-        var stringValue: String
-        var intValue: Int?
-
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-            self.intValue = nil
-        }
-
-        init?(intValue: Int) {
-            self.stringValue = String(intValue)
-            self.intValue = intValue
-        }
     }
 }
 
@@ -339,8 +480,12 @@ private struct SkillEffectPayloadValues: Decodable {
         for (key, value) in raw {
             if let number = value.doubleValue {
                 numeric[key] = number
+            } else if let number = value.intValue {
+                numeric[key] = Double(number)
             } else if let array = value.stringArrayValue {
                 stringArrays[key] = array
+            } else if let array = value.intArrayValue {
+                stringArrays[key] = array.map(String.init)
             } else if let string = value.stringValue {
                 strings[key] = string
             }
@@ -355,28 +500,50 @@ private struct SkillEffectPayloadValues: Decodable {
 }
 
 private struct SkillEffectFlexibleValue: Decodable {
+    let intValue: Int?
     let doubleValue: Double?
     let stringValue: String?
     let stringArrayValue: [String]?
+    let intArrayValue: [Int]?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let double = try? container.decode(Double.self) {
+        if let int = try? container.decode(Int.self) {
+            intValue = int
+            doubleValue = Double(int)
+            stringValue = nil
+            stringArrayValue = nil
+            intArrayValue = nil
+        } else if let double = try? container.decode(Double.self) {
+            intValue = nil
             doubleValue = double
             stringValue = nil
             stringArrayValue = nil
+            intArrayValue = nil
+        } else if let array = try? container.decode([Int].self) {
+            intValue = nil
+            doubleValue = nil
+            stringValue = nil
+            stringArrayValue = nil
+            intArrayValue = array
         } else if let array = try? container.decode([String].self) {
+            intValue = nil
             doubleValue = nil
             stringValue = nil
             stringArrayValue = array
+            intArrayValue = nil
         } else if let string = try? container.decode(String.self) {
+            intValue = nil
             doubleValue = nil
             stringValue = string
             stringArrayValue = nil
+            intArrayValue = nil
         } else {
+            intValue = nil
             doubleValue = nil
             stringValue = nil
             stringArrayValue = nil
+            intArrayValue = nil
         }
     }
 }
@@ -414,6 +581,78 @@ extension Generator {
         }
 
         for (categoryKey, category) in categories {
+            if let groups = category?.groups, !groups.isEmpty {
+                for group in groups {
+                    for variant in group.variants {
+                        let effectPayloads: [VariantEffectPayload]
+                        if let effects = variant.effects, !effects.isEmpty {
+                            effectPayloads = try effects.map { node in
+                                guard let effectType = node.kind, !effectType.isEmpty else {
+                                    throw GeneratorError.executionFailed("Skill \(variant.id) の kind が指定されていません")
+                                }
+                                return VariantEffectPayload(
+                                    familyId: nil,
+                                    effectType: effectType,
+                                    parameters: node.parameters,
+                                    numericValues: node.numericValues,
+                                    stringValues: [:],
+                                    stringArrayValues: node.stringArrayValues,
+                                    statScale: node.statScale
+                                )
+                            }
+                        } else {
+                            let template = group.effectTemplate ?? .empty
+                            let merged = template.merged(with: variant.overrides)
+                            guard let effectType = merged.kind, !effectType.isEmpty else {
+                                throw GeneratorError.executionFailed("Skill \(variant.id) の kind が指定されていません")
+                            }
+                            effectPayloads = [VariantEffectPayload(
+                                familyId: nil,
+                                effectType: effectType,
+                                parameters: merged.parameters,
+                                numericValues: merged.numericValues,
+                                stringValues: [:],
+                                stringArrayValues: merged.stringArrayValues,
+                                statScale: merged.statScale
+                            )]
+                        }
+
+                        var effects: [SkillEntry.Effect] = []
+
+                        for (index, payload) in effectPayloads.enumerated() {
+                            // Merge parameters with stringValues (both are string params)
+                            var allParameters = payload.parameters ?? [:]
+                            for (key, value) in payload.stringValues {
+                                allParameters[key] = value
+                            }
+
+                            // Add statScale parameters if present
+                            var allNumericValues = payload.numericValues
+                            if let statScale = payload.statScale {
+                                allParameters["scalingStat"] = statScale.stat
+                                allNumericValues["scalingCoefficient"] = statScale.percent
+                            }
+
+                            effects.append(SkillEntry.Effect(index: index,
+                                                             kind: payload.effectType,
+                                                             familyId: payload.familyId,
+                                                             parameters: allParameters,
+                                                             numericValues: allNumericValues,
+                                                             stringValues: [:],  // Already merged into parameters
+                                                             stringArrayValues: payload.stringArrayValues))
+                        }
+
+                        entries.append(SkillEntry(id: variant.id,
+                                                  name: variant.label,
+                                                  description: variant.description,
+                                                  type: "passive",
+                                                  category: categoryKey,
+                                                  effects: effects))
+                    }
+                }
+                continue
+            }
+
             guard let families = category?.families else { continue }
             for family in families {
                 for variant in family.variants {
@@ -544,7 +783,7 @@ extension Generator {
                     }
 
                     // Insert skill_effects
-                    let familyIdInt = EnumMappings.skillEffectFamily[effect.familyId]
+                    let familyIdInt: Int? = effect.familyId.flatMap { EnumMappings.skillEffectFamily[$0] }
                     bindInt(effectStatement, index: 1, value: entry.id)
                     bindInt(effectStatement, index: 2, value: effect.index)
                     bindInt(effectStatement, index: 3, value: kindInt)
