@@ -14169,6 +14169,132 @@
       "toleranceBasis": "決定的（条件一致）",
       "testFile": "SkillRuntimeEffectExpectationTests.swift",
       "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-072",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "reaction"
+      ],
+      "description": "reaction が1件で一致するか",
+      "formula": "trigger=selfDamagedPhysical, target=attacker, damageType=physical, chance=35, attackCountMultiplier=0.6, criticalChancePercentMultiplier=1.2, accuracyMultiplier=0.8, requiresMartial=true, requiresAllyBehind=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-073",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "specialAttack"
+      ],
+      "description": "specialAttack(preemptive) が1件で一致するか",
+      "formula": "specialAttackId=2, chancePercent=60, preemptive=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-074",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "timedBuffTrigger.battleStart"
+      ],
+      "description": "timedBuffTrigger(battleStart) が一致するか",
+      "formula": "atTurn(1), duration=2, modifiers={damageDealtPercent:15, hitScoreAdditive:3}, scope=self, category=general",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-075",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "timedBuffTrigger.turnElapsed"
+      ],
+      "description": "timedBuffTrigger(turnElapsed) が一致するか",
+      "formula": "everyTurn, perTurnModifiers={hitScoreAdditive:1, evasionScoreAdditive:2, attackPercent:3, defensePercent:4, attackCountPercent:5}, scope=party, category=general",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-076",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "tacticSpellAmplify"
+      ],
+      "description": "tacticSpellAmplify が一致するか",
+      "formula": "atTurn(3), modifiers={spellSpecific:2:1.4}, duration=3, scope=party, category=spell",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-077",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "timedMagicPowerAmplify"
+      ],
+      "description": "timedMagicPowerAmplify が一致するか",
+      "formula": "atTurn(4), modifiers={magicalDamageDealtMultiplier:1.3}, duration=4, scope=party, category=magic",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-078",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "timedBreathPowerAmplify"
+      ],
+      "description": "timedBreathPowerAmplify が一致するか",
+      "formula": "atTurn(5), modifiers={breathDamageDealtMultiplier:1.2}, duration=5, scope=party, category=breath",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
     }
   ]
 }

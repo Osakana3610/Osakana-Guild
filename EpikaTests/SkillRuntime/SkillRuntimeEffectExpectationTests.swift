@@ -881,5 +881,287 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
                        passed: passed,
                        rawData: ["turn": 5, "chancePercent": 40])
         }
+
+        // MARK: - Reactions / Timed Buffs
+
+        do {
+            let effect = makeEffect(type: .reaction,
+                                    parameters: [
+                                        .trigger: Int(ReactionTrigger.selfDamagedPhysical.rawValue),
+                                        .target: Int(BattleActor.SkillEffects.Reaction.Target.attacker.rawValue),
+                                        .damageType: physical,
+                                        .requiresMartial: 1,
+                                        .requiresAllyBehind: 1
+                                    ],
+                                    values: [
+                                        .chancePercent: 35,
+                                        .attackCountMultiplier: 0.6,
+                                        .criticalChancePercentMultiplier: 1.2,
+                                        .accuracyMultiplier: 0.8
+                                    ])
+            let reactions = try compile(effect).combat.reactions
+            let entry = reactions.first
+            let passed = reactions.count == 1
+                && entry?.skillId == 9000
+                && entry?.identifier == "9000"
+                && entry?.displayName == "EffectExpectations"
+                && entry?.trigger == .selfDamagedPhysical
+                && entry?.target == .attacker
+                && entry?.damageType == .physical
+                && entry?.baseChancePercent == 35
+                && abs((entry?.attackCountMultiplier ?? 0) - 0.6) < 0.0001
+                && abs((entry?.criticalChancePercentMultiplier ?? 0) - 1.2) < 0.0001
+                && abs((entry?.accuracyMultiplier ?? 0) - 0.8) < 0.0001
+                && entry?.requiresMartial == true
+                && entry?.requiresAllyBehind == true
+            recordPass(id: "SKILL-EFFECT-072",
+                       passed: passed,
+                       rawData: ["trigger": Double(ReactionTrigger.selfDamagedPhysical.rawValue),
+                                 "target": Double(BattleActor.SkillEffects.Reaction.Target.attacker.rawValue),
+                                 "damageType": Double(physical),
+                                 "requiresMartial": 1,
+                                 "requiresAllyBehind": 1,
+                                 "chancePercent": 35,
+                                 "attackCountMultiplier": 0.6,
+                                 "criticalChancePercentMultiplier": 1.2,
+                                 "accuracyMultiplier": 0.8,
+                                 "count": Double(reactions.count)])
+        }
+
+        do {
+            let effect = makeEffect(type: .specialAttack,
+                                    parameters: [
+                                        .specialAttackId: Int(SpecialAttackKind.specialB.rawValue),
+                                        .mode: 1
+                                    ],
+                                    values: [.chancePercent: 60])
+            let specials = try compile(effect).combat.specialAttacks
+            let entry = specials.preemptive.first
+            let passed = specials.preemptive.count == 1
+                && specials.normal.isEmpty
+                && entry?.kind == .specialB
+                && entry?.chancePercent == 60
+                && entry?.preemptive == true
+            recordPass(id: "SKILL-EFFECT-073",
+                       passed: passed,
+                       rawData: ["specialAttackId": Double(SpecialAttackKind.specialB.rawValue),
+                                 "mode": 1,
+                                 "chancePercent": 60,
+                                 "preemptiveCount": Double(specials.preemptive.count)])
+        }
+
+        do {
+            let effect = makeEffect(index: 0,
+                                    type: .timedBuffTrigger,
+                                    parameters: [
+                                        .trigger: Int(ReactionTrigger.battleStart.rawValue),
+                                        .target: Int(TimedBuffScope.`self`.rawValue)
+                                    ],
+                                    values: [
+                                        .duration: 2,
+                                        .damageDealtPercent: 15,
+                                        .hitScoreAdditive: 3
+                                    ])
+            let triggers = try compile(effect).status.timedBuffTriggers
+            let entry = triggers.first
+            let expectedModifiers: [String: Double] = [
+                "damageDealtPercent": 15,
+                "hitScoreAdditive": 3
+            ]
+            let triggerModeMatches: Bool
+            if case .atTurn(1) = entry?.triggerMode {
+                triggerModeMatches = true
+            } else {
+                triggerModeMatches = false
+            }
+            let passed = triggers.count == 1
+                && entry?.id == "9000_0"
+                && entry?.displayName == "EffectExpectations"
+                && triggerModeMatches
+                && entry?.modifiers == expectedModifiers
+                && entry?.perTurnModifiers.isEmpty == true
+                && entry?.duration == 2
+                && entry?.scope == .`self`
+                && entry?.category == "general"
+                && entry?.sourceSkillId == 9000
+            recordPass(id: "SKILL-EFFECT-074",
+                       passed: passed,
+                       rawData: ["trigger": Double(ReactionTrigger.battleStart.rawValue),
+                                 "target": Double(TimedBuffScope.`self`.rawValue),
+                                 "duration": 2,
+                                 "damageDealtPercent": 15,
+                                 "hitScoreAdditive": 3,
+                                 "count": Double(triggers.count)])
+        }
+
+        do {
+            let effect = makeEffect(index: 1,
+                                    type: .timedBuffTrigger,
+                                    parameters: [
+                                        .trigger: Int(ReactionTrigger.turnElapsed.rawValue),
+                                        .target: Int(TimedBuffScope.party.rawValue)
+                                    ],
+                                    values: [
+                                        .hitScoreAdditivePerTurn: 1,
+                                        .evasionScoreAdditivePerTurn: 2,
+                                        .attackPercentPerTurn: 3,
+                                        .defensePercentPerTurn: 4,
+                                        .attackCountPercentPerTurn: 5
+                                    ])
+            let triggers = try compile(effect).status.timedBuffTriggers
+            let entry = triggers.first
+            let expectedPerTurn: [String: Double] = [
+                "hitScoreAdditive": 1,
+                "evasionScoreAdditive": 2,
+                "attackPercent": 3,
+                "defensePercent": 4,
+                "attackCountPercent": 5
+            ]
+            let triggerModeMatches: Bool
+            if case .everyTurn = entry?.triggerMode {
+                triggerModeMatches = true
+            } else {
+                triggerModeMatches = false
+            }
+            let passed = triggers.count == 1
+                && entry?.id == "9000_1"
+                && entry?.displayName == "EffectExpectations"
+                && triggerModeMatches
+                && entry?.modifiers.isEmpty == true
+                && entry?.perTurnModifiers == expectedPerTurn
+                && entry?.duration == 0
+                && entry?.scope == .party
+                && entry?.category == "general"
+                && entry?.sourceSkillId == 9000
+            recordPass(id: "SKILL-EFFECT-075",
+                       passed: passed,
+                       rawData: ["trigger": Double(ReactionTrigger.turnElapsed.rawValue),
+                                 "target": Double(TimedBuffScope.party.rawValue),
+                                 "hitScoreAdditivePerTurn": 1,
+                                 "evasionScoreAdditivePerTurn": 2,
+                                 "attackPercentPerTurn": 3,
+                                 "defensePercentPerTurn": 4,
+                                 "attackCountPercentPerTurn": 5,
+                                 "count": Double(triggers.count)])
+        }
+
+        do {
+            let effect = makeEffect(index: 2,
+                                    type: .tacticSpellAmplify,
+                                    parameters: [
+                                        .spellId: 2,
+                                        .target: Int(TimedBuffScope.party.rawValue)
+                                    ],
+                                    values: [
+                                        .multiplier: 1.4,
+                                        .triggerTurn: 3
+                                    ])
+            let triggers = try compile(effect).status.timedBuffTriggers
+            let entry = triggers.first
+            let expectedModifiers: [String: Double] = [
+                "spellSpecific:2": 1.4
+            ]
+            let triggerModeMatches: Bool
+            if case .atTurn(3) = entry?.triggerMode {
+                triggerModeMatches = true
+            } else {
+                triggerModeMatches = false
+            }
+            let passed = triggers.count == 1
+                && entry?.id == "9000_2"
+                && entry?.displayName == "EffectExpectations"
+                && triggerModeMatches
+                && entry?.modifiers == expectedModifiers
+                && entry?.perTurnModifiers.isEmpty == true
+                && entry?.duration == 3
+                && entry?.scope == .party
+                && entry?.category == "spell"
+                && entry?.sourceSkillId == 9000
+            recordPass(id: "SKILL-EFFECT-076",
+                       passed: passed,
+                       rawData: ["spellId": 2,
+                                 "target": Double(TimedBuffScope.party.rawValue),
+                                 "multiplier": 1.4,
+                                 "triggerTurn": 3,
+                                 "count": Double(triggers.count)])
+        }
+
+        do {
+            let effect = makeEffect(index: 3,
+                                    type: .timedMagicPowerAmplify,
+                                    parameters: [
+                                        .target: Int(TimedBuffScope.party.rawValue)
+                                    ],
+                                    values: [
+                                        .triggerTurn: 4,
+                                        .multiplier: 1.3
+                                    ])
+            let triggers = try compile(effect).status.timedBuffTriggers
+            let entry = triggers.first
+            let expectedModifiers: [String: Double] = [
+                "magicalDamageDealtMultiplier": 1.3
+            ]
+            let triggerModeMatches: Bool
+            if case .atTurn(4) = entry?.triggerMode {
+                triggerModeMatches = true
+            } else {
+                triggerModeMatches = false
+            }
+            let passed = triggers.count == 1
+                && entry?.id == "9000_3"
+                && entry?.displayName == "EffectExpectations"
+                && triggerModeMatches
+                && entry?.modifiers == expectedModifiers
+                && entry?.perTurnModifiers.isEmpty == true
+                && entry?.duration == 4
+                && entry?.scope == .party
+                && entry?.category == "magic"
+                && entry?.sourceSkillId == 9000
+            recordPass(id: "SKILL-EFFECT-077",
+                       passed: passed,
+                       rawData: ["target": Double(TimedBuffScope.party.rawValue),
+                                 "triggerTurn": 4,
+                                 "multiplier": 1.3,
+                                 "count": Double(triggers.count)])
+        }
+
+        do {
+            let effect = makeEffect(index: 4,
+                                    type: .timedBreathPowerAmplify,
+                                    parameters: [
+                                        .target: Int(TimedBuffScope.party.rawValue)
+                                    ],
+                                    values: [
+                                        .triggerTurn: 5,
+                                        .multiplier: 1.2
+                                    ])
+            let triggers = try compile(effect).status.timedBuffTriggers
+            let entry = triggers.first
+            let expectedModifiers: [String: Double] = [
+                "breathDamageDealtMultiplier": 1.2
+            ]
+            let triggerModeMatches: Bool
+            if case .atTurn(5) = entry?.triggerMode {
+                triggerModeMatches = true
+            } else {
+                triggerModeMatches = false
+            }
+            let passed = triggers.count == 1
+                && entry?.id == "9000_4"
+                && entry?.displayName == "EffectExpectations"
+                && triggerModeMatches
+                && entry?.modifiers == expectedModifiers
+                && entry?.perTurnModifiers.isEmpty == true
+                && entry?.duration == 5
+                && entry?.scope == .party
+                && entry?.category == "breath"
+                && entry?.sourceSkillId == 9000
+            recordPass(id: "SKILL-EFFECT-078",
+                       passed: passed,
+                       rawData: ["target": Double(TimedBuffScope.party.rawValue),
+                                 "triggerTurn": 5,
+                                 "multiplier": 1.2,
+                                 "count": Double(triggers.count)])
+        }
     }
 }
