@@ -148,27 +148,11 @@ nonisolated enum TestActorBuilder {
         )
     }
 
-    /// テスト用のBattleContextを生成
-    static func makeContext(
-        seed: UInt64,
-        attacker: BattleActor,
-        defender: BattleActor
-    ) -> BattleContext {
-        BattleContext(
-            players: [attacker],
-            enemies: [defender],
-            statusDefinitions: [:],
-            skillDefinitions: [:],
-            enemySkillDefinitions: [:],
-            random: GameRandomSource(seed: seed)
-        )
-    }
-
     // MARK: - 戦闘ループテスト用
 
     /// 汎用プレイヤーを生成
     ///
-    /// BattleTurnEngine.runBattle用のプレイヤーを生成する。
+    /// BattleEngine.runBattle用のプレイヤーを生成する。
     /// ダメージ計算テストではmakeAttacker/makeDefenderを使用すること。
     ///
     /// - Parameters:
@@ -238,7 +222,7 @@ nonisolated enum TestActorBuilder {
 
     /// 汎用敵を生成
     ///
-    /// BattleTurnEngine.runBattle用の敵を生成する。
+    /// BattleEngine.runBattle用の敵を生成する。
     /// ダメージ計算テストではmakeAttacker/makeDefenderを使用すること。
     ///
     /// - Parameters:

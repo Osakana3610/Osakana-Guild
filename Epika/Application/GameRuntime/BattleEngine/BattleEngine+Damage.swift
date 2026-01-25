@@ -1,53 +1,19 @@
 // ==============================================================================
-// BattleTurnEngine.Damage.swift
+// BattleEngine+Damage.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - ダメージ計算全般（物理、魔法、ブレス、回復）
-//   - 命中判定と回避計算
-//   - 必殺判定とダメージ倍率
-//   - 防御力劣化システム
-//   - バリア消費処理
-//
-// 【本体との関係】
-//   - BattleTurnEngineの拡張ファイル
-//   - ダメージ計算に特化した機能を提供
-//
-// 【主要機能】
-//   - computeHitChance: 命中率計算
-//   - computePhysicalDamage: 物理ダメージ計算
-//   - computeMagicalDamage: 魔法ダメージ計算
-//   - computeBreathDamage: ブレスダメージ計算
-//   - computeHealingAmount: 回復量計算
-//   - 各種修正値計算（列、与ダメ、被ダメ、回復等）
-//
-// 【使用箇所】
-//   - BattleTurnEngine各拡張ファイル（攻撃処理から呼び出し）
+//   - 新戦闘エンジン用の命中/物理ダメージ計算
 //
 // ==============================================================================
 
 import Foundation
 
-// MARK: - Damage Calculation
-extension BattleTurnEngine {
+extension BattleEngine {
     nonisolated static let criticalDefenseRetainedFactor: Double = 0.5
 
-    nonisolated struct MagicalDamageResult: Sendable {
-        let damage: Int
-        let wasCritical: Bool
-        let wasNullified: Bool
-        let guardBarrierConsumed: Int
-        let barrierConsumed: Int
-    }
-
-    nonisolated struct BreathDamageResult: Sendable {
-        let damage: Int
-        let guardBarrierConsumed: Int
-        let barrierConsumed: Int
-    }
-
-    // MARK: - Modifier Key Constants (avoid string concatenation per hit)
+    // MARK: - Modifier Key Constants
     private nonisolated static let physicalDamageDealtKey = "physicalDamageDealtMultiplier"
     private nonisolated static let physicalDamageTakenKey = "physicalDamageTakenMultiplier"
     private nonisolated static let magicalDamageDealtKey = "magicalDamageDealtMultiplier"
@@ -55,22 +21,39 @@ extension BattleTurnEngine {
     private nonisolated static let breathDamageDealtKey = "breathDamageDealtMultiplier"
     private nonisolated static let breathDamageTakenKey = "breathDamageTakenMultiplier"
 
+    // MARK: - Damage Results
+
+    struct MagicalDamageResult {
+        let damage: Int
+        let wasCritical: Bool
+        let wasNullified: Bool
+        let guardBarrierConsumed: Int
+        let barrierConsumed: Int
+    }
+
+    struct BreathDamageResult {
+        let damage: Int
+        let guardBarrierConsumed: Int
+        let barrierConsumed: Int
+    }
+
+    // MARK: - Hit / Physical Damage
+
     nonisolated static func computeHitChance(attacker: BattleActor,
                                  defender: BattleActor,
                                  hitIndex: Int,
                                  accuracyMultiplier: Double,
-                                 context: inout BattleContext) -> Double {
+                                 state: inout BattleState) -> Double {
         let hitBonus = aggregateAdditive(from: attacker.timedBuffs, key: "hitScoreAdditive")
         var attackerScore = max(1.0, Double(attacker.snapshot.hitScore) + hitBonus)
-        // 累積ヒットボーナス（命中スコア）
         if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
             let consecutiveHits = attacker.attackHistory.consecutiveHits
             attackerScore = max(1.0, attackerScore + bonus.hitScorePerHit * Double(consecutiveHits))
         }
         let defenderScore = max(1.0, degradedEvasionScore(for: defender))
         let baseRatio = attackerScore / (attackerScore + defenderScore)
-        let attackerRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
-        let defenderRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
+        let attackerRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &state.random)
+        let defenderRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &state.random)
         let randomFactor = attackerRoll / max(0.01, defenderRoll)
         let luckModifier = Double(attacker.luck - defender.luck) * 0.002
         let accuracyMod = hitAccuracyModifier(for: hitIndex)
@@ -82,13 +65,13 @@ extension BattleTurnEngine {
     nonisolated static func computePhysicalDamage(attacker: BattleActor,
                                       defender: inout BattleActor,
                                       hitIndex: Int,
-                                      context: inout BattleContext) -> (damage: Int, critical: Bool) {
-        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
-        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
+                                      state: inout BattleState) -> (damage: Int, critical: Bool) {
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &state.random)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &state.random)
 
         let attackPower = Double(attacker.snapshot.physicalAttackScore) * attackRoll
         let defensePower = degradedPhysicalDefense(for: defender) * defenseRoll
-        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, context: &context)
+        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, state: &state)
         let effectiveDefensePower = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
         let baseDifference = max(1.0, attackPower - effectiveDefensePower)
         let additionalDamageScore = Double(attacker.snapshot.additionalDamageScore)
@@ -99,7 +82,6 @@ extension BattleTurnEngine {
         let takenMultiplier = damageTakenModifier(for: defender, damageType: .physical, attacker: attacker)
         let penetrationTakenMultiplier = defender.skillEffects.damage.penetrationTakenMultiplier
 
-        // 累積ヒットボーナス（ダメージ）
         var cumulativeDamageMultiplier = 1.0
         if let bonus = attacker.skillEffects.combat.cumulativeHitBonus {
             let consecutiveHits = attacker.attackHistory.consecutiveHits
@@ -112,7 +94,6 @@ extension BattleTurnEngine {
         }
         coreDamage *= damageMultiplier
 
-        // 固有耐性を適用
         let innatePhysical = defender.innateResistances.physical
         let innatePiercing = defender.innateResistances.piercing
 
@@ -122,7 +103,7 @@ extension BattleTurnEngine {
         if isCritical {
             totalDamage *= criticalDamageBonus(for: attacker)
             totalDamage *= defender.skillEffects.damage.criticalTakenMultiplier
-            totalDamage *= defender.innateResistances.critical  // 必殺耐性
+            totalDamage *= defender.innateResistances.critical
         }
 
         let barrierMultiplier = applyBarrierIfAvailable(for: .physical, defender: &defender)
@@ -140,12 +121,11 @@ extension BattleTurnEngine {
                                      defender: inout BattleActor,
                                      spellId: UInt8?,
                                      allowMagicCritical: Bool = false,
-                                     context: inout BattleContext) -> MagicalDamageResult {
-        // 魔法無効化判定
+                                     state: inout BattleState) -> MagicalDamageResult {
         let nullifyChance = defender.skillEffects.damage.magicNullifyChancePercent
         if nullifyChance > 0 {
             let cappedChance = max(0, min(100, Int(nullifyChance.rounded())))
-            if BattleRandomSystem.percentChance(cappedChance, random: &context.random) {
+            if BattleRandomSystem.percentChance(cappedChance, random: &state.random) {
                 return MagicalDamageResult(damage: 0,
                                            wasCritical: false,
                                            wasNullified: true,
@@ -154,8 +134,8 @@ extension BattleTurnEngine {
             }
         }
 
-        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
-        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &state.random)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &state.random)
 
         let attackPower = Double(attacker.snapshot.magicalAttackScore) * attackRoll
         let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
@@ -165,17 +145,15 @@ extension BattleTurnEngine {
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .magical)
         damage *= damageTakenModifier(for: defender, damageType: .magical, spellId: spellId, attacker: attacker)
 
-        // 必殺判定（必殺魔法有効時のみ、倍率は物理と共用。防御半減は物理/逆回復のみ）
         let didCritical = allowMagicCritical && shouldTriggerCritical(attacker: attacker,
                                                                       defender: defender,
-                                                                      context: &context)
+                                                                      state: &state)
         if didCritical {
             damage *= criticalDamageBonus(for: attacker)
             damage *= defender.skillEffects.damage.criticalTakenMultiplier
             damage *= defender.innateResistances.critical
         }
 
-        // 個別魔法耐性を適用
         if let spellId {
             damage *= defender.innateResistances.spells[spellId, default: 1.0]
         }
@@ -205,12 +183,12 @@ extension BattleTurnEngine {
 
     nonisolated static func computeReverseHealingDamage(attacker: BattleActor,
                                          defender: inout BattleActor,
-                                         context: inout BattleContext) -> (damage: Int, critical: Bool) {
-        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &context.random)
-        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &context.random)
+                                         state: inout BattleState) -> (damage: Int, critical: Bool) {
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &state.random)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &state.random)
         let attackPower = Double(attacker.snapshot.magicalHealingScore) * attackRoll
         let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
-        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, context: &context)
+        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, state: &state)
         let effectiveDefense = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
         var damage = max(1.0, attackPower - effectiveDefense)
 
@@ -234,13 +212,13 @@ extension BattleTurnEngine {
 
     nonisolated static func computeBreathDamage(attacker: BattleActor,
                                     defender: inout BattleActor,
-                                    context: inout BattleContext) -> BreathDamageResult {
-        let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &context.random)
+                                    state: inout BattleState) -> BreathDamageResult {
+        let variance = BattleRandomSystem.speedMultiplier(luck: attacker.luck, random: &state.random)
         var damage = Double(attacker.snapshot.breathDamageScore) * variance
 
         damage *= damageDealtModifier(for: attacker, against: defender, damageType: .breath)
         damage *= damageTakenModifier(for: defender, damageType: .breath, attacker: attacker)
-        damage *= defender.innateResistances.breath  // ブレス耐性
+        damage *= defender.innateResistances.breath
 
         let barrierKey = barrierKey(for: .breath)
         let guardActive = defender.guardActive
@@ -266,8 +244,8 @@ extension BattleTurnEngine {
     nonisolated static func computeHealingAmount(caster: BattleActor,
                                      target: BattleActor,
                                      spellId: UInt8?,
-                                     context: inout BattleContext) -> Int {
-        let multiplier = BattleRandomSystem.statMultiplier(luck: caster.luck, random: &context.random)
+                                     state: inout BattleState) -> Int {
+        let multiplier = BattleRandomSystem.statMultiplier(luck: caster.luck, random: &state.random)
         var amount = Double(caster.snapshot.magicalHealingScore) * multiplier
         amount *= spellPowerModifier(for: caster, spellId: spellId)
         amount *= healingDealtModifier(for: caster)
@@ -281,6 +259,8 @@ extension BattleTurnEngine {
         defender.currentHP = max(0, defender.currentHP - applied)
         return applied
     }
+
+    // MARK: - Modifiers
 
     nonisolated static func hitAccuracyModifier(for hitIndex: Int) -> Double {
         guard hitIndex > 1 else { return 1.0 }
@@ -334,7 +314,6 @@ extension BattleTurnEngine {
         let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
         let raceMultiplier = attacker.skillEffects.damage.dealtAgainst.value(for: defender.raceId)
 
-        // HP閾値倍率（暗殺者スキル用）
         let defenderHPPercent = Double(defender.currentHP) / Double(max(1, defender.snapshot.maxHP)) * 100.0
         var hpThresholdMultiplier = 1.0
         for threshold in attacker.skillEffects.damage.hpThresholdMultipliers {
@@ -363,7 +342,6 @@ extension BattleTurnEngine {
             result *= defender.skillEffects.spell.specificTakenMultipliers[spellId, default: 1.0]
         }
 
-        // レベル比較ダメージ軽減（低レベル敵からの被ダメ軽減）
         if let attacker,
            let defenderLevel = defender.level,
            let attackerLevel = attacker.level,
@@ -391,10 +369,10 @@ extension BattleTurnEngine {
 
     nonisolated static func shouldTriggerCritical(attacker: BattleActor,
                                       defender: BattleActor,
-                                      context: inout BattleContext) -> Bool {
+                                      state: inout BattleState) -> Bool {
         let chance = max(0, min(100, attacker.snapshot.criticalChancePercent))
         guard chance > 0 else { return false }
-        return BattleRandomSystem.percentChance(chance, random: &context.random)
+        return BattleRandomSystem.percentChance(chance, random: &state.random)
     }
 
     nonisolated static func criticalDamageBonus(for attacker: BattleActor) -> Double {
@@ -404,7 +382,6 @@ extension BattleTurnEngine {
     }
 
     nonisolated static func barrierKey(for damageType: BattleDamageType) -> UInt8 {
-        // BattleDamageType.rawValue と一致させる (physical=1, magical=2, breath=3)
         damageType.rawValue
     }
 
@@ -453,7 +430,6 @@ extension BattleTurnEngine {
         defender.degradationPercent = min(100.0, degradation + increment)
     }
 
-    // 既知のスペルID定数（Definition層で確定後に更新）
     nonisolated static let magicArrowSpellId: UInt8 = 1
 
     nonisolated static func applyMagicDegradation(to defender: inout BattleActor,
@@ -474,18 +450,21 @@ extension BattleTurnEngine {
     }
 
     @discardableResult
-    nonisolated static func applyDegradationRepairIfAvailable(to actor: inout BattleActor, context: inout BattleContext) -> Double {
+    nonisolated static func applyDegradationRepairIfAvailable(to actor: inout BattleActor,
+                                                  state: inout BattleState) -> Double {
         let minP = actor.skillEffects.misc.degradationRepairMinPercent
         let maxP = actor.skillEffects.misc.degradationRepairMaxPercent
         guard minP > 0, maxP >= minP else { return 0 }
         let bonus = actor.skillEffects.misc.degradationRepairBonusPercent
         let range = maxP - minP
-        let roll = minP + context.random.nextDouble(in: 0...range)
+        let roll = minP + state.random.nextDouble(in: 0...range)
         let repaired = roll * (1.0 + bonus / 100.0)
         let before = actor.degradationPercent
         actor.degradationPercent = max(0.0, actor.degradationPercent - repaired)
         return max(0.0, before - actor.degradationPercent)
     }
+
+    // MARK: - Buff Aggregation
 
     nonisolated static func modifierDealtKey(for damageType: BattleDamageType) -> String {
         switch damageType {
@@ -524,6 +503,7 @@ extension BattleTurnEngine {
     }
 
     // MARK: - Row Modifier Tables
+
     private nonisolated static let nearBaseRow: [Double] = [1.0, 0.85, 0.72, 0.61, 0.52, 0.44]
     private nonisolated static let nearAptRow: [Double] = [1.28, 1.03, 0.84, 0.68, 0.55, 0.44]
     private nonisolated static let farBaseRow: [Double] = nearBaseRow

@@ -22,9 +22,9 @@
 //     - 共通: chancePercent（使用確率）, usesPerBattle（使用回数制限）
 //
 // 【使用箇所】
-//   - BattleTurnEngine.EnemySpecialSkill: 敵特殊技の実行
-//   - BattleTurnEngine.Damage: ダメージ計算時の属性参照
-//   - BattleTurnEngine.StatusEffects: 状態異常付与
+//   - BattleEngine: 敵特殊技の実行
+//   - BattleEngine: ダメージ計算時の属性参照
+//   - BattleEngine: 状態異常付与
 //
 // ==============================================================================
 

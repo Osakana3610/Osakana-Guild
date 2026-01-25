@@ -139,7 +139,7 @@ enum TimedBuffTriggerHandler: SkillEffectHandler {
     ) throws {
         // trigger: 5=battleStart, 12=turnElapsed (EnumMappings.triggerType)
         let triggerRaw = payload.parameters[.trigger] ?? Int(ReactionTrigger.battleStart.rawValue)
-        let triggerId = payload.familyId.map { String($0) } ?? "\(context.skillId)_timedBuff"
+        let triggerId = "\(context.skillId)_\(context.effectIndex)"
         // scope: 1=party, 2=self (TimedBuffScope)
         let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.`self`.rawValue)
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .`self`
@@ -208,7 +208,7 @@ enum TimedMagicPowerAmplifyHandler: SkillEffectHandler {
     ) throws {
         let turn = try payload.requireValue(.triggerTurn, skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
+        let triggerId = "\(context.skillId)_\(context.effectIndex)"
         // scope: 1=party, 2=self (TimedBuffScope)
         let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.party.rawValue)
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .party
@@ -237,7 +237,7 @@ enum TimedBreathPowerAmplifyHandler: SkillEffectHandler {
     ) throws {
         let turn = try payload.requireValue(.triggerTurn, skillId: context.skillId, effectIndex: context.effectIndex)
         let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
-        let triggerId = payload.familyId.map { String($0) } ?? payload.effectType.identifier
+        let triggerId = "\(context.skillId)_\(context.effectIndex)"
         // scope: 1=party, 2=self (TimedBuffScope)
         let scopeRaw = payload.parameters[.target] ?? Int(TimedBuffScope.party.rawValue)
         let scope = BattleActor.SkillEffects.TimedBuffTrigger.Scope(rawValue: UInt8(scopeRaw)) ?? .party

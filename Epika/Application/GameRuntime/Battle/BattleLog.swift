@@ -14,7 +14,7 @@
 //   - PartyMemberSnapshot: 探索開始時のパーティメンバー情報
 //
 // 【使用箇所】
-//   - BattleContext（ログの記録）
+//   - BattleEngine（ログの記録）
 //   - BattleLogRenderer（表示用変換）
 //
 // ==============================================================================
@@ -23,8 +23,7 @@ import Foundation
 
 // MARK: - BattleActionEntry (Next-gen structure)
 
-/// 行動宣言と結果を1レコードにまとめた新版ログ構造
-/// 移行期間はBattleActionと併存させ、順次こちらへ置き換える
+/// 行動宣言と結果を1レコードにまとめたログ構造
 nonisolated struct BattleActionEntry: Codable, Sendable {
     struct Declaration: Codable, Sendable {
         var kind: ActionKind
@@ -80,7 +79,7 @@ nonisolated struct BattleActionEntry: Codable, Sendable {
         var target: UInt16?
         var value: UInt32?
         var statusId: UInt16?
-        var extra: UInt16?
+        var extra: UInt32?
     }
 
     var turn: UInt8
@@ -121,7 +120,7 @@ extension BattleActionEntry {
                        target: UInt16?,
                        value: UInt32? = nil,
                        statusId: UInt16? = nil,
-                       extra: UInt16? = nil) {
+                       extra: UInt32? = nil) {
             addEffect(Effect(kind: kind, target: target, value: value, statusId: statusId, extra: extra))
         }
 
@@ -140,9 +139,6 @@ extension BattleActionEntry {
 
 /// 戦闘ログ全体
 nonisolated struct BattleLog: Codable, Sendable {
-    static let currentVersion: UInt8 = 1
-
-    var version: UInt8               // battle log schema version
     var initialHP: [UInt16: UInt32]  // actorIndex → 開始時HP
     var entries: [BattleActionEntry] // 新形式
     var outcome: UInt8               // 0=victory, 1=defeat, 2=retreat
@@ -150,57 +146,21 @@ nonisolated struct BattleLog: Codable, Sendable {
 
     static let empty = BattleLog(initialHP: [:], entries: [], outcome: 0, turns: 0)
 
-    private enum CodingKeys: String, CodingKey {
-        case version
-        case initialHP
-        case entries
-        case outcome
-        case turns
-    }
-
     init(initialHP: [UInt16: UInt32],
          entries: [BattleActionEntry] = [],
          outcome: UInt8,
-         turns: UInt8,
-         version: UInt8 = BattleLog.currentVersion) {
-        self.version = version
+         turns: UInt8) {
         self.initialHP = initialHP
         self.entries = entries
         self.outcome = outcome
         self.turns = turns
     }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let decodedVersion = try container.decodeIfPresent(UInt8.self, forKey: .version) ?? 0
-        guard decodedVersion == BattleLog.currentVersion else {
-            throw BattleLogDecodingError.unsupportedVersion(decodedVersion)
-        }
-        version = decodedVersion
-        initialHP = try container.decode([UInt16: UInt32].self, forKey: .initialHP)
-        entries = try container.decode([BattleActionEntry].self, forKey: .entries)
-        outcome = try container.decode(UInt8.self, forKey: .outcome)
-        turns = try container.decode(UInt8.self, forKey: .turns)
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(version, forKey: .version)
-        try container.encode(initialHP, forKey: .initialHP)
-        try container.encode(entries, forKey: .entries)
-        try container.encode(outcome, forKey: .outcome)
-        try container.encode(turns, forKey: .turns)
-    }
-}
-
-enum BattleLogDecodingError: Error {
-    case unsupportedVersion(UInt8)
 }
 
 // MARK: - ActionKind
 
 /// 行動種別（行動選択用 + ログ専用を統合）
-/// rawValue は後方互換性のため固定。新規追加時は既存値の間または末尾に配置
+/// rawValue はログシリアライズ用途のため固定。新規追加時は既存値の間または末尾に配置
 enum ActionKind: UInt8, Codable, Sendable {
     // === 行動選択で使用（旧ActionCategory） ===
     case defend = 1               // "{actor}は防御態勢を取った"

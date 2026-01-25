@@ -1,41 +1,20 @@
 // ==============================================================================
-// BattleTurnEngine.StatusEffects.swift
+// BattleEngine+StatusEffects.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - 状態異常の付与と判定
-//   - 状態異常の継続ダメージ処理
-//   - 状態異常の自然回復
-//   - 暴走判定
-//   - 自動状態異常治癒
-//
-// 【本体との関係】
-//   - BattleTurnEngineの拡張ファイル
-//   - 状態異常システムに特化した機能を提供
-//
-// 【主要機能】
-//   - attemptApplyStatus: 状態異常の付与試行
-//   - hasStatus: 状態異常の保持判定
-//   - isActionLocked: 行動不能判定
-//   - shouldTriggerBerserk: 暴走判定
-//   - applyStatusTicks: 状態異常の継続効果処理
-//   - attemptInflictStatuses: 状態異常の付与試行
-//   - applyAutoStatusCureIfNeeded: 自動状態異常治癒
-//
-// 【使用箇所】
-//   - BattleTurnEngine各拡張ファイル（攻撃、ターン処理等）
+//   - 新戦闘エンジン用の状態異常付与と判定
 //
 // ==============================================================================
 
 import Foundation
 
-// MARK: - Status Effects
-extension BattleTurnEngine {
-    // 既知のステータスID定数（Definition層で確定後に更新）
+extension BattleEngine {
     nonisolated static let confusionStatusId: UInt8 = 1
-    // EnumMappings.statusEffectTag: confusion=3
     nonisolated static let statusTagConfusion: UInt8 = 3
+    private nonisolated static let statusTagSleep: UInt8 = 4
+    private nonisolated static let statusTagPetrify: UInt8 = 10
 
     nonisolated static func statusApplicationChancePercent(basePercent: Double,
                                                statusId: UInt8,
@@ -49,20 +28,13 @@ extension BattleTurnEngine {
         return max(0.0, scaled * additiveScale)
     }
 
-    // EnumMappings.statusEffectTag: sleep=4, petrify=10
-    private nonisolated static let statusTagSleep: UInt8 = 4
-    private nonisolated static let statusTagPetrify: UInt8 = 10
-
     nonisolated static func statusBarrierAdjustment(statusId: UInt8,
                                         target: inout BattleActor,
-                                        context: BattleContext) -> Double {
-        // statusIdに対応する定義を取得してタグで判定
-        guard let definition = context.statusDefinitions[statusId] else { return 1.0 }
+                                        state: BattleState) -> Double {
+        guard let definition = state.statusDefinitions[statusId] else { return 1.0 }
         let hasSleepTag = definition.tags.contains(statusTagSleep) || definition.tags.contains(statusTagPetrify)
         guard hasSleepTag else { return 1.0 }
-        // 注: breath tagはstatusEffectTagには存在しないため、常にmagicalとして扱う
-        let damageType: BattleDamageType = .magical
-        return applyBarrierIfAvailable(for: damageType, defender: &target)
+        return applyBarrierIfAvailable(for: .magical, defender: &target)
     }
 
     @discardableResult
@@ -71,17 +43,17 @@ extension BattleTurnEngine {
                                    durationTurns: Int?,
                                    sourceId: String?,
                                    to target: inout BattleActor,
-                                   context: inout BattleContext,
+                                   state: inout BattleState,
                                    sourceProcMultiplier: Double = 1.0) -> Bool {
-        guard let definition = context.statusDefinitions[statusId] else { return false }
-        let barrierScale = statusBarrierAdjustment(statusId: statusId, target: &target, context: context)
+        guard let definition = state.statusDefinitions[statusId] else { return false }
+        let barrierScale = statusBarrierAdjustment(statusId: statusId, target: &target, state: state)
         let chancePercent = statusApplicationChancePercent(basePercent: baseChancePercent,
                                                            statusId: statusId,
                                                            target: target,
                                                            sourceProcMultiplier: sourceProcMultiplier) * barrierScale
         guard chancePercent > 0 else { return false }
         let probability = min(1.0, chancePercent / 100.0)
-        guard context.random.nextBool(probability: probability) else { return false }
+        guard state.random.nextBool(probability: probability) else { return false }
 
         let resolvedTurns = max(0, durationTurns ?? definition.durationTurns ?? 0)
         var updated = false
@@ -103,13 +75,12 @@ extension BattleTurnEngine {
                                                             stackValue: 0))
         }
 
-        // ステータス付与のログは呼び出し元で出力する（side/indexの情報がないため）
         return true
     }
 
-    nonisolated static func hasStatus(tag: UInt8, in actor: BattleActor, context: BattleContext) -> Bool {
+    nonisolated static func hasStatus(tag: UInt8, in actor: BattleActor, state: BattleState) -> Bool {
         actor.statusEffects.contains { effect in
-            guard let definition = context.statusDefinition(for: effect) else { return false }
+            guard let definition = state.statusDefinition(for: effect) else { return false }
             return definition.tags.contains(tag)
         }
     }
@@ -118,29 +89,28 @@ extension BattleTurnEngine {
         actor.skillEffects.misc.vampiricImpulse && !actor.skillEffects.misc.vampiricSuppression
     }
 
-    nonisolated static func isActionLocked(actor: BattleActor, context: BattleContext) -> Bool {
+    nonisolated static func isActionLocked(actor: BattleActor, state: BattleState) -> Bool {
         actor.statusEffects.contains { effect in
-            guard let definition = context.statusDefinition(for: effect) else { return false }
+            guard let definition = state.statusDefinition(for: effect) else { return false }
             return definition.actionLocked ?? false
         }
     }
 
-    nonisolated static func isActionLocked(effect: AppliedStatusEffect, context: BattleContext) -> Bool {
-        context.statusDefinition(for: effect)?.actionLocked ?? false
+    nonisolated static func isActionLocked(effect: AppliedStatusEffect, state: BattleState) -> Bool {
+        state.statusDefinition(for: effect)?.actionLocked ?? false
     }
 
     nonisolated static func shouldTriggerBerserk(for actor: inout BattleActor,
-                                     context: inout BattleContext) -> Bool {
+                                     state: inout BattleState) -> Bool {
         guard let chance = actor.skillEffects.status.berserkChancePercent,
               chance > 0 else { return false }
         let scaled = chance * actor.skillEffects.combat.procChanceMultiplier
         let capped = max(0, min(100, Int(scaled.rounded(.towardZero))))
-        guard BattleRandomSystem.percentChance(capped, random: &context.random) else { return false }
-        let alreadyConfused = hasStatus(tag: statusTagConfusion, in: actor, context: context)
+        guard BattleRandomSystem.percentChance(capped, random: &state.random) else { return false }
+        let alreadyConfused = hasStatus(tag: statusTagConfusion, in: actor, state: state)
         if !alreadyConfused {
             let applied = AppliedStatusEffect(id: confusionStatusId, remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
             actor.statusEffects.append(applied)
-            // 暴走のログは呼び出し元でperformAction経由で出力する（side/indexの情報がないため）
         }
         return true
     }
@@ -148,11 +118,11 @@ extension BattleTurnEngine {
     nonisolated static func applyStatusTicks(for side: ActorSide,
                                   index: Int,
                                   actor: inout BattleActor,
-                                  context: inout BattleContext) {
-        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                                  state: inout BattleState) {
+        let actorIdx = state.actorIndex(for: side, arrayIndex: index)
         var updated: [AppliedStatusEffect] = []
         for var effect in actor.statusEffects {
-            guard let definition = context.statusDefinition(for: effect) else {
+            guard let definition = state.statusDefinition(for: effect) else {
                 updated.append(effect)
                 continue
             }
@@ -162,14 +132,14 @@ extension BattleTurnEngine {
                 let damage = max(1, Int(rawDamage.rounded()))
                 let applied = applyDamage(amount: damage, to: &actor)
                 if applied > 0 {
-                    let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
-                                                                      kind: .statusTick)
+                    let entryBuilder = state.makeActionEntryBuilder(actorId: actorIdx,
+                                                                    kind: .statusTick)
                     entryBuilder.addEffect(kind: .statusTick,
                                            target: actorIdx,
                                            value: UInt32(applied),
                                            statusId: UInt16(effect.id),
-                                           extra: UInt16(clamping: damage))
-                    context.appendActionEntry(entryBuilder.build())
+                                           extra: UInt32(clamping: damage))
+                    state.appendActionEntry(entryBuilder.build())
                 }
             }
 
@@ -178,7 +148,11 @@ extension BattleTurnEngine {
             }
 
             if effect.remainingTurns <= 0 {
-                appendStatusExpireLog(for: actor, side: side, index: index, definition: definition, context: &context)
+                appendStatusExpireLog(for: actor,
+                                      side: side,
+                                      index: index,
+                                      definition: definition,
+                                      state: &state)
                 continue
             }
 
@@ -189,7 +163,7 @@ extension BattleTurnEngine {
 
     nonisolated static func attemptInflictStatuses(from attacker: BattleActor,
                                        to defender: inout BattleActor,
-                                       context: inout BattleContext) {
+                                       state: inout BattleState) {
         guard !attacker.skillEffects.status.inflictions.isEmpty else { return }
         for inflict in attacker.skillEffects.status.inflictions {
             let baseChance = statusInflictBaseChance(for: inflict, attacker: attacker, defender: defender)
@@ -199,7 +173,7 @@ extension BattleTurnEngine {
                                    durationTurns: nil,
                                    sourceId: attacker.identifier,
                                    to: &defender,
-                                   context: &context,
+                                   state: &state,
                                    sourceProcMultiplier: attacker.skillEffects.combat.procChanceMultiplier)
         }
     }
@@ -217,44 +191,33 @@ extension BattleTurnEngine {
         return inflict.baseChancePercent
     }
 
-    // MARK: - Auto Status Cure
-
-    /// 味方が状態異常を受けた時、autoStatusCureOnAllyを持つ味方がいれば自動でキュア
-    /// - Parameters:
-    ///   - targetSide: 状態異常を受けたキャラのサイド
-    ///   - targetIndex: 状態異常を受けたキャラのインデックス
-    ///   - context: 戦闘コンテキスト
     nonisolated static func applyAutoStatusCureIfNeeded(for targetSide: ActorSide,
                                             targetIndex: Int,
-                                            context: inout BattleContext) {
-        // 対象を取得
-        guard var target = context.actor(for: targetSide, index: targetIndex),
+                                            state: inout BattleState) {
+        guard var target = state.actor(for: targetSide, index: targetIndex),
               target.isAlive,
               !target.statusEffects.isEmpty else { return }
 
-        // 同じサイドの味方でautoStatusCureOnAllyを持つキャラを探す
-        let allies: [BattleActor] = targetSide == .player ? context.players : context.enemies
+        let allies: [BattleActor] = targetSide == .player ? state.players : state.enemies
         let hasCurer = allies.enumerated().contains { index, ally in
             index != targetIndex && ally.isAlive && ally.skillEffects.status.autoStatusCureOnAlly
         }
         guard hasCurer else { return }
 
-        // 状態異常を全てクリア
         let removedStatuses = target.statusEffects
         target.statusEffects = []
-        context.updateActor(target, side: targetSide, index: targetIndex)
+        state.updateActor(target, side: targetSide, index: targetIndex)
 
-        // ログ出力
         if !removedStatuses.isEmpty {
-            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
-            let entryBuilder = context.makeActionEntryBuilder(actorId: targetIdx,
-                                                              kind: .statusRecover)
+            let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+            let entryBuilder = state.makeActionEntryBuilder(actorId: targetIdx,
+                                                            kind: .statusRecover)
             for status in removedStatuses {
                 entryBuilder.addEffect(kind: .statusRecover,
                                        target: targetIdx,
                                        statusId: UInt16(status.id))
             }
-            context.appendActionEntry(entryBuilder.build())
+            state.appendActionEntry(entryBuilder.build())
         }
     }
 }
