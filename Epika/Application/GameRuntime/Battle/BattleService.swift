@@ -16,12 +16,12 @@
 //
 // 【公開API】
 //   - resolveBattle(...) → Resolution (nonisolated)
-//     - 敵グループ生成→BattleContext構築→ターンエンジン実行
+//     - 敵グループ生成→BattleActor構築→BattleEngine実行
 //
 // 【戦闘フロー】
 //   1. BattleEnemyGroupBuilder.build: 敵グループ生成
-//   2. BattleContextBuilder.build: コンテキスト構築
-//   3. BattleTurnEngine.runBattle: ターン処理実行
+//   2. BattleContextBuilder.build: BattleActor構築
+//   3. BattleEngine.Engine.runBattle: ターン処理実行
 //   4. Resolution生成
 //
 // 【使用箇所】
@@ -113,12 +113,12 @@ enum BattleService {
         var mutablePlayers = players
         var mutableEnemies = enemies
         var mutableRandom = random
-        let battleResult = BattleTurnEngine.runBattle(players: &mutablePlayers,
-                                                      enemies: &mutableEnemies,
-                                                      statusEffects: masterData.statusEffectsById,
-                                                      skillDefinitions: masterData.skillsById,
-                                                      enemySkillDefinitions: masterData.enemySkillsById,
-                                                      random: &mutableRandom)
+        let battleResult = BattleEngine.Engine.runBattle(players: &mutablePlayers,
+                                                         enemies: &mutableEnemies,
+                                                         statusEffects: masterData.statusEffectsById,
+                                                         skillDefinitions: masterData.skillsById,
+                                                         enemySkillDefinitions: masterData.enemySkillsById,
+                                                         random: &mutableRandom)
 
         let revivedPlayers = applyBetweenFloorsResurrection(to: battleResult.players, random: &mutableRandom)
         let revivedEnemies = applyBetweenFloorsResurrection(to: battleResult.enemies, random: &mutableRandom)

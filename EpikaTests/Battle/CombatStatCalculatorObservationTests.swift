@@ -606,7 +606,6 @@ private extension CombatStatCalculatorObservationTests {
         SkillDefinition.Effect(
             index: index,
             effectType: type,
-            familyId: nil,
             parameters: parameters,
             values: values,
             arrayValues: [:]

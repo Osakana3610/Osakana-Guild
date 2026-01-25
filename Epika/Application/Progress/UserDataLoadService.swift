@@ -211,14 +211,11 @@ final class UserDataLoadService: Sendable {
 
 enum UserDataLoadError: Error, LocalizedError {
     case itemNotFoundInCache(stackKey: String)
-    case unsupportedBattleLogVersion
 
     var errorDescription: String? {
         switch self {
         case .itemNotFoundInCache(let stackKey):
             return "アイテムがキャッシュに見つかりません: \(stackKey)"
-        case .unsupportedBattleLogVersion:
-            return "旧形式の戦闘ログのため表示できません"
         }
     }
 }

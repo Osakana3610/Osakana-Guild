@@ -75,15 +75,11 @@ extension UserDataLoadService {
     func battleLogArchive(partyId: UInt8,
                           startedAt: Date,
                           occurredAt: Date) async throws -> BattleLogArchive? {
-        do {
-            return try await explorationService.battleLogArchive(
-                partyId: partyId,
-                startedAt: startedAt,
-                occurredAt: occurredAt
-            )
-        } catch ExplorationProgressService.BattleLogArchiveDecodingError.unsupportedVersion {
-            throw UserDataLoadError.unsupportedBattleLogVersion
-        }
+        return try await explorationService.battleLogArchive(
+            partyId: partyId,
+            startedAt: startedAt,
+            occurredAt: occurredAt
+        )
     }
 
     /// 指定パーティ・開始日時の探索詳細（ログ込み）を取得
