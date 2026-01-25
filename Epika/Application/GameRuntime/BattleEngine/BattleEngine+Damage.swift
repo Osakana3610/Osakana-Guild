@@ -181,6 +181,35 @@ extension BattleEngine {
                                    barrierConsumed: barrierConsumed)
     }
 
+    nonisolated static func computeReverseHealingDamage(attacker: BattleActor,
+                                         defender: inout BattleActor,
+                                         state: inout BattleState) -> (damage: Int, critical: Bool) {
+        let attackRoll = BattleRandomSystem.statMultiplier(luck: attacker.luck, random: &state.random)
+        let defenseRoll = BattleRandomSystem.statMultiplier(luck: defender.luck, random: &state.random)
+        let attackPower = Double(attacker.snapshot.magicalHealingScore) * attackRoll
+        let defensePower = degradedMagicalDefense(for: defender) * defenseRoll * 0.5
+        let isCritical = shouldTriggerCritical(attacker: attacker, defender: defender, state: &state)
+        let effectiveDefense = isCritical ? defensePower * criticalDefenseRetainedFactor : defensePower
+        var damage = max(1.0, attackPower - effectiveDefense)
+
+        damage *= reverseHealingDamageDealtModifier(for: attacker)
+        damage *= damageTakenModifier(for: defender, damageType: .magical, attacker: attacker)
+
+        if isCritical {
+            damage *= criticalDamageBonus(for: attacker)
+            damage *= defender.skillEffects.damage.criticalTakenMultiplier
+        }
+
+        let barrierMultiplier = applyBarrierIfAvailable(for: .magical, defender: &defender)
+        damage *= barrierMultiplier
+
+        if barrierMultiplier == 1.0, defender.guardActive {
+            damage *= 0.5
+        }
+
+        return (max(1, Int(damage.rounded())), isCritical)
+    }
+
     nonisolated static func computeBreathDamage(attacker: BattleActor,
                                     defender: inout BattleActor,
                                     state: inout BattleState) -> BreathDamageResult {
@@ -294,6 +323,12 @@ extension BattleEngine {
         }
 
         return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: damageType) * raceMultiplier * hpThresholdMultiplier
+    }
+
+    nonisolated static func reverseHealingDamageDealtModifier(for attacker: BattleActor) -> Double {
+        let key = modifierDealtKey(for: .magical)
+        let buffMultiplier = aggregateModifier(from: attacker.timedBuffs, key: key)
+        return buffMultiplier * attacker.skillEffects.damage.dealt.value(for: .magical)
     }
 
     nonisolated static func damageTakenModifier(for defender: BattleActor,
@@ -412,6 +447,21 @@ extension BattleEngine {
         let remainingArmor = max(0.0, 100.0 - defender.degradationPercent)
         let increment = remainingArmor * (coefficient / 100.0)
         defender.degradationPercent = min(100.0, defender.degradationPercent + increment)
+    }
+
+    @discardableResult
+    nonisolated static func applyDegradationRepairIfAvailable(to actor: inout BattleActor,
+                                                  state: inout BattleState) -> Double {
+        let minP = actor.skillEffects.misc.degradationRepairMinPercent
+        let maxP = actor.skillEffects.misc.degradationRepairMaxPercent
+        guard minP > 0, maxP >= minP else { return 0 }
+        let bonus = actor.skillEffects.misc.degradationRepairBonusPercent
+        let range = maxP - minP
+        let roll = minP + state.random.nextDouble(in: 0...range)
+        let repaired = roll * (1.0 + bonus / 100.0)
+        let before = actor.degradationPercent
+        actor.degradationPercent = max(0.0, actor.degradationPercent - repaired)
+        return max(0.0, before - actor.degradationPercent)
     }
 
     // MARK: - Buff Aggregation

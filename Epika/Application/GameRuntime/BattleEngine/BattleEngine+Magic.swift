@@ -182,6 +182,8 @@ extension BattleEngine {
                                           maxTargets: targetCount,
                                           distinct: true)
 
+        var defeatedTargets: [(ActorSide, Int)] = []
+
         for targetRef in targets {
             guard let refreshedAttacker = state.actor(for: side, index: attackerIndex),
                   refreshedAttacker.isAlive else { break }
@@ -230,6 +232,13 @@ extension BattleEngine {
                                     index: targetRef.1,
                                     state: &state,
                                     entryBuilder: entryBuilder)
+                    defeatedTargets.append(targetRef)
+                } else {
+                    let attackerRef = BattleEngine.reference(for: side, index: attackerIndex)
+                    state.reactionQueue.append(.init(
+                        event: .selfDamagedMagical(side: targetRef.0, actorIndex: targetRef.1, attacker: attackerRef),
+                        depth: 0
+                    ))
                 }
             }
 
@@ -264,6 +273,25 @@ extension BattleEngine {
             appendSkillEffectLogs(events, state: &state, turnOverride: state.turn)
         }
 
+        for targetRef in defeatedTargets {
+            handleDefeatReactions(targetSide: targetRef.0,
+                                  targetIndex: targetRef.1,
+                                  killerSide: side,
+                                  killerIndex: attackerIndex,
+                                  state: &state,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: true)
+        }
+
+        state.reactionQueue.append(.init(
+            event: .selfMagicAttack(side: side, casterIndex: attackerIndex),
+            depth: 0
+        ))
+        state.reactionQueue.append(.init(
+            event: .allyMagicAttack(side: side, casterIndex: attackerIndex),
+            depth: 0
+        ))
+
         return true
     }
 
@@ -288,6 +316,8 @@ extension BattleEngine {
                                           allowFriendlyTargets: allowFriendlyTargets,
                                           maxTargets: 6,
                                           distinct: true)
+
+        var defeatedTargets: [(ActorSide, Int)] = []
 
         for targetRef in targets {
             guard let refreshedAttacker = state.actor(for: side, index: attackerIndex),
@@ -323,6 +353,7 @@ extension BattleEngine {
                                 index: targetRef.1,
                                 state: &state,
                                 entryBuilder: entryBuilder)
+                defeatedTargets.append(targetRef)
             }
         }
 
@@ -330,6 +361,16 @@ extension BattleEngine {
         if !pendingBarrierLogs.isEmpty {
             let events = pendingBarrierLogs.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
             appendSkillEffectLogs(events, state: &state, turnOverride: state.turn)
+        }
+
+        for targetRef in defeatedTargets {
+            handleDefeatReactions(targetSide: targetRef.0,
+                                  targetIndex: targetRef.1,
+                                  killerSide: side,
+                                  killerIndex: attackerIndex,
+                                  state: &state,
+                                  reactionDepth: 0,
+                                  allowsReactionEvents: true)
         }
 
         return true

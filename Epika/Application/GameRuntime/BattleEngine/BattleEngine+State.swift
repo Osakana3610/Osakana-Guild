@@ -54,4 +54,20 @@ extension BattleEngine.BattleState {
     nonisolated func statusDefinition(for effect: AppliedStatusEffect) -> StatusEffectDefinition? {
         statusDefinitions[effect.id]
     }
+
+    nonisolated func skillDefinition(for skillId: UInt16) -> SkillDefinition? {
+        skillDefinitions[skillId]
+    }
+
+    nonisolated func enemySkillDefinition(for skillId: UInt16) -> EnemySkillDefinition? {
+        enemySkillDefinitions[skillId]
+    }
+
+    nonisolated mutating func incrementEnemySkillUsage(actorIdentifier: String, skillId: UInt16) {
+        enemySkillUsage[actorIdentifier, default: [:]][skillId, default: 0] += 1
+    }
+
+    nonisolated func enemySkillUsageCount(actorIdentifier: String, skillId: UInt16) -> Int {
+        enemySkillUsage[actorIdentifier]?[skillId] ?? 0
+    }
 }

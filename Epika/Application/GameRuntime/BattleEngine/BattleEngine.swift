@@ -53,14 +53,39 @@ enum BattleEngine {
         }
     }
 
+    nonisolated static func reference(for side: ActorSide, index: Int) -> ActorReference {
+        switch side {
+        case .player:
+            return .player(index)
+        case .enemy:
+            return .enemy(index)
+        }
+    }
+
     // MARK: - BattleState
 
     /// 新エンジン用の戦闘状態
     nonisolated struct BattleState: Sendable {
+        struct CachedFlags: Sendable {
+            let hasShuffleEnemyOrderSkill: Bool
+            let playerSacrificeIndices: [Int]
+            let enemySacrificeIndices: [Int]
+            struct EnemyActionDebuffSource: Sendable {
+                let side: ActorSide
+                let index: Int
+                let chancePercent: Double
+                let reduction: Int
+            }
+            let enemyActionDebuffs: [EnemyActionDebuffSource]
+            let playerRescueCandidateIndices: [Int]
+            let enemyRescueCandidateIndices: [Int]
+        }
+
         // 参照データ（不変）
         let statusDefinitions: [UInt8: StatusEffectDefinition]
         let skillDefinitions: [UInt16: SkillDefinition]
         let enemySkillDefinitions: [UInt16: EnemySkillDefinition]
+        let cached: CachedFlags
 
         // 戦闘状態（可変）
         var players: [BattleActor]
@@ -69,6 +94,13 @@ enum BattleEngine {
         var initialHP: [UInt16: UInt32]
         var turn: Int
         var random: GameRandomSource
+        var enemySkillUsage: [String: [UInt16: Int]]
+        var reactionQueue: [PendingReaction]
+        var actionOrderSnapshot: [ActorReference: ActionOrderSnapshot]
+
+        // MARK: - 定数
+        nonisolated static let maxTurns = 20
+        nonisolated static let martialAccuracyMultiplier: Double = 1.6
 
         nonisolated init(players: [BattleActor],
              enemies: [BattleActor],
@@ -85,6 +117,63 @@ enum BattleEngine {
             self.actionEntries = []
             self.initialHP = [:]
             self.turn = 0
+            self.enemySkillUsage = [:]
+            self.reactionQueue = []
+            self.actionOrderSnapshot = [:]
+            self.cached = Self.buildCachedFlags(players: players, enemies: enemies)
+        }
+
+        private nonisolated static func buildCachedFlags(players: [BattleActor], enemies: [BattleActor]) -> CachedFlags {
+            let hasShuffleEnemyOrderSkill = players.contains { $0.skillEffects.combat.actionOrderShuffleEnemy }
+
+            let playerSacrificeIndices = players.enumerated()
+                .filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }
+                .map { $0.offset }
+            let enemySacrificeIndices = enemies.enumerated()
+                .filter { $0.element.skillEffects.resurrection.sacrificeInterval != nil }
+                .map { $0.offset }
+
+            var enemyActionDebuffs: [CachedFlags.EnemyActionDebuffSource] = []
+            for (index, player) in players.enumerated() {
+                for debuff in player.skillEffects.combat.enemyActionDebuffs {
+                    enemyActionDebuffs.append(.init(side: .player,
+                                                    index: index,
+                                                    chancePercent: debuff.baseChancePercent,
+                                                    reduction: debuff.reduction))
+                }
+            }
+
+            let playerRescueCandidateIndices = players.enumerated()
+                .filter { !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
+                .sorted { lhs, rhs in
+                    let leftSlot = lhs.element.formationSlot
+                    let rightSlot = rhs.element.formationSlot
+                    if leftSlot == rightSlot {
+                        return lhs.offset < rhs.offset
+                    }
+                    return leftSlot < rightSlot
+                }
+                .map { $0.offset }
+            let enemyRescueCandidateIndices = enemies.enumerated()
+                .filter { !$0.element.skillEffects.resurrection.rescueCapabilities.isEmpty }
+                .sorted { lhs, rhs in
+                    let leftSlot = lhs.element.formationSlot
+                    let rightSlot = rhs.element.formationSlot
+                    if leftSlot == rightSlot {
+                        return lhs.offset < rhs.offset
+                    }
+                    return leftSlot < rightSlot
+                }
+                .map { $0.offset }
+
+            return CachedFlags(
+                hasShuffleEnemyOrderSkill: hasShuffleEnemyOrderSkill,
+                playerSacrificeIndices: playerSacrificeIndices,
+                enemySacrificeIndices: enemySacrificeIndices,
+                enemyActionDebuffs: enemyActionDebuffs,
+                playerRescueCandidateIndices: playerRescueCandidateIndices,
+                enemyRescueCandidateIndices: enemyRescueCandidateIndices
+            )
         }
 
         // MARK: - 初期HP記録
@@ -190,6 +279,62 @@ enum BattleEngine {
         nonisolated var isDefeat: Bool {
             players.allSatisfy { !$0.isAlive }
         }
+
+        nonisolated var isBattleOver: Bool {
+            isVictory || isDefeat
+        }
+    }
+
+    // MARK: - Reaction Event
+
+    nonisolated enum ReactionEvent: Sendable {
+        case allyDefeated(side: ActorSide, fallenIndex: Int, killer: ActorReference?)
+        case selfEvadePhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+        case selfDamagedPhysical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+        case selfDamagedMagical(side: ActorSide, actorIndex: Int, attacker: ActorReference)
+        case allyDamagedPhysical(side: ActorSide, defenderIndex: Int, attacker: ActorReference)
+        case selfKilledEnemy(side: ActorSide, actorIndex: Int, killedEnemy: ActorReference)
+        case allyMagicAttack(side: ActorSide, casterIndex: Int)
+        case selfAttackNoKill(side: ActorSide, actorIndex: Int, target: ActorReference)
+        case selfMagicAttack(side: ActorSide, casterIndex: Int)
+
+        nonisolated var defenderIndex: Int? {
+            switch self {
+            case .allyDefeated(_, let fallenIndex, _): return fallenIndex
+            case .selfEvadePhysical(_, let actorIndex, _): return actorIndex
+            case .selfDamagedPhysical(_, let actorIndex, _): return actorIndex
+            case .selfDamagedMagical(_, let actorIndex, _): return actorIndex
+            case .allyDamagedPhysical(_, let defenderIndex, _): return defenderIndex
+            case .selfKilledEnemy: return nil
+            case .allyMagicAttack: return nil
+            case .selfAttackNoKill: return nil
+            case .selfMagicAttack: return nil
+            }
+        }
+
+        nonisolated var attackerReference: ActorReference? {
+            switch self {
+            case .allyDefeated(_, _, let killer): return killer
+            case .selfEvadePhysical(_, _, let attacker): return attacker
+            case .selfDamagedPhysical(_, _, let attacker): return attacker
+            case .selfDamagedMagical(_, _, let attacker): return attacker
+            case .allyDamagedPhysical(_, _, let attacker): return attacker
+            case .selfKilledEnemy(_, _, let killedEnemy): return killedEnemy
+            case .allyMagicAttack: return nil
+            case .selfAttackNoKill(_, _, let target): return target
+            case .selfMagicAttack: return nil
+            }
+        }
+    }
+
+    nonisolated struct PendingReaction: Sendable {
+        let event: ReactionEvent
+        let depth: Int
+    }
+
+    nonisolated struct ActionOrderSnapshot: Sendable {
+        let speed: Int
+        let tiebreaker: Double
     }
 
     // MARK: - ActionRequest
@@ -308,7 +453,7 @@ enum BattleEngine {
                 random: random
             )
 
-            let result = executeBaseline(&state)
+            let result = BattleEngine.executeMainLoop(&state)
 
             // 結果を呼び出し元に反映
             players = state.players
@@ -318,32 +463,41 @@ enum BattleEngine {
             return result
         }
 
-        /// 未実装パイプラインの最小実行
-        /// - 目的: ログと結果の器を返し、並行検証の足場を用意する
-        private nonisolated static func executeBaseline(_ state: inout BattleState) -> Result {
-            state.buildInitialHP()
+    }
+}
 
-            state.appendSimpleEntry(kind: .battleStart)
+// MARK: - ActionCandidate / PhysicalAttackOverrides
+extension BattleEngine {
+    struct ActionCandidate {
+        let category: ActionKind
+        let weight: Int
+    }
 
-            for index in state.enemies.indices {
-                let actorIndex = state.actorIndex(for: .enemy, arrayIndex: index)
-                state.appendSimpleEntry(kind: .enemyAppear,
-                                        actorId: actorIndex,
-                                        effectKind: .enemyAppear)
-            }
+    nonisolated struct PhysicalAttackOverrides {
+        var physicalAttackScoreOverride: Int?
+        var ignoreDefense: Bool
+        var forceHit: Bool
+        var criticalChancePercentMultiplier: Double
+        var maxAttackMultiplier: Double
+        var doubleDamageAgainstRaceIds: Set<UInt8>
 
-            if state.isVictory {
-                state.appendSimpleEntry(kind: .victory)
-                return state.makeResult(BattleLog.outcomeVictory)
-            }
-
-            if state.isDefeat {
-                state.appendSimpleEntry(kind: .defeat)
-                return state.makeResult(BattleLog.outcomeDefeat)
-            }
-
-            state.appendSimpleEntry(kind: .retreat)
-            return state.makeResult(BattleLog.outcomeRetreat)
+        nonisolated init(physicalAttackScoreOverride: Int? = nil,
+             ignoreDefense: Bool = false,
+             forceHit: Bool = false,
+             criticalChancePercentMultiplier: Double = 1.0,
+             maxAttackMultiplier: Double = 1.0,
+             doubleDamageAgainstRaceIds: Set<UInt8> = []) {
+            self.physicalAttackScoreOverride = physicalAttackScoreOverride
+            self.ignoreDefense = ignoreDefense
+            self.forceHit = forceHit
+            self.criticalChancePercentMultiplier = criticalChancePercentMultiplier
+            self.maxAttackMultiplier = maxAttackMultiplier
+            self.doubleDamageAgainstRaceIds = doubleDamageAgainstRaceIds
         }
+    }
+
+    struct FollowUpDescriptor {
+        let hitCount: Int
+        let damageMultiplier: Double
     }
 }

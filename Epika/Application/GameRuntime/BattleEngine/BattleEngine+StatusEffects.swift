@@ -85,6 +85,82 @@ extension BattleEngine {
         }
     }
 
+    nonisolated static func hasVampiricImpulse(actor: BattleActor) -> Bool {
+        actor.skillEffects.misc.vampiricImpulse && !actor.skillEffects.misc.vampiricSuppression
+    }
+
+    nonisolated static func isActionLocked(actor: BattleActor, state: BattleState) -> Bool {
+        actor.statusEffects.contains { effect in
+            guard let definition = state.statusDefinition(for: effect) else { return false }
+            return definition.actionLocked ?? false
+        }
+    }
+
+    nonisolated static func isActionLocked(effect: AppliedStatusEffect, state: BattleState) -> Bool {
+        state.statusDefinition(for: effect)?.actionLocked ?? false
+    }
+
+    nonisolated static func shouldTriggerBerserk(for actor: inout BattleActor,
+                                     state: inout BattleState) -> Bool {
+        guard let chance = actor.skillEffects.status.berserkChancePercent,
+              chance > 0 else { return false }
+        let scaled = chance * actor.skillEffects.combat.procChanceMultiplier
+        let capped = max(0, min(100, Int(scaled.rounded(.towardZero))))
+        guard BattleRandomSystem.percentChance(capped, random: &state.random) else { return false }
+        let alreadyConfused = hasStatus(tag: statusTagConfusion, in: actor, state: state)
+        if !alreadyConfused {
+            let applied = AppliedStatusEffect(id: confusionStatusId, remainingTurns: 3, source: actor.identifier, stackValue: 0.0)
+            actor.statusEffects.append(applied)
+        }
+        return true
+    }
+
+    nonisolated static func applyStatusTicks(for side: ActorSide,
+                                  index: Int,
+                                  actor: inout BattleActor,
+                                  state: inout BattleState) {
+        let actorIdx = state.actorIndex(for: side, arrayIndex: index)
+        var updated: [AppliedStatusEffect] = []
+        for var effect in actor.statusEffects {
+            guard let definition = state.statusDefinition(for: effect) else {
+                updated.append(effect)
+                continue
+            }
+
+            if let percent = definition.tickDamagePercent, percent != 0, actor.isAlive {
+                let rawDamage = Double(actor.snapshot.maxHP) * Double(percent) / 100.0
+                let damage = max(1, Int(rawDamage.rounded()))
+                let applied = applyDamage(amount: damage, to: &actor)
+                if applied > 0 {
+                    let entryBuilder = state.makeActionEntryBuilder(actorId: actorIdx,
+                                                                    kind: .statusTick)
+                    entryBuilder.addEffect(kind: .statusTick,
+                                           target: actorIdx,
+                                           value: UInt32(applied),
+                                           statusId: UInt16(effect.id),
+                                           extra: UInt16(clamping: damage))
+                    state.appendActionEntry(entryBuilder.build())
+                }
+            }
+
+            if effect.remainingTurns > 0 {
+                effect.remainingTurns -= 1
+            }
+
+            if effect.remainingTurns <= 0 {
+                appendStatusExpireLog(for: actor,
+                                      side: side,
+                                      index: index,
+                                      definition: definition,
+                                      state: &state)
+                continue
+            }
+
+            updated.append(effect)
+        }
+        actor.statusEffects = updated
+    }
+
     nonisolated static func attemptInflictStatuses(from attacker: BattleActor,
                                        to defender: inout BattleActor,
                                        state: inout BattleState) {

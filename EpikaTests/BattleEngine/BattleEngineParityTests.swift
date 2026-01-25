@@ -77,24 +77,38 @@ nonisolated final class BattleEngineParityTests: XCTestCase {
         XCTAssertEqual(result.battleLog.entries.last?.declaration.kind, .defeat)
     }
 
-    func testNewEngineOutcomeRetreatWhenNoImmediateOutcome() {
+    func testParity_OutcomeMatchesLegacyForSimpleBattle() {
         let player = TestActorBuilder.makePlayer(luck: 18)
         let enemy = TestActorBuilder.makeEnemy(luck: 18)
-        var players = [player]
-        var enemies = [enemy]
-        var random = GameRandomSource(seed: 7)
+        var legacyPlayers = [player]
+        var legacyEnemies = [enemy]
+        var legacyRandom = GameRandomSource(seed: 7)
 
-        let result = BattleEngine.Engine.runBattle(
-            players: &players,
-            enemies: &enemies,
+        let legacy = BattleTurnEngine.runBattle(
+            players: &legacyPlayers,
+            enemies: &legacyEnemies,
             statusEffects: [:],
             skillDefinitions: [:],
-            random: &random
+            random: &legacyRandom
         )
 
-        XCTAssertEqual(result.outcome, BattleLog.outcomeRetreat,
-            "未実装パイプラインの暫定結果は撤退とする")
-        XCTAssertEqual(result.battleLog.entries.last?.declaration.kind, .retreat)
+        var newPlayers = [player]
+        var newEnemies = [enemy]
+        var newRandom = GameRandomSource(seed: 7)
+
+        let newResult = BattleEngine.Engine.runBattle(
+            players: &newPlayers,
+            enemies: &newEnemies,
+            statusEffects: [:],
+            skillDefinitions: [:],
+            random: &newRandom
+        )
+
+        XCTAssertEqual(legacy.outcome, newResult.outcome,
+                       "戦闘結果が新旧で一致すること")
+        XCTAssertEqual(legacy.battleLog.turns, newResult.battleLog.turns,
+                       "ターン数が新旧で一致すること")
+        assertActionEntriesEqual(legacy.battleLog.entries, newResult.battleLog.entries)
     }
 
     func testParity_PhysicalAttackBasicMatchesLegacy() {
@@ -452,6 +466,250 @@ nonisolated final class BattleEngineParityTests: XCTestCase {
         assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
         XCTAssertEqual(legacyContext.enemies.first?.statusEffects, newState.enemies.first?.statusEffects)
     }
+
+    func testParity_ReactionPriorityOrderMatchesLegacy() {
+        let counter = makeReaction(trigger: .selfDamagedPhysical, skillId: 2101)
+        let retaliation = makeReaction(trigger: .allyDefeated, target: .killer, skillId: 2102)
+        let followUp = makeReaction(trigger: .selfKilledEnemy, skillId: 2103)
+
+        var skillEffects = BattleActor.SkillEffects.neutral
+        skillEffects.combat.reactions = [counter, retaliation, followUp]
+
+        let player = TestActorBuilder.makeReactionTestPlayer(skillEffects: skillEffects)
+        let enemy = TestActorBuilder.makeReactionTestEnemy(hp: 200000)
+
+        var legacyContext = BattleContext(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+        let legacyPlayerRef = BattleContext.reference(for: .player, index: 0)
+        legacyContext.actionOrderSnapshot[legacyPlayerRef] = BattleContext.ActionOrderSnapshot(speed: 50, tiebreaker: 0.5)
+
+        let legacyEnemyRef = BattleContext.reference(for: .enemy, index: 0)
+        legacyContext.reactionQueue = [
+            BattleContext.PendingReaction(
+                event: .selfDamagedPhysical(side: .player, actorIndex: 0, attacker: legacyEnemyRef),
+                depth: 0
+            ),
+            BattleContext.PendingReaction(
+                event: .allyDefeated(side: .player, fallenIndex: 0, killer: legacyEnemyRef),
+                depth: 0
+            ),
+            BattleContext.PendingReaction(
+                event: .selfKilledEnemy(side: .player, actorIndex: 0, killedEnemy: legacyEnemyRef),
+                depth: 0
+            )
+        ]
+        BattleTurnEngine.processReactionQueue(context: &legacyContext)
+
+        var newState = BattleEngine.BattleState(
+            players: [player],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 42)
+        )
+        let newPlayerRef = BattleEngine.reference(for: .player, index: 0)
+        newState.actionOrderSnapshot[newPlayerRef] = BattleEngine.ActionOrderSnapshot(speed: 50, tiebreaker: 0.5)
+
+        let newEnemyRef = BattleEngine.reference(for: .enemy, index: 0)
+        newState.reactionQueue = [
+            BattleEngine.PendingReaction(
+                event: .selfDamagedPhysical(side: .player, actorIndex: 0, attacker: newEnemyRef),
+                depth: 0
+            ),
+            BattleEngine.PendingReaction(
+                event: .allyDefeated(side: .player, fallenIndex: 0, killer: newEnemyRef),
+                depth: 0
+            ),
+            BattleEngine.PendingReaction(
+                event: .selfKilledEnemy(side: .player, actorIndex: 0, killedEnemy: newEnemyRef),
+                depth: 0
+            )
+        ]
+        BattleEngine.processReactionQueue(state: &newState)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+    }
+
+    func testParity_ReactionCounterAfterPhysicalAttackMatchesLegacy() {
+        let reaction = makeReaction(trigger: .selfDamagedPhysical, skillId: 2101)
+
+        var defenderEffects = BattleActor.SkillEffects.neutral
+        defenderEffects.combat.reactions = [reaction]
+
+        let defender = TestActorBuilder.makeReactionTestPlayer(skillEffects: defenderEffects, partyMemberId: 1)
+        let attacker = TestActorBuilder.makeReactionTestEnemy(hp: 200000)
+
+        var legacyContext = BattleContext(
+            players: [defender],
+            enemies: [attacker],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 31)
+        )
+
+        let legacyDidAttack = BattleTurnEngine.executePhysicalAttack(
+            for: .enemy,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidAttack)
+        BattleTurnEngine.processReactionQueue(context: &legacyContext)
+
+        var newState = BattleEngine.BattleState(
+            players: [defender],
+            enemies: [attacker],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 31)
+        )
+
+        let newDidAttack = BattleEngine.executePhysicalAttack(
+            for: .enemy,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidAttack)
+        BattleEngine.processReactionQueue(state: &newState)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.players[0].currentHP, newState.players[0].currentHP)
+        XCTAssertEqual(legacyContext.enemies[0].currentHP, newState.enemies[0].currentHP)
+    }
+
+    func testParity_ReactionFollowUpAfterNoKillMatchesLegacy() {
+        let reaction = makeReaction(trigger: .selfAttackNoKill, skillId: 2201)
+
+        var attackerEffects = BattleActor.SkillEffects.neutral
+        attackerEffects.combat.reactions = [reaction]
+
+        let attacker = TestActorBuilder.makeReactionTestPlayer(skillEffects: attackerEffects, partyMemberId: 1)
+        let defender = TestActorBuilder.makeReactionTestEnemy(hp: 200000)
+
+        var legacyContext = BattleContext(
+            players: [attacker],
+            enemies: [defender],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 37)
+        )
+
+        let legacyDidAttack = BattleTurnEngine.executePhysicalAttack(
+            for: .player,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidAttack)
+        BattleTurnEngine.processReactionQueue(context: &legacyContext)
+
+        var newState = BattleEngine.BattleState(
+            players: [attacker],
+            enemies: [defender],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 37)
+        )
+
+        let newDidAttack = BattleEngine.executePhysicalAttack(
+            for: .player,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets()
+        )
+        XCTAssertTrue(newDidAttack)
+        BattleEngine.processReactionQueue(state: &newState)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.players[0].currentHP, newState.players[0].currentHP)
+        XCTAssertEqual(legacyContext.enemies[0].currentHP, newState.enemies[0].currentHP)
+    }
+
+    func testParity_RescueOnDefeatMatchesLegacy() {
+        let rescueCapability = BattleActor.SkillEffects.RescueCapability(
+            usesPriestMagic: false,
+            minLevel: 1,
+            guaranteed: true
+        )
+
+        var rescuerEffects = BattleActor.SkillEffects.neutral
+        rescuerEffects.resurrection.rescueCapabilities = [rescueCapability]
+
+        var victim = TestActorBuilder.makePlayer(maxHP: 100,
+                                                 physicalDefenseScore: 0,
+                                                 hitScore: 10,
+                                                 evasionScore: 0,
+                                                 luck: 18,
+                                                 partyMemberId: 1)
+        victim.currentHP = 10
+
+        let rescuer = TestActorBuilder.makePlayer(maxHP: 1000,
+                                                  physicalDefenseScore: 100,
+                                                  hitScore: 50,
+                                                  evasionScore: 0,
+                                                  luck: 18,
+                                                  skillEffects: rescuerEffects,
+                                                  level: 1,
+                                                  partyMemberId: 2)
+
+        let enemy = TestActorBuilder.makeEnemy(maxHP: 10000,
+                                               physicalAttackScore: 20000,
+                                               hitScore: 200,
+                                               evasionScore: 0,
+                                               luck: 18)
+
+        var legacyContext = BattleContext(
+            players: [victim, rescuer],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 5)
+        )
+
+        let legacyDidAttack = BattleTurnEngine.executePhysicalAttack(
+            for: .enemy,
+            attackerIndex: 0,
+            context: &legacyContext,
+            forcedTargets: BattleContext.SacrificeTargets(playerTarget: 0, enemyTarget: nil)
+        )
+        XCTAssertTrue(legacyDidAttack)
+        BattleTurnEngine.processReactionQueue(context: &legacyContext)
+
+        var newState = BattleEngine.BattleState(
+            players: [victim, rescuer],
+            enemies: [enemy],
+            statusDefinitions: [:],
+            skillDefinitions: [:],
+            enemySkillDefinitions: [:],
+            random: GameRandomSource(seed: 5)
+        )
+
+        let newDidAttack = BattleEngine.executePhysicalAttack(
+            for: .enemy,
+            attackerIndex: 0,
+            state: &newState,
+            forcedTargets: BattleEngine.SacrificeTargets(playerTarget: 0, enemyTarget: nil)
+        )
+        XCTAssertTrue(newDidAttack)
+        BattleEngine.processReactionQueue(state: &newState)
+
+        assertActionEntriesEqual(legacyContext.actionEntries, newState.actionEntries)
+        XCTAssertEqual(legacyContext.players[0].currentHP, newState.players[0].currentHP)
+        XCTAssertEqual(legacyContext.players[0].isAlive, newState.players[0].isAlive)
+    }
     
     private func assertActionEntriesEqual(_ lhs: [BattleActionEntry],
                                           _ rhs: [BattleActionEntry],
@@ -522,6 +780,34 @@ nonisolated final class BattleEngineParityTests: XCTestCase {
             healPercentOfMaxHP: healPercentOfMaxHP,
             castCondition: castCondition,
             description: ""
+        )
+    }
+
+    private func makeReaction(
+        trigger: BattleActor.SkillEffects.Reaction.Trigger = .selfDamagedPhysical,
+        target: BattleActor.SkillEffects.Reaction.Target = .attacker,
+        chancePercent: Double = 100,
+        damageType: BattleDamageType = .physical,
+        attackCountMultiplier: Double = 1.0,
+        criticalChancePercentMultiplier: Double = 1.0,
+        requiresMartial: Bool = false,
+        requiresAllyBehind: Bool = false,
+        displayName: String = "テスト反撃",
+        skillId: UInt16 = 1202
+    ) -> BattleActor.SkillEffects.Reaction {
+        BattleActor.SkillEffects.Reaction(
+            identifier: "test.reaction",
+            displayName: displayName,
+            skillId: skillId,
+            trigger: trigger,
+            target: target,
+            damageType: damageType,
+            baseChancePercent: chancePercent,
+            attackCountMultiplier: attackCountMultiplier,
+            criticalChancePercentMultiplier: criticalChancePercentMultiplier,
+            accuracyMultiplier: 1.0,
+            requiresMartial: requiresMartial,
+            requiresAllyBehind: requiresAllyBehind
         )
     }
 
