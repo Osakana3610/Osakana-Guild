@@ -272,8 +272,6 @@ struct EncounterDetailView: View {
             cachedTurnSummaries = buildTurnSummaries()
 
             actorIcons = iconMap
-        } catch EncounterDetailError.unsupportedBattleLogVersion {
-            battleLogError = EncounterDetailError.unsupportedBattleLogVersion.errorDescription
         } catch {
             battleLogError = EncounterDetailError.decodingFailed.errorDescription
         }
@@ -292,8 +290,6 @@ struct EncounterDetailView: View {
                 startedAt: startedAt,
                 occurredAt: occurredAt
             )
-        } catch UserDataLoadError.unsupportedBattleLogVersion {
-            throw EncounterDetailError.unsupportedBattleLogVersion
         } catch {
             throw EncounterDetailError.decodingFailed
         }
@@ -302,7 +298,6 @@ struct EncounterDetailView: View {
     enum EncounterDetailError: LocalizedError {
         case battleLogNotAvailable
         case decodingFailed
-        case unsupportedBattleLogVersion
 
         var errorDescription: String? {
             switch self {
@@ -310,8 +305,6 @@ struct EncounterDetailView: View {
                 return "戦闘ログを取得できませんでした"
             case .decodingFailed:
                 return "戦闘ログのデコードに失敗しました"
-            case .unsupportedBattleLogVersion:
-                return "旧形式の戦闘ログのため表示できません"
             }
         }
     }
