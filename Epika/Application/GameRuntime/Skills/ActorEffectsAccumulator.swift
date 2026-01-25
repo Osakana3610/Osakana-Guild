@@ -152,15 +152,13 @@ struct ActorEffectsAccumulator {
             coverRowsBehindCondition: misc.coverRowsBehindCondition
         )
 
-        let modifiers = modifierSnapshot()
         return BattleActor.SkillEffects(
             damage: damageGroup,
             spell: spellGroup,
             combat: combatGroup,
             status: statusGroup,
             resurrection: resurrectionGroup,
-            misc: miscGroup,
-            modifierSnapshot: modifiers
+            misc: miscGroup
         )
     }
 }
@@ -318,144 +316,4 @@ struct MiscAccumulator {
     var targetingWeight: Double = 1.0
     var coverRowsBehind: Bool = false
     var coverRowsBehindCondition: SkillConditionType?
-}
-
-// MARK: - Modifier Snapshot
-
-extension ActorEffectsAccumulator {
-    nonisolated func modifierSnapshot() -> SkillModifierSnapshot {
-        var snapshot = SkillModifierSnapshot.empty
-
-        func key(_ kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) -> SkillModifierKey {
-            SkillModifierKey(kind: kind, slot: slot, param: param)
-        }
-
-        func setPercent(_ value: Double, kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) {
-            guard value != 0 else { return }
-            snapshot.additivePercents[key(kind, slot: slot, param: param)] = value
-        }
-
-        func setMultiplier(_ value: Double, kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) {
-            guard value != 1.0 else { return }
-            snapshot.multipliers[key(kind, slot: slot, param: param)] = value
-        }
-
-        func setMax(_ value: Double, kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) {
-            guard value != 0 else { return }
-            snapshot.maxValues[key(kind, slot: slot, param: param)] = value
-        }
-
-        func setMin(_ value: Double, kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) {
-            snapshot.minValues[key(kind, slot: slot, param: param)] = value
-        }
-
-        func setInt(_ value: Int, kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) {
-            guard value != 0 else { return }
-            snapshot.intValues[key(kind, slot: slot, param: param)] = value
-        }
-
-        func setFlag(_ enabled: Bool, kind: SkillEffectType, slot: UInt8 = 0, param: UInt16 = 0) {
-            guard enabled else { return }
-            snapshot.flags.insert(key(kind, slot: slot, param: param))
-        }
-
-        // Damage
-        for (rawType, percent) in damage.dealtPercentByType {
-            setPercent(percent, kind: .damageDealtPercent, param: UInt16(rawType))
-        }
-        for (rawType, multiplier) in damage.dealtMultiplierByType {
-            setMultiplier(multiplier, kind: .damageDealtMultiplier, param: UInt16(rawType))
-        }
-        for (rawType, percent) in damage.takenPercentByType {
-            setPercent(percent, kind: .damageTakenPercent, param: UInt16(rawType))
-        }
-        for (rawType, multiplier) in damage.takenMultiplierByType {
-            setMultiplier(multiplier, kind: .damageTakenMultiplier, param: UInt16(rawType))
-        }
-        for (raceId, multiplier) in damage.targetMultipliers {
-            setMultiplier(multiplier, kind: .damageDealtMultiplierAgainst, param: UInt16(raceId))
-        }
-        setPercent(damage.criticalDamagePercent, kind: .criticalDamagePercent)
-        setMultiplier(damage.criticalDamageMultiplier, kind: .criticalDamageMultiplier)
-        setMultiplier(damage.criticalDamageTakenMultiplier, kind: .criticalDamageTakenMultiplier)
-        setMultiplier(damage.penetrationDamageTakenMultiplier, kind: .penetrationDamageTakenMultiplier)
-        setPercent(damage.martialBonusPercent, kind: .martialBonusPercent)
-        setMultiplier(damage.martialBonusMultiplier, kind: .martialBonusMultiplier)
-        if let minHitScale = damage.minHitScale {
-            setMin(minHitScale, kind: .minHitScale)
-        }
-        setMax(damage.magicNullifyChancePercent, kind: .magicNullifyChancePercent)
-        setPercent(damage.levelComparisonDamageTakenPercent, kind: .levelComparisonDamageTaken)
-
-        // Spell
-        setPercent(spell.spellPowerPercent, kind: .spellPowerPercent)
-        setMultiplier(spell.spellPowerMultiplier, kind: .spellPowerMultiplier)
-        for (spellId, multiplier) in spell.spellSpecificMultipliers {
-            setMultiplier(multiplier, kind: .spellSpecificMultiplier, param: UInt16(spellId))
-        }
-        for (spellId, multiplier) in spell.spellSpecificTakenMultipliers {
-            setMultiplier(multiplier, kind: .spellSpecificTakenMultiplier, param: UInt16(spellId))
-        }
-        setInt(spell.breathExtraCharges, kind: .breathVariant)
-        setFlag(spell.magicCriticalEnabled, kind: .magicCriticalEnable)
-
-        // Combat
-        setMultiplier(combat.procChanceMultiplier, kind: .procMultiplier)
-        for (target, addPercent) in combat.procRateAdditives {
-            setPercent(addPercent, kind: .procRate, slot: 1, param: UInt16(target))
-        }
-        for (target, multiplier) in combat.procRateMultipliers {
-            setMultiplier(multiplier, kind: .procRate, slot: 3, param: UInt16(target))
-        }
-        setMultiplier(combat.actionOrderMultiplier, kind: .actionOrderMultiplier)
-        setFlag(combat.actionOrderShuffle, kind: .actionOrderShuffle)
-        setFlag(combat.actionOrderShuffleEnemy, kind: .actionOrderShuffleEnemy)
-        setMultiplier(combat.counterAttackEvasionMultiplier, kind: .counterAttackEvasionMultiplier)
-        setFlag(combat.parryEnabled, kind: .parry, slot: 0)
-        setMax(combat.parryBonusPercent, kind: .parry, slot: 1)
-        setFlag(combat.shieldBlockEnabled, kind: .shieldBlock, slot: 0)
-        setMax(combat.shieldBlockBonusPercent, kind: .shieldBlock, slot: 1)
-        for (damageType, charges) in combat.barrierCharges {
-            setInt(charges, kind: .barrier, param: UInt16(damageType))
-        }
-        for (damageType, charges) in combat.guardBarrierCharges {
-            setInt(charges, kind: .barrierOnGuard, param: UInt16(damageType))
-        }
-        setPercent(combat.enemySingleActionSkipChancePercent, kind: .enemySingleActionSkipChance)
-        setFlag(combat.firstStrike, kind: .firstStrike)
-
-        // Status
-        for (statusId, resistance) in status.statusResistances {
-            setPercent(resistance.additivePercent, kind: .statusResistancePercent, param: UInt16(statusId))
-            setMultiplier(resistance.multiplier, kind: .statusResistanceMultiplier, param: UInt16(statusId))
-        }
-        if let berserkChance = status.berserkChancePercent {
-            setMax(berserkChance, kind: .berserk)
-        }
-        setFlag(status.autoStatusCureOnAlly, kind: .autoStatusCureOnAlly)
-
-        // Misc
-        setPercent(misc.endOfTurnHealingPercent, kind: .endOfTurnHealing)
-        setPercent(misc.endOfTurnSelfHPPercent, kind: .endOfTurnSelfHPPercent)
-        if let dodgeCap = misc.dodgeCapMax {
-            setMax(dodgeCap, kind: .dodgeCap)
-        }
-        setPercent(misc.absorptionPercent, kind: .absorption, slot: 0)
-        setPercent(misc.absorptionCapPercent, kind: .absorption, slot: 1)
-        setFlag(misc.reverseHealingEnabled, kind: .reverseHealing)
-        setFlag(misc.autoDegradationRepair, kind: .autoDegradationRepair)
-        setMax(misc.degradationRepairMinPercent, kind: .degradationRepair, slot: 0)
-        setMax(misc.degradationRepairMaxPercent, kind: .degradationRepair, slot: 1)
-        setPercent(misc.degradationRepairBonusPercent, kind: .degradationRepairBoost)
-        if let retreatTurn = misc.retreatTurn {
-            setMin(Double(retreatTurn), kind: .retreatAtTurn, slot: 0)
-        }
-        if let retreatChance = misc.retreatChancePercent {
-            setMax(retreatChance, kind: .retreatAtTurn, slot: 1)
-        }
-        setMultiplier(misc.targetingWeight, kind: .targetingWeight)
-        setFlag(misc.coverRowsBehind, kind: .coverRowsBehind, slot: 0)
-
-        return snapshot
-    }
 }

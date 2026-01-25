@@ -154,7 +154,7 @@ struct CombatExecutionService {
         // スナップショットとソートキーを一緒に作成
         let snapshotsWithKeys: [(snapshot: BattleParticipantSnapshot, enemyId: UInt16, suffixIndex: Int)] = resolution.enemyActors.enumerated().map { (index, actor) in
             // actorIndex = (arrayIndex + 1) * 1000 + enemyMasterIndex
-            // BattleEngineのactorIndex規則と一致する必要がある
+            // これは BattleContext.actorIndex の計算方法と一致する必要がある
             let actorIndex = UInt16(index + 1) * 1000 + (actor.enemyMasterIndex ?? 0)
             let enemyId = actor.enemyMasterIndex ?? 0
             let slotIndex = extractSlotIndex(from: actor.identifier)

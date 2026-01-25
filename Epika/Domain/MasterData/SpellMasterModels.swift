@@ -25,7 +25,7 @@
 //   - SpellDefinition.CastCondition: 詠唱条件（none/lowHP/allyDead/enemyCount/targetHalfHP）
 //
 // 【使用箇所】
-//   - BattleEngine: 呪文詠唱・効果処理
+//   - BattleTurnEngine.Magic: 呪文詠唱・効果処理
 //   - SkillRuntimeEffectCompiler.Spell: 呪文スキルのコンパイル
 //   - CharacterSkillsSection: 習得呪文表示
 //

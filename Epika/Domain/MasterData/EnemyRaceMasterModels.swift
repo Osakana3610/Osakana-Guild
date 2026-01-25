@@ -17,7 +17,7 @@
 //   - EnemyDefinition.resistanceOverrides で個別調整可能
 //
 // 【使用箇所】
-//   - BattleEngine: ダメージ計算時の耐性参照
+//   - BattleTurnEngine: ダメージ計算時の耐性参照
 //   - MonsterEncyclopediaView: 種族分類表示
 //
 // ==============================================================================

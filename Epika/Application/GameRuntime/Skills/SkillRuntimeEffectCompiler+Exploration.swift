@@ -31,9 +31,9 @@ extension SkillRuntimeEffectCompiler {
                 switch payload.effectType {
                 case .explorationTimeMultiplier:
                     let multiplier = try payload.requireValue(.multiplier, skillId: skill.id, effectIndex: effect.index)
-                    let dungeonId = payload.parameters[.dungeonName].map { UInt16($0) }
+                    // dungeonId/dungeonNameはパラメータではなくfamilyIdで識別するため、ここでは直接設定しない
                     modifiers.addEntry(multiplier: multiplier,
-                                       dungeonId: dungeonId,
+                                       dungeonId: nil,
                                        dungeonName: nil)
                 case .absorption,
                      .actionOrderMultiplier,

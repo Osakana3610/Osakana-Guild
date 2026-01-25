@@ -1,65 +1,83 @@
 // ==============================================================================
-// BattleEngine+Magic.swift
+// BattleTurnEngine.Magic.swift
 // Epika
 // ==============================================================================
 //
 // 【責務】
-//   - 新戦闘エンジンの魔法/ブレス処理
-//   - 呪文選択、回復/バフ/浄化の実行
+//   - 魔法攻撃と回復魔法の実行
+//   - ブレス攻撃の実行
+//   - 呪文の選択とチャージ消費
+//   - 状態異常付与判定
+//
+// 【本体との関係】
+//   - BattleTurnEngineの拡張ファイル
+//   - 魔法系行動に特化した機能を提供
+//
+// 【主要機能】
+//   - executePriestMagic: 僧侶魔法（回復）の実行
+//   - executeMageMagic: 魔法使い魔法（攻撃）の実行
+//   - executeBreath: ブレス攻撃の実行
+//   - selectMageSpell、selectPriestHealingSpell: 呪文選択
+//   - spellPowerModifier: 呪文威力修正
+//
+// 【使用箇所】
+//   - BattleTurnEngine.TurnLoop（行動実行時）
 //
 // ==============================================================================
 
 import Foundation
 
-extension BattleEngine {
+// MARK: - Magic (Priest & Mage)
+extension BattleTurnEngine {
     @discardableResult
     nonisolated static func executePriestMagic(for side: ActorSide,
                                    casterIndex: Int,
-                                   state: inout BattleState,
-                                   forcedTargets _: SacrificeTargets) -> Bool {
-        guard var caster = state.actor(for: side, index: casterIndex), caster.isAlive else { return false }
+                                   context: inout BattleContext,
+                                   forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard var caster = context.actor(for: side, index: casterIndex), caster.isAlive else { return false }
 
-        let allies: [BattleActor] = side == .player ? state.players : state.enemies
-        let opponents: [BattleActor] = side == .player ? state.enemies : state.players
+        let allies: [BattleActor] = side == .player ? context.players : context.enemies
+        let opponents: [BattleActor] = side == .player ? context.enemies : context.players
 
+        // 発動条件を満たす呪文をtier重みで抽選
         let available = caster.spells.priest.filter { caster.actionResources.hasAvailableCharges(for: $0.id) }
-        guard let spell = selectSpellByTierWeight(in: available,
-                                                  matching: { canCastSpell($0, caster: caster, allies: allies, opponents: opponents) },
-                                                  random: &state.random) else {
+        guard let spell = selectSpellByTierWeight(in: available, matching: { canCastSpell($0, caster: caster, allies: allies, opponents: opponents) }, random: &context.random) else {
             return false
         }
 
         guard caster.actionResources.consume(spellId: spell.id) else { return false }
-        state.updateActor(caster, side: side, index: casterIndex)
+        context.updateActor(caster, side: side, index: casterIndex)
 
         switch spell.category {
         case .healing:
+            // castConditionがtargetHalfHPの場合、HP半分以下の味方のみを対象にする
             let requireHalfHP = spell.castCondition.flatMap { SpellDefinition.CastCondition(rawValue: $0) } == .targetHalfHP
             if spell.targeting == .partyAllies {
                 performPartyHealingSpell(casterSide: side,
                                          casterIndex: casterIndex,
                                          spell: spell,
                                          requireHalfHP: requireHalfHP,
-                                         state: &state)
+                                         context: &context)
             } else {
                 guard let targetIndex = selectHealingTargetIndex(in: allies, requireHalfHP: requireHalfHP) else { return true }
                 performPriestMagic(casterSide: side,
                                    casterIndex: casterIndex,
                                    targetIndex: targetIndex,
                                    spell: spell,
-                                   state: &state)
+                                   context: &context)
             }
         case .buff:
             performBuffSpell(casterSide: side,
                              casterIndex: casterIndex,
                              spell: spell,
-                             state: &state)
+                             context: &context)
         case .cleanse:
             _ = performCleanseSpell(casterSide: side,
                                     casterIndex: casterIndex,
                                     spell: spell,
-                                    state: &state)
+                                    context: &context)
         case .damage, .status:
+            // 僧侶はdamage/statusを持たない想定だが、念のため
             break
         }
 
@@ -70,56 +88,61 @@ extension BattleEngine {
                                    casterIndex: Int,
                                    targetIndex: Int,
                                    spell: SpellDefinition,
-                                   state: inout BattleState) {
-        guard let caster = state.actor(for: casterSide, index: casterIndex) else { return }
-        guard var target = state.actor(for: casterSide, index: targetIndex) else { return }
+                                   context: inout BattleContext) {
+        guard let caster = context.actor(for: casterSide, index: casterIndex) else { return }
+        guard var target = context.actor(for: casterSide, index: targetIndex) else { return }
 
         let healAmount: Int
         if let percent = spell.healPercentOfMaxHP {
+            // 最大HPの割合で回復（フルヒールなど）
             healAmount = target.snapshot.maxHP * percent / 100
         } else {
-            let baseAmount = computeHealingAmount(caster: caster, target: target, spellId: spell.id, state: &state)
+            // 通常の回復計算 + healMultiplier
+            let baseAmount = computeHealingAmount(caster: caster, target: target, spellId: spell.id, context: &context)
             let multiplier = spell.healMultiplier ?? 1.0
             healAmount = Int(Double(baseAmount) * multiplier)
         }
         let missing = target.snapshot.maxHP - target.currentHP
         let applied = min(healAmount, missing)
         target.currentHP += applied
-        state.updateActor(target, side: casterSide, index: targetIndex)
+        context.updateActor(target, side: casterSide, index: targetIndex)
 
-        let casterIdx = state.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        let targetIdx = state.actorIndex(for: casterSide, arrayIndex: targetIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: casterIdx,
-                                                        kind: .priestMagic,
-                                                        skillIndex: UInt16(spell.id))
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+                                                          kind: .priestMagic,
+                                                          skillIndex: UInt16(spell.id))
         entryBuilder.addEffect(kind: .magicHeal, target: targetIdx, value: UInt32(applied))
-        state.appendActionEntry(entryBuilder.build())
+        context.appendActionEntry(entryBuilder.build())
     }
 
     nonisolated static func performPartyHealingSpell(casterSide: ActorSide,
                                          casterIndex: Int,
                                          spell: SpellDefinition,
                                          requireHalfHP: Bool,
-                                         state: inout BattleState) {
-        guard let caster = state.actor(for: casterSide, index: casterIndex) else { return }
-        let allies: [BattleActor] = casterSide == .player ? state.players : state.enemies
+                                         context: inout BattleContext) {
+        guard let caster = context.actor(for: casterSide, index: casterIndex) else { return }
+        let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
         let targetIndices = selectHealingTargetIndices(in: allies, requireHalfHP: requireHalfHP)
         guard !targetIndices.isEmpty else { return }
 
-        let casterIdx = state.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: casterIdx,
-                                                        kind: .priestMagic,
-                                                        skillIndex: UInt16(spell.id))
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+                                                          kind: .priestMagic,
+                                                          skillIndex: UInt16(spell.id))
         var didApply = false
 
         for targetIndex in targetIndices {
-            guard var target = state.actor(for: casterSide, index: targetIndex) else { continue }
+            guard var target = context.actor(for: casterSide, index: targetIndex) else { continue }
 
             let healAmount: Int
             if let percent = spell.healPercentOfMaxHP {
                 healAmount = target.snapshot.maxHP * percent / 100
             } else {
-                let baseAmount = computeHealingAmount(caster: caster, target: target, spellId: spell.id, state: &state)
+                let baseAmount = computeHealingAmount(caster: caster,
+                                                      target: target,
+                                                      spellId: spell.id,
+                                                      context: &context)
                 let multiplier = spell.healMultiplier ?? 1.0
                 healAmount = Int(Double(baseAmount) * multiplier)
             }
@@ -127,57 +150,59 @@ extension BattleEngine {
             guard missing > 0 else { continue }
             let applied = min(healAmount, missing)
             target.currentHP += applied
-            state.updateActor(target, side: casterSide, index: targetIndex)
+            context.updateActor(target, side: casterSide, index: targetIndex)
 
-            let targetIdx = state.actorIndex(for: casterSide, arrayIndex: targetIndex)
+            let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .magicHeal, target: targetIdx, value: UInt32(applied))
             didApply = true
         }
 
         if didApply {
-            state.appendActionEntry(entryBuilder.build())
+            context.appendActionEntry(entryBuilder.build())
         }
     }
 
     @discardableResult
     nonisolated static func executeMageMagic(for side: ActorSide,
                                  attackerIndex: Int,
-                                 state: inout BattleState,
-                                 forcedTargets _: SacrificeTargets) -> Bool {
-        guard var attacker = state.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
+                                 context: inout BattleContext,
+                                 forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
 
-        let allies: [BattleActor] = side == .player ? state.players : state.enemies
-        let opponents: [BattleActor] = side == .player ? state.enemies : state.players
+        let allies: [BattleActor] = side == .player ? context.players : context.enemies
+        let opponents: [BattleActor] = side == .player ? context.enemies : context.players
 
+        // 発動条件を満たす呪文をtier重みで抽選
         let available = attacker.spells.mage.filter { attacker.actionResources.hasAvailableCharges(for: $0.id) }
-        guard let spell = selectSpellByTierWeight(in: available,
-                                                  matching: { canCastSpell($0, caster: attacker, allies: allies, opponents: opponents) },
-                                                  random: &state.random) else {
+        guard let spell = selectSpellByTierWeight(in: available, matching: { canCastSpell($0, caster: attacker, allies: allies, opponents: opponents) }, random: &context.random) else {
             return false
         }
 
         guard attacker.actionResources.consume(spellId: spell.id) else { return false }
-        state.updateActor(attacker, side: side, index: attackerIndex)
+        context.updateActor(attacker, side: side, index: attackerIndex)
 
-        let attackerIdx = state.actorIndex(for: side, arrayIndex: attackerIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: attackerIdx,
-                                                        kind: .mageMagic,
-                                                        skillIndex: UInt16(spell.id))
+        // 魔法名付きログを追加
+        let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+                                                          kind: .mageMagic,
+                                                          skillIndex: UInt16(spell.id))
         var pendingSkillEffectLogs: [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)] = []
         var pendingBarrierLogs: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
+        // buffの場合は専用処理
         if spell.category == .buff {
             performBuffSpell(casterSide: side,
                              casterIndex: attackerIndex,
                              spell: spell,
-                             state: &state)
+                             context: &context)
             return true
         }
 
-        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, state: state)
+        // damage/statusの処理
+        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targetCount = statusTargetCount(for: attacker, spell: spell)
         let targets = selectStatusTargets(attackerSide: side,
-                                          state: &state,
+                                          context: &context,
                                           allowFriendlyTargets: allowFriendlyTargets,
                                           maxTargets: targetCount,
                                           distinct: true)
@@ -185,18 +210,18 @@ extension BattleEngine {
         var defeatedTargets: [(ActorSide, Int)] = []
 
         for targetRef in targets {
-            guard let refreshedAttacker = state.actor(for: side, index: attackerIndex),
+            guard let refreshedAttacker = context.actor(for: side, index: attackerIndex),
                   refreshedAttacker.isAlive else { break }
-            guard var target = state.actor(for: targetRef.0, index: targetRef.1),
+            guard var target = context.actor(for: targetRef.0, index: targetRef.1),
                   target.isAlive else { continue }
 
-            let targetIdx = state.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+            let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
             if spell.category == .damage {
                 let result = computeMagicalDamage(attacker: refreshedAttacker,
                                                   defender: &target,
                                                   spellId: spell.id,
                                                   allowMagicCritical: refreshedAttacker.skillEffects.spell.magicCriticalEnabled,
-                                                  state: &state)
+                                                  context: &context)
                 if result.wasNullified {
                     pendingSkillEffectLogs.append((kind: .magicNullify,
                                                    actorId: targetIdx,
@@ -205,7 +230,7 @@ extension BattleEngine {
                 if result.wasCritical {
                     entryBuilder.addEffect(kind: .skillEffect,
                                            target: targetIdx,
-                                           extra: UInt32(SkillEffectLogKind.magicCritical.rawValue))
+                                           extra: SkillEffectLogKind.magicCritical.rawValue)
                 }
                 if result.guardBarrierConsumed > 0 {
                     for _ in 0..<result.guardBarrierConsumed {
@@ -220,30 +245,34 @@ extension BattleEngine {
                 let applied = applyDamage(amount: result.damage, to: &target)
                 applyMagicDegradation(to: &target, spellId: spell.id, caster: refreshedAttacker)
 
-                state.updateActor(target, side: targetRef.0, index: targetRef.1)
+                context.updateActor(target, side: targetRef.0, index: targetRef.1)
                 entryBuilder.addEffect(kind: .magicDamage,
                                        target: targetIdx,
                                        value: UInt32(applied),
-                                       extra: UInt32(clamping: result.damage))
+                                       extra: UInt16(clamping: result.damage))
 
                 if !target.isAlive {
                     appendDefeatLog(for: target,
                                     side: targetRef.0,
                                     index: targetRef.1,
-                                    state: &state,
+                                    context: &context,
                                     entryBuilder: entryBuilder)
                     defeatedTargets.append(targetRef)
                 } else {
-                    let attackerRef = BattleEngine.reference(for: side, index: attackerIndex)
-                    state.reactionQueue.append(.init(
-                        event: .selfDamagedMagical(side: targetRef.0, actorIndex: targetRef.1, attacker: attackerRef),
+                    // 被ダメ時リアクション（魔法反撃）
+                    let attackerRef = BattleContext.reference(for: side, index: attackerIndex)
+                    context.reactionQueue.append(.init(
+                        event: .selfDamagedMagical(side: targetRef.0,
+                                                   actorIndex: targetRef.1,
+                                                   attacker: attackerRef),
                         depth: 0
                     ))
                 }
             }
 
+            // 呪文にステータスIDが設定されている場合は付与を試みる
             if let statusId = spell.statusId {
-                guard var freshTarget = state.actor(for: targetRef.0, index: targetRef.1),
+                guard var freshTarget = context.actor(for: targetRef.0, index: targetRef.1),
                       freshTarget.isAlive else { continue }
                 let baseChance = baseStatusChancePercent(spell: spell, caster: refreshedAttacker, target: freshTarget)
                 let statusApplied = attemptApplyStatus(statusId: statusId,
@@ -251,12 +280,13 @@ extension BattleEngine {
                                                        durationTurns: nil,
                                                        sourceId: refreshedAttacker.identifier,
                                                        to: &freshTarget,
-                                                       state: &state,
+                                                       context: &context,
                                                        sourceProcMultiplier: refreshedAttacker.skillEffects.combat.procChanceMultiplier)
-                state.updateActor(freshTarget, side: targetRef.0, index: targetRef.1)
+                context.updateActor(freshTarget, side: targetRef.0, index: targetRef.1)
 
+                // autoStatusCureOnAlly判定
                 if statusApplied {
-                    applyAutoStatusCureIfNeeded(for: targetRef.0, targetIndex: targetRef.1, state: &state)
+                    applyAutoStatusCureIfNeeded(for: targetRef.0, targetIndex: targetRef.1, context: &context)
                     entryBuilder.addEffect(kind: .statusInflict, target: targetIdx, statusId: UInt16(statusId))
                 } else {
                     entryBuilder.addEffect(kind: .statusResist, target: targetIdx, statusId: UInt16(statusId))
@@ -264,13 +294,13 @@ extension BattleEngine {
             }
         }
 
-        state.appendActionEntry(entryBuilder.build())
+        context.appendActionEntry(entryBuilder.build())
         if !pendingSkillEffectLogs.isEmpty {
-            appendSkillEffectLogs(pendingSkillEffectLogs, state: &state, turnOverride: state.turn)
+            appendSkillEffectLogs(pendingSkillEffectLogs, context: &context, turnOverride: context.turn)
         }
         if !pendingBarrierLogs.isEmpty {
             let events = pendingBarrierLogs.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
-            appendSkillEffectLogs(events, state: &state, turnOverride: state.turn)
+            appendSkillEffectLogs(events, context: &context, turnOverride: context.turn)
         }
 
         for targetRef in defeatedTargets {
@@ -278,16 +308,19 @@ extension BattleEngine {
                                   targetIndex: targetRef.1,
                                   killerSide: side,
                                   killerIndex: attackerIndex,
-                                  state: &state,
+                                  context: &context,
                                   reactionDepth: 0,
                                   allowsReactionEvents: true)
         }
 
-        state.reactionQueue.append(.init(
+        // 自分の魔法攻撃イベント
+        context.reactionQueue.append(.init(
             event: .selfMagicAttack(side: side, casterIndex: attackerIndex),
             depth: 0
         ))
-        state.reactionQueue.append(.init(
+
+        // 味方が魔法攻撃したイベントを発火（追撃用）
+        context.reactionQueue.append(.init(
             event: .allyMagicAttack(side: side, casterIndex: attackerIndex),
             depth: 0
         ))
@@ -298,21 +331,21 @@ extension BattleEngine {
     @discardableResult
     nonisolated static func executeBreath(for side: ActorSide,
                               attackerIndex: Int,
-                              state: inout BattleState,
-                              forcedTargets _: SacrificeTargets) -> Bool {
-        guard var attacker = state.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
+                              context: inout BattleContext,
+                              forcedTargets: BattleContext.SacrificeTargets) -> Bool {
+        guard var attacker = context.actor(for: side, index: attackerIndex), attacker.isAlive else { return false }
         guard attacker.actionResources.consume(.breath) else { return false }
 
-        state.updateActor(attacker, side: side, index: attackerIndex)
+        context.updateActor(attacker, side: side, index: attackerIndex)
 
-        let attackerIdx = state.actorIndex(for: side, arrayIndex: attackerIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: attackerIdx,
-                                                        kind: .breath)
+        let attackerIdx = context.actorIndex(for: side, arrayIndex: attackerIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: attackerIdx,
+                                                          kind: .breath)
         var pendingBarrierLogs: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
-        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, state: state)
+        let allowFriendlyTargets = hasStatus(tag: statusTagConfusion, in: attacker, context: context)
         let targets = selectStatusTargets(attackerSide: side,
-                                          state: &state,
+                                          context: &context,
                                           allowFriendlyTargets: allowFriendlyTargets,
                                           maxTargets: 6,
                                           distinct: true)
@@ -320,47 +353,47 @@ extension BattleEngine {
         var defeatedTargets: [(ActorSide, Int)] = []
 
         for targetRef in targets {
-            guard let refreshedAttacker = state.actor(for: side, index: attackerIndex),
+            guard let refreshedAttacker = context.actor(for: side, index: attackerIndex),
                   refreshedAttacker.isAlive else { break }
-            guard var target = state.actor(for: targetRef.0, index: targetRef.1),
+            guard var target = context.actor(for: targetRef.0, index: targetRef.1),
                   target.isAlive else { continue }
 
-            let result = computeBreathDamage(attacker: refreshedAttacker, defender: &target, state: &state)
+            let result = computeBreathDamage(attacker: refreshedAttacker, defender: &target, context: &context)
             if result.guardBarrierConsumed > 0 {
-                let targetIdx = state.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+                let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
                 for _ in 0..<result.guardBarrierConsumed {
                     pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierGuardBreath))
                 }
             } else if result.barrierConsumed > 0 {
-                let targetIdx = state.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+                let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
                 for _ in 0..<result.barrierConsumed {
                     pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierBreath))
                 }
             }
             let applied = applyDamage(amount: result.damage, to: &target)
 
-            state.updateActor(target, side: targetRef.0, index: targetRef.1)
+            context.updateActor(target, side: targetRef.0, index: targetRef.1)
 
-            let targetIdx = state.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
+            let targetIdx = context.actorIndex(for: targetRef.0, arrayIndex: targetRef.1)
             entryBuilder.addEffect(kind: .breathDamage,
                                    target: targetIdx,
                                    value: UInt32(applied),
-                                   extra: UInt32(clamping: result.damage))
+                                   extra: UInt16(clamping: result.damage))
 
             if !target.isAlive {
                 appendDefeatLog(for: target,
                                 side: targetRef.0,
                                 index: targetRef.1,
-                                state: &state,
+                                context: &context,
                                 entryBuilder: entryBuilder)
                 defeatedTargets.append(targetRef)
             }
         }
 
-        state.appendActionEntry(entryBuilder.build())
+        context.appendActionEntry(entryBuilder.build())
         if !pendingBarrierLogs.isEmpty {
             let events = pendingBarrierLogs.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
-            appendSkillEffectLogs(events, state: &state, turnOverride: state.turn)
+            appendSkillEffectLogs(events, context: &context, turnOverride: context.turn)
         }
 
         for targetRef in defeatedTargets {
@@ -368,7 +401,7 @@ extension BattleEngine {
                                   targetIndex: targetRef.1,
                                   killerSide: side,
                                   killerIndex: attackerIndex,
-                                  state: &state,
+                                  context: &context,
                                   reactionDepth: 0,
                                   allowsReactionEvents: true)
         }
@@ -388,6 +421,7 @@ extension BattleEngine {
         return highestTierSpell(in: available)
     }
 
+    /// 回復呪文のみを選択（救出処理用）
     nonisolated static func selectPriestHealingSpell(for actor: BattleActor) -> SpellDefinition? {
         let available = actor.spells.priest.filter { actor.actionResources.hasAvailableCharges(for: $0.id) }
         guard !available.isEmpty else { return nil }
@@ -409,6 +443,7 @@ extension BattleEngine {
         }
     }
 
+    /// tierを重みとした抽選で呪文を選択（高tierほど選ばれやすい）
     nonisolated static func selectSpellByTierWeight(in spells: [SpellDefinition],
                                         matching predicate: ((SpellDefinition) -> Bool)? = nil,
                                         random: inout GameRandomSource) -> SpellDefinition? {
@@ -421,6 +456,7 @@ extension BattleEngine {
         guard !filtered.isEmpty else { return nil }
         if filtered.count == 1 { return filtered[0] }
 
+        // tierを重みとして抽選
         let totalWeight = filtered.reduce(0) { $0 + $1.tier }
         guard totalWeight > 0 else { return filtered[0] }
 
@@ -464,23 +500,28 @@ extension BattleEngine {
         return modifier
     }
 
+    // MARK: - Buff Spell
+
+    /// バフ呪文を味方全体に適用
     nonisolated static func performBuffSpell(casterSide: ActorSide,
                                  casterIndex: Int,
                                  spell: SpellDefinition,
-                                 state: inout BattleState) {
-        let allies: [BattleActor] = casterSide == .player ? state.players : state.enemies
-        let casterIdx = state.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: casterIdx,
-                                                        kind: spell.school == .mage ? .mageMagic : .priestMagic,
-                                                        skillIndex: UInt16(spell.id))
+                                 context: inout BattleContext) {
+        let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+                                                          kind: spell.school == .mage ? .mageMagic : .priestMagic,
+                                                          skillIndex: UInt16(spell.id))
 
+        // spell.buffsからstatModifiersを構築
         var statModifiers: [String: Double] = [:]
         for buff in spell.buffs {
             let key = buff.type.identifier + "Multiplier"
             statModifiers[key] = buff.multiplier
         }
 
-        let permanentDuration = 20 * 5
+        // 戦闘中永続（戦闘は最大20ターンなので99で十分）
+        let permanentDuration = BattleContext.maxTurns * 5
         let timedBuff = TimedBuff(
             id: "spell.\(spell.id)",
             baseDuration: permanentDuration,
@@ -492,20 +533,25 @@ extension BattleEngine {
         for index in allies.indices where allies[index].isAlive {
             var target = allies[index]
             upsert(buff: timedBuff, into: &target.timedBuffs)
-            state.updateActor(target, side: casterSide, index: index)
-            let targetIdx = state.actorIndex(for: casterSide, arrayIndex: index)
+            context.updateActor(target, side: casterSide, index: index)
+            let targetIdx = context.actorIndex(for: casterSide, arrayIndex: index)
             entryBuilder.addEffect(kind: .buffApply, target: targetIdx)
         }
 
-        state.appendActionEntry(entryBuilder.build())
+        context.appendActionEntry(entryBuilder.build())
     }
 
+    // MARK: - Cleanse Spell
+
+    /// 状態異常を持つ味方1人の状態異常を1つ除去
+    /// - Returns: 対象がいなければfalse
     nonisolated static func performCleanseSpell(casterSide: ActorSide,
                                     casterIndex: Int,
                                     spell: SpellDefinition,
-                                    state: inout BattleState) -> Bool {
-        let allies: [BattleActor] = casterSide == .player ? state.players : state.enemies
+                                    context: inout BattleContext) -> Bool {
+        let allies: [BattleActor] = casterSide == .player ? context.players : context.enemies
 
+        // 状態異常を持つ味方のインデックスを収集
         var afflictedIndices: [Int] = []
         for index in allies.indices where allies[index].isAlive && !allies[index].statusEffects.isEmpty {
             afflictedIndices.append(index)
@@ -513,31 +559,37 @@ extension BattleEngine {
 
         guard !afflictedIndices.isEmpty else { return false }
 
-        let targetIndex = afflictedIndices[state.random.nextInt(in: 0...(afflictedIndices.count - 1))]
+        // ランダムに1人選択
+        let targetIndex = afflictedIndices[context.random.nextInt(in: 0...(afflictedIndices.count - 1))]
         var target = allies[targetIndex]
 
-        let statusIndex = state.random.nextInt(in: 0...(target.statusEffects.count - 1))
+        // ランダムに1つの状態異常を除去
+        let statusIndex = context.random.nextInt(in: 0...(target.statusEffects.count - 1))
         let removedStatus = target.statusEffects.remove(at: statusIndex)
-        state.updateActor(target, side: casterSide, index: targetIndex)
+        context.updateActor(target, side: casterSide, index: targetIndex)
 
-        let casterIdx = state.actorIndex(for: casterSide, arrayIndex: casterIndex)
-        let targetIdx = state.actorIndex(for: casterSide, arrayIndex: targetIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: casterIdx,
-                                                        kind: spell.school == .mage ? .mageMagic : .priestMagic,
-                                                        skillIndex: UInt16(spell.id))
+        let casterIdx = context.actorIndex(for: casterSide, arrayIndex: casterIndex)
+        let targetIdx = context.actorIndex(for: casterSide, arrayIndex: targetIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: casterIdx,
+                                                          kind: spell.school == .mage ? .mageMagic : .priestMagic,
+                                                          skillIndex: UInt16(spell.id))
         entryBuilder.addEffect(kind: .statusRecover,
                                target: targetIdx,
                                statusId: UInt16(removedStatus.id))
-        state.appendActionEntry(entryBuilder.build())
+        context.appendActionEntry(entryBuilder.build())
         return true
     }
 
+    // MARK: - Spell Condition Checks
+
+    /// 呪文の発動条件をチェック
     nonisolated static func canCastSpell(_ spell: SpellDefinition,
                              caster: BattleActor,
                              allies: [BattleActor],
                              opponents: [BattleActor]) -> Bool {
         switch spell.category {
         case .healing:
+            // castConditionがtargetHalfHPの場合、HP半分以下の味方がいるかチェック
             if let conditionRaw = spell.castCondition,
                let condition = SpellDefinition.CastCondition(rawValue: conditionRaw),
                condition == .targetHalfHP {
@@ -569,23 +621,5 @@ extension BattleEngine {
             }
         }
         return true
-    }
-
-    private nonisolated static func upsert(buff: TimedBuff, into buffs: inout [TimedBuff]) {
-        guard let index = buffs.firstIndex(where: { $0.id == buff.id }) else {
-            buffs.append(buff)
-            return
-        }
-
-        let currentLevel = buffs[index].baseDuration
-        let incomingLevel = buff.baseDuration
-
-        if incomingLevel > currentLevel {
-            buffs[index] = buff
-        } else if incomingLevel == currentLevel {
-            var merged = buff
-            merged.remainingTurns = max(buffs[index].remainingTurns, buff.remainingTurns)
-            buffs[index] = merged
-        }
     }
 }

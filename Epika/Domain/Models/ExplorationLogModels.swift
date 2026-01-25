@@ -117,8 +117,9 @@ struct CompactLogEntry: Codable, Sendable {
 }
 
 /// rawValue固定の意図:
-/// 各caseに明示的なrawValue（0, 1, 10, 20...）を指定し、
-/// ログのシリアライズ/解析で安定した識別子として扱う。
+/// 各caseに明示的なrawValue（0, 1, 10, 20...）を指定することで、
+/// 将来新しいテンプレートを追加しても既存のrawValueが変わらず、
+/// 保存済みログの後方互換性を維持できる。
 /// 新規追加時は既存値の間（例: 24と30の間に25〜29）または末尾に配置する。
 enum LogTemplate: UInt8, Codable, Sendable {
     // === 戦闘開始・終了 ===

@@ -34,7 +34,7 @@
 //   - actionPreferences, hitPoints: 互換用
 //
 // 【使用箇所】
-//   - BattleActor: 戦闘中のキャラクター状態
+//   - BattleContext: 戦闘中のキャラクター状態
 //   - RuntimePartyState: パーティメンバー
 //   - UI層: キャラクター表示
 //

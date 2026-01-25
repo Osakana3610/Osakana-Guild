@@ -100,6 +100,7 @@ extension Generator {
                 skill_id INTEGER NOT NULL,
                 effect_index INTEGER NOT NULL,
                 kind INTEGER NOT NULL,
+                family_id INTEGER,
                 PRIMARY KEY (skill_id, effect_index),
                 FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
             );

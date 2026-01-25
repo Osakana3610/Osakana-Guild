@@ -23,7 +23,7 @@
 //
 // 【使用箇所】
 //   - BattleService: 戦闘処理での敵ステータス参照
-//   - BattleEngine: 敵の行動選択・ダメージ計算
+//   - BattleTurnEngine: 敵の行動選択・ダメージ計算
 //   - DropService: ドロップアイテム決定
 //   - MonsterEncyclopediaView: 図鑑表示
 //

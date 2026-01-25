@@ -268,7 +268,7 @@ struct BattleLogRenderer {
                                            statusNames: [UInt16: String]) -> String? {
         switch entry.declaration.kind {
         case .skillEffect:
-            return resolveSkillEffectLabel(extra: entry.declaration.extra.map(UInt32.init),
+            return resolveSkillEffectLabel(extra: entry.declaration.extra,
                                            location: "BattleLogRenderer.resolveActionLabel")
         case .priestMagic, .mageMagic:
             guard let skillIndex = entry.declaration.skillIndex,
@@ -642,8 +642,7 @@ struct BattleLogRenderer {
                                            statusNames: [UInt16: String]) -> String? {
         switch effect.kind {
         case .skillEffect:
-            let extra = effect.extra ?? entry.declaration.extra.map(UInt32.init)
-            return resolveSkillEffectLabel(extra: extra,
+            return resolveSkillEffectLabel(extra: effect.extra ?? entry.declaration.extra,
                                            location: "BattleLogRenderer.resolveEffectLabel")
         case .statusInflict, .statusResist, .statusRecover, .statusTick:
             guard let statusId = effect.statusId,
@@ -804,13 +803,9 @@ struct BattleLogRenderer {
         }
     }
 
-    private static func resolveSkillEffectLabel(extra: UInt32?, location: String) -> String? {
-        guard let extra else {
-            reportMissing("SkillEffectLogKind missing/invalid: \(String(describing: extra))", location: location)
-            return nil
-        }
-        let rawValue = UInt16(clamping: extra)
-        guard let kind = SkillEffectLogKind(rawValue: rawValue) else {
+    private static func resolveSkillEffectLabel(extra: UInt16?, location: String) -> String? {
+        guard let extra,
+              let kind = SkillEffectLogKind(rawValue: extra) else {
             reportMissing("SkillEffectLogKind missing/invalid: \(String(describing: extra))", location: location)
             return nil
         }
@@ -910,21 +905,7 @@ struct BattleLogRenderer {
     }
 
     private static func displayValue(for effect: BattleActionEntry.Effect) -> Int? {
-        switch effect.kind {
-        case .physicalDamage,
-             .magicDamage,
-             .breathDamage,
-             .statusTick,
-             .statusRampage,
-             .enemySpecialDamage,
-             .damageSelf:
-            if let raw = effect.extra {
-                return Int(raw)
-            }
-        default:
-            break
-        }
-        return effect.value.map { Int($0) }
+        effect.value.map { Int($0) }
     }
 
     private static func formatAmount(_ value: Int) -> String {

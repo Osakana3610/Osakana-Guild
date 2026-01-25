@@ -1,0 +1,723 @@
+// ==============================================================================
+// BattleTurnEngine.TurnEnd.swift
+// Epika
+// ==============================================================================
+//
+// 【責務】
+//   - ターン終了時の処理全般
+//   - 状態異常のティック処理
+//   - 自動蘇生とネクロマンサー
+//   - 救助処理
+//   - 時限バフの管理
+//   - 呪文チャージの自動回復
+//
+// 【本体との関係】
+//   - BattleTurnEngineの拡張ファイル
+//   - ターン終了処理に特化した機能を提供
+//
+// 【主要機能】
+//   - endOfTurn: ターン終了処理のエントリポイント
+//   - processEndOfTurn: 個別Actorのターン終了処理
+//   - applyEndOfTurnPartyHealing: パーティ全体回復
+//   - applyNecromancerIfNeeded: ネクロマンサー蘇生
+//   - applyEndOfTurnResurrectionIfNeeded: 自動蘇生
+//   - attemptRescue: 救助処理
+//   - applyTimedBuffTriggers: 時限バフの発動
+//   - updateTimedBuffs: 時限バフの更新
+//   - applySpellChargeRecovery: 呪文チャージ回復
+//
+// 【使用箇所】
+//   - BattleTurnEngine.TurnLoop（ターン終了時）
+//
+// ==============================================================================
+
+import Foundation
+
+// MARK: - Turn End Processing
+extension BattleTurnEngine {
+    nonisolated static func endOfTurn(_ context: inout BattleContext) {
+        for index in context.players.indices {
+            var actor = context.players[index]
+            processEndOfTurn(for: .player, index: index, actor: &actor, context: &context)
+            context.players[index] = actor
+        }
+        for index in context.enemies.indices {
+            var actor = context.enemies[index]
+            processEndOfTurn(for: .enemy, index: index, actor: &actor, context: &context)
+            context.enemies[index] = actor
+        }
+
+        applyEndOfTurnPartyHealing(for: .player, context: &context)
+        applyNecromancerIfNeeded(for: .player, context: &context)
+
+        applyEndOfTurnPartyHealing(for: .enemy, context: &context)
+        applyNecromancerIfNeeded(for: .enemy, context: &context)
+
+        applyTimedBuffTriggers(&context)
+        applySpellChargeRecovery(&context)
+    }
+
+    nonisolated static func processEndOfTurn(for side: ActorSide,
+                                 index: Int,
+                                 actor: inout BattleActor,
+                                 context: inout BattleContext) {
+        let wasAlive = actor.isAlive
+        actor.guardActive = false
+        actor.guardBarrierCharges = [:]
+        actor.attackHistory.reset()
+        applyStatusTicks(for: side, index: index, actor: &actor, context: &context)
+        if actor.skillEffects.misc.autoDegradationRepair {
+            let repaired = applyDegradationRepairIfAvailable(to: &actor, context: &context)
+            if repaired > 0 {
+                let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                appendSkillEffectLog(.degradationRepair,
+                                     actorId: actorIdx,
+                                     context: &context,
+                                     turnOverride: context.turn)
+            }
+        }
+        applySpellChargeRegenIfNeeded(for: &actor, context: context)
+        updateTimedBuffs(for: side, index: index, actor: &actor, context: &context)
+        applyEndOfTurnSelfHPDeltaIfNeeded(for: side, index: index, actor: &actor, context: &context)
+        applyEndOfTurnResurrectionIfNeeded(for: side, index: index, actor: &actor, context: &context, allowVitalize: true)
+        if wasAlive && !actor.isAlive {
+            appendDefeatLog(for: actor, side: side, index: index, context: &context)
+        }
+    }
+
+    nonisolated static func applyEndOfTurnPartyHealing(for side: ActorSide, context: inout BattleContext) {
+        let actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard !actors.isEmpty else { return }
+
+        // 生存キャラ全員の回復%を合算
+        let totalPercent = actors
+            .filter { $0.isAlive }
+            .reduce(0.0) { $0 + $1.skillEffects.misc.endOfTurnHealingPercent }
+        guard totalPercent > 0 else { return }
+        let factor = totalPercent / 100.0
+
+        // ログ用: 最も高い%を持つ生存キャラをhealerとする
+        let healerIndex = actors.indices
+            .filter { actors[$0].isAlive && actors[$0].skillEffects.misc.endOfTurnHealingPercent > 0 }
+            .max { actors[$0].skillEffects.misc.endOfTurnHealingPercent < actors[$1].skillEffects.misc.endOfTurnHealingPercent }!
+        let healer = actors[healerIndex]
+        let healerIdx = context.actorIndex(for: side, arrayIndex: healerIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: healerIdx,
+                                                          kind: .healParty,
+                                                          turnOverride: context.turn)
+        var didApply = false
+
+        for targetIndex in actors.indices {
+            guard side == .player ? context.players[targetIndex].isAlive : context.enemies[targetIndex].isAlive else { continue }
+            var target = side == .player ? context.players[targetIndex] : context.enemies[targetIndex]
+            let baseHealing = Double(target.snapshot.maxHP) * factor
+            let dealt = healingDealtModifier(for: healer)
+            let received = healingReceivedModifier(for: target)
+            let amount = max(1, Int((baseHealing * dealt * received).rounded()))
+            let missing = target.snapshot.maxHP - target.currentHP
+            guard missing > 0 else { continue }
+            let applied = min(amount, missing)
+            target.currentHP += applied
+            context.updateActor(target, side: side, index: targetIndex)
+            let targetIdx = context.actorIndex(for: side, arrayIndex: targetIndex)
+            entryBuilder.addEffect(kind: .healParty,
+                                   target: targetIdx,
+                                   value: UInt32(applied))
+            didApply = true
+        }
+
+        if didApply {
+            context.appendActionEntry(entryBuilder.build())
+        }
+    }
+
+    nonisolated static func applyEndOfTurnSelfHPDeltaIfNeeded(for side: ActorSide,
+                                                   index: Int,
+                                                   actor: inout BattleActor,
+                                                   context: inout BattleContext) {
+        guard actor.isAlive else { return }
+        let percent = actor.skillEffects.misc.endOfTurnSelfHPPercent
+        guard percent != 0 else { return }
+        let magnitude = abs(percent) / 100.0
+        guard magnitude > 0 else { return }
+        let rawAmount = Double(actor.snapshot.maxHP) * magnitude
+        let amount: Int
+        if percent > 0 {
+            let healed = rawAmount * healingDealtModifier(for: actor) * healingReceivedModifier(for: actor)
+            amount = max(1, Int(healed.rounded()))
+        } else {
+            amount = max(1, Int(rawAmount.rounded()))
+        }
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+        if percent > 0 {
+            let missing = actor.snapshot.maxHP - actor.currentHP
+            guard missing > 0 else { return }
+            let applied = min(amount, missing)
+            actor.currentHP += applied
+            context.appendSimpleEntry(kind: .healSelf,
+                                      actorId: actorIdx,
+                                      targetId: actorIdx,
+                                      value: UInt32(applied),
+                                      effectKind: .healSelf)
+        } else {
+            let rawDamage = amount
+            let applied = applyDamage(amount: rawDamage, to: &actor)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
+                                                              kind: .damageSelf)
+            entryBuilder.addEffect(kind: .damageSelf,
+                                   target: actorIdx,
+                                   value: UInt32(applied),
+                                   extra: UInt16(clamping: rawDamage))
+            context.appendActionEntry(entryBuilder.build())
+        }
+    }
+
+    nonisolated static func applyEndOfTurnResurrectionIfNeeded(for side: ActorSide,
+                                                   index: Int,
+                                                   actor: inout BattleActor,
+                                                   context: inout BattleContext,
+                                                   allowVitalize: Bool) {
+        guard !actor.isAlive else { return }
+
+        guard let best = actor.skillEffects.resurrection.actives.max(by: { lhs, rhs in
+            if lhs.chancePercent == rhs.chancePercent {
+                return (lhs.maxTriggers ?? .max) < (rhs.maxTriggers ?? .max)
+            }
+            return lhs.chancePercent < rhs.chancePercent
+        }) else { return }
+
+        if let maxTriggers = best.maxTriggers,
+           actor.resurrectionTriggersUsed >= maxTriggers {
+            return
+        }
+
+        var forcedTriggered = false
+        if let forced = actor.skillEffects.resurrection.forced {
+            let limit = forced.maxTriggers ?? 1
+            if actor.forcedResurrectionTriggersUsed < limit {
+                actor.forcedResurrectionTriggersUsed += 1
+                forcedTriggered = true
+            }
+        }
+
+        if !forcedTriggered {
+            let chance = max(0, min(100, best.chancePercent))
+            guard BattleRandomSystem.percentChance(chance, random: &context.random) else { return }
+        }
+
+        let healAmount: Int
+        switch best.hpScale {
+        case .magicalHealingScore:
+            let base = max(actor.snapshot.magicalHealingScore, Int(Double(actor.snapshot.maxHP) * 0.05))
+            healAmount = max(1, base)
+        case .maxHP5Percent:
+            let raw = Double(actor.snapshot.maxHP) * 0.05
+            healAmount = max(1, Int(raw.rounded()))
+        }
+
+        actor.currentHP = min(actor.snapshot.maxHP, healAmount)
+        actor.statusEffects = []
+        actor.guardActive = false
+        actor.resurrectionTriggersUsed += 1
+
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+        if forcedTriggered {
+            appendSkillEffectLog(.resurrectionBuff,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
+        }
+
+        if allowVitalize,
+           let vitalize = actor.skillEffects.resurrection.vitalize,
+           !actor.vitalizeActive {
+            actor.vitalizeActive = true
+            if vitalize.removePenalties {
+                actor.suppressedSkillIds.formUnion(vitalize.removeSkillIds)
+            }
+            if vitalize.rememberSkills {
+                actor.grantedSkillIds.formUnion(vitalize.grantSkillIds)
+            }
+            rebuildSkillsAfterResurrection(for: &actor, context: context)
+            appendSkillEffectLog(.resurrectionVitalize,
+                                 actorId: actorIdx,
+                                 context: &context,
+                                 turnOverride: context.turn)
+        }
+
+        context.appendSimpleEntry(kind: .resurrection,
+                                  actorId: actorIdx,
+                                  targetId: actorIdx,
+                                  value: UInt32(actor.currentHP),
+                                  effectKind: .resurrection)
+    }
+
+    nonisolated static func rebuildSkillsAfterResurrection(for actor: inout BattleActor, context: BattleContext) {
+        var skillIds = actor.baseSkillIds
+        if !actor.suppressedSkillIds.isEmpty {
+            skillIds.subtract(actor.suppressedSkillIds)
+        }
+        if !actor.grantedSkillIds.isEmpty {
+            skillIds.formUnion(actor.grantedSkillIds)
+        }
+        guard !skillIds.isEmpty else { return }
+
+        let definitions: [SkillDefinition] = skillIds.compactMap { skillId in
+            context.skillDefinitions[skillId]
+        }
+        guard !definitions.isEmpty else { return }
+
+        do {
+            let stats = ActorStats(
+                strength: actor.strength,
+                wisdom: actor.wisdom,
+                spirit: actor.spirit,
+                vitality: actor.vitality,
+                agility: actor.agility,
+                luck: actor.luck
+            )
+            let skillCompiler = try UnifiedSkillEffectCompiler(skills: definitions, stats: stats)
+            let effects = skillCompiler.actorEffects
+            actor.skillEffects = effects
+
+            for (key, value) in effects.combat.barrierCharges {
+                let current = actor.barrierCharges[key] ?? 0
+                if value > current {
+                    actor.barrierCharges[key] = value
+                }
+            }
+            for (key, value) in effects.combat.guardBarrierCharges {
+                let current = actor.guardBarrierCharges[key] ?? 0
+                if value > current {
+                    actor.guardBarrierCharges[key] = value
+                }
+            }
+        } catch {
+            // スキル再構築に失敗した場合は現状を維持
+        }
+    }
+
+    nonisolated static func applySpellChargeRegenIfNeeded(for actor: inout BattleActor, context: BattleContext) {
+        let spells = actor.spells.mage + actor.spells.priest
+        guard !spells.isEmpty else { return }
+        var usage = actor.spellChargeRegenUsage
+        var touched = false
+        for spell in spells {
+            guard let modifier = actor.skillEffects.spell.chargeModifier(for: spell.id),
+                  let regen = modifier.regen,
+                  regen.every > 0 else { continue }
+            if let maxTriggers = regen.maxTriggers,
+               let used = usage[spell.id],
+               used >= maxTriggers {
+                continue
+            }
+            guard context.turn % regen.every == 0 else { continue }
+            if actor.actionResources.addCharges(forSpellId: spell.id, amount: regen.amount, cap: regen.cap) {
+                usage[spell.id] = (usage[spell.id] ?? 0) + 1
+                touched = true
+            }
+        }
+        if touched {
+            actor.spellChargeRegenUsage = usage
+        }
+    }
+
+    nonisolated static func applyNecromancerIfNeeded(for side: ActorSide, context: inout BattleContext) {
+        guard context.turn >= 2 else { return }
+        let actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard actors.contains(where: { $0.skillEffects.resurrection.necromancerInterval != nil }) else { return }
+
+        for index in actors.indices {
+            var actor = side == .player ? context.players[index] : context.enemies[index]
+            guard let interval = actor.skillEffects.resurrection.necromancerInterval else { continue }
+            if let last = actor.necromancerLastTriggerTurn, context.turn <= last { continue }
+            let offset = context.turn - 2
+            guard offset >= 0, offset % interval == 0 else { continue }
+            actor.necromancerLastTriggerTurn = context.turn
+            context.updateActor(actor, side: side, index: index)
+
+            let allActors: [BattleActor] = side == .player ? context.players : context.enemies
+            if let reviveIndex = allActors.indices.first(where: { !allActors[$0].isAlive && !allActors[$0].skillEffects.resurrection.actives.isEmpty }) {
+                var target = side == .player ? context.players[reviveIndex] : context.enemies[reviveIndex]
+                target.resurrectionTriggersUsed = 0
+                applyEndOfTurnResurrectionIfNeeded(for: side, index: reviveIndex, actor: &target, context: &context, allowVitalize: false)
+                context.updateActor(target, side: side, index: reviveIndex)
+                let casterIdx = context.actorIndex(for: side, arrayIndex: index)
+                let targetIdx = context.actorIndex(for: side, arrayIndex: reviveIndex)
+                context.appendSimpleEntry(kind: .necromancer,
+                                          actorId: casterIdx,
+                                          targetId: targetIdx,
+                                          value: UInt32(target.currentHP),
+                                          effectKind: .necromancer)
+            }
+        }
+    }
+
+    nonisolated static func applyTimedBuffTriggers(_ context: inout BattleContext) {
+        applyTimedBuffTriggers(&context, includeEveryTurn: true)
+    }
+
+    nonisolated static func applyTimedBuffTriggers(_ context: inout BattleContext, includeEveryTurn: Bool) {
+        applyTimedBuffTriggersForSide(.player, includeEveryTurn: includeEveryTurn, context: &context)
+        applyTimedBuffTriggersForSide(.enemy, includeEveryTurn: includeEveryTurn, context: &context)
+    }
+
+    private nonisolated static func applyTimedBuffTriggersForSide(_ side: ActorSide,
+                                                          includeEveryTurn: Bool,
+                                                          context: inout BattleContext) {
+        var actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard !actors.isEmpty else { return }
+
+        var fired: [(trigger: BattleActor.SkillEffects.TimedBuffTrigger, ownerIndex: Int)] = []
+
+        for index in actors.indices {
+            var actor = actors[index]
+            var remaining: [BattleActor.SkillEffects.TimedBuffTrigger] = []
+
+            for trigger in actor.skillEffects.status.timedBuffTriggers {
+                guard actor.isAlive else {
+                    remaining.append(trigger)
+                    continue
+                }
+
+                switch trigger.triggerMode {
+                case .atTurn(let turn):
+                    if turn == context.turn {
+                        fired.append((trigger: trigger, ownerIndex: index))
+                    } else {
+                        remaining.append(trigger)
+                    }
+                case .everyTurn:
+                    if includeEveryTurn {
+                        fired.append((trigger: trigger, ownerIndex: index))
+                    }
+                    remaining.append(trigger) // 毎ターン発動するので残す
+                }
+            }
+
+            actor.skillEffects.status.timedBuffTriggers = remaining
+            actors[index] = actor
+        }
+
+        if side == .player {
+            context.players = actors
+        } else {
+            context.enemies = actors
+        }
+
+        guard !fired.isEmpty else { return }
+
+        for (trigger, ownerIndex) in fired {
+            var refreshedActors: [BattleActor] = side == .player ? context.players : context.enemies
+
+            let targetIndices: [Int]
+            switch trigger.scope {
+            case .party:
+                targetIndices = refreshedActors.indices.filter { refreshedActors[$0].isAlive }
+            case .`self`:
+                targetIndices = refreshedActors.indices.contains(ownerIndex) && refreshedActors[ownerIndex].isAlive
+                    ? [ownerIndex]
+                    : []
+            }
+
+            let actorIdx = context.actorIndex(for: side, arrayIndex: ownerIndex)
+            let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
+                                                              kind: .buffApply,
+                                                              skillIndex: trigger.sourceSkillId,
+                                                              turnOverride: context.turn)
+            var didAddEffect = false
+
+            for index in targetIndices {
+                var actor = refreshedActors[index]
+
+                // atTurn: modifiersを適用（TimedBuffとして）
+                // everyTurn: perTurnModifiersを累積適用
+                switch trigger.triggerMode {
+                case .atTurn:
+                    let spellSpecificMods = trigger.modifiers.filter { $0.key.hasPrefix("spellSpecific:") }
+                    for (key, mult) in spellSpecificMods {
+                        let spellIdString = String(key.dropFirst("spellSpecific:".count))
+                        guard let spellId = UInt8(spellIdString) else { continue }
+                        actor.skillEffects.spell.specificMultipliers[spellId, default: 1.0] *= mult
+                    }
+
+                    let otherMods = trigger.modifiers.filter { !$0.key.hasPrefix("spellSpecific:") }
+                    var normalizedMods = otherMods
+                    if let percent = otherMods["damageDealtPercent"] {
+                        let multiplier = 1.0 + percent / 100.0
+                        normalizedMods["physicalDamageDealtMultiplier"] = multiplier
+                        normalizedMods["magicalDamageDealtMultiplier"] = multiplier
+                        normalizedMods["breathDamageDealtMultiplier"] = multiplier
+                        normalizedMods.removeValue(forKey: "damageDealtPercent")
+                    }
+                    if !normalizedMods.isEmpty {
+                        let buff = TimedBuff(id: trigger.id,
+                                             baseDuration: trigger.duration,
+                                             remainingTurns: trigger.duration,
+                                             statModifiers: normalizedMods,
+                                             sourceSkillId: trigger.sourceSkillId)
+                        upsert(buff: buff, into: &actor.timedBuffs)
+                    }
+
+                case .everyTurn:
+                    // 毎ターン固定値を加算（スナップショットが永続するため自然に累積）
+                    applyPerTurnModifiers(trigger.perTurnModifiers, to: &actor)
+                }
+
+                refreshedActors[index] = actor
+                let targetIdx = context.actorIndex(for: side, arrayIndex: index)
+                entryBuilder.addEffect(kind: .buffApply, target: targetIdx)
+                didAddEffect = true
+            }
+
+            if side == .player {
+                context.players = refreshedActors
+            } else {
+                context.enemies = refreshedActors
+            }
+
+            if didAddEffect {
+                context.appendActionEntry(entryBuilder.build())
+            }
+        }
+    }
+
+    private nonisolated static func applyPerTurnModifiers(_ modifiers: [String: Double], to actor: inout BattleActor) {
+        guard !modifiers.isEmpty else { return }
+
+        // 毎ターン固定値を加算（スナップショットが永続するため自然に累積）
+        for (key, value) in modifiers {
+            switch key {
+            case "hitScoreAdditive":
+                actor.snapshot.hitScore += Int(value.rounded(.towardZero))
+            case "evasionScoreAdditive":
+                actor.snapshot.evasionScore += Int(value.rounded(.towardZero))
+            case "attackPercent":
+                let bonus = Int((Double(actor.snapshot.physicalAttackScore) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.physicalAttackScore += bonus
+            case "defensePercent":
+                let bonus = Int((Double(actor.snapshot.physicalDefenseScore) * value / 100.0).rounded(.towardZero))
+                actor.snapshot.physicalDefenseScore += bonus
+            case "attackCountPercent":
+                let bonus = actor.snapshot.attackCount * value / 100.0
+                actor.snapshot.attackCount = max(1.0, actor.snapshot.attackCount + bonus)
+            case "damageDealtPercent":
+                actor.skillEffects.damage.dealt = .init(
+                    physical: actor.skillEffects.damage.dealt.physical * (1.0 + value / 100.0),
+                    magical: actor.skillEffects.damage.dealt.magical * (1.0 + value / 100.0),
+                    breath: actor.skillEffects.damage.dealt.breath * (1.0 + value / 100.0)
+                )
+            default:
+                break
+            }
+        }
+    }
+
+    nonisolated static func upsert(buff: TimedBuff, into buffs: inout [TimedBuff]) {
+        guard let index = buffs.firstIndex(where: { $0.id == buff.id }) else {
+            buffs.append(buff)
+            return
+        }
+
+        let currentLevel = buffs[index].baseDuration
+        let incomingLevel = buff.baseDuration
+
+        if incomingLevel > currentLevel {
+            // 高レベルで上書き
+            buffs[index] = buff
+        } else if incomingLevel == currentLevel {
+            // 同レベルなら残りターン数の長い方を採用
+            var merged = buff
+            merged.remainingTurns = max(buffs[index].remainingTurns, buff.remainingTurns)
+            buffs[index] = merged
+        }
+        // 低レベルは無視（何もしない）
+    }
+
+    nonisolated static func updateTimedBuffs(for side: ActorSide,
+                                  index: Int,
+                                  actor: inout BattleActor,
+                                  context: inout BattleContext) {
+        var retained: [TimedBuff] = []
+        let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+        for var buff in actor.timedBuffs {
+            if buff.remainingTurns > 0 {
+                buff.remainingTurns -= 1
+            }
+            if buff.remainingTurns <= 0 {
+                context.appendSimpleEntry(kind: .buffExpire,
+                                          actorId: actorIdx,
+                                          targetId: actorIdx,
+                                          skillIndex: buff.sourceSkillId,
+                                          effectKind: .buffExpire)
+                continue
+            }
+            retained.append(buff)
+        }
+        actor.timedBuffs = retained
+    }
+
+    @discardableResult
+    nonisolated static func attemptRescue(of fallenIndex: Int,
+                              side: ActorSide,
+                              context: inout BattleContext) -> Bool {
+        guard let fallen = context.actor(for: side, index: fallenIndex) else { return false }
+        guard !fallen.isAlive else { return true }
+
+        // 戦闘開始時にキャッシュ済みの救助候補インデックスを使用（陣形順ソート済み）
+        let cachedCandidateIndices: [Int] = side == .player
+            ? context.cached.playerRescueCandidateIndices
+            : context.cached.enemyRescueCandidateIndices
+
+        for candidateIndex in cachedCandidateIndices {
+            // 生存チェックは毎回必要（戦闘中に死亡する可能性があるため）
+            guard var rescuer = context.actor(for: side, index: candidateIndex),
+                  rescuer.isAlive else { continue }
+            guard canAttemptRescue(rescuer, turn: context.turn) else { continue }
+
+            let capabilities = availableRescueCapabilities(for: rescuer)
+            guard let capability = capabilities.max(by: { $0.minLevel < $1.minLevel }) ?? capabilities.first else { continue }
+
+            let successChance = capability.guaranteed ? 100 : rescueChance(for: rescuer)
+            guard successChance > 0 else { continue }
+            guard BattleRandomSystem.percentChance(successChance, random: &context.random) else { continue }
+
+            guard var revivedTarget = context.actor(for: side, index: fallenIndex), !revivedTarget.isAlive else {
+                return true
+            }
+
+            var appliedHeal = revivedTarget.snapshot.maxHP
+            if capability.usesPriestMagic {
+                guard let spell = selectPriestHealingSpell(for: rescuer) else { continue }
+                guard rescuer.actionResources.consume(spellId: spell.id) else { continue }
+                let healAmount = computeHealingAmount(caster: rescuer, target: revivedTarget, spellId: spell.id, context: &context)
+                appliedHeal = max(1, healAmount)
+            }
+
+            if !rescuer.skillEffects.resurrection.rescueModifiers.ignoreActionCost {
+                rescuer.rescueActionsUsed += 1
+            }
+
+            revivedTarget.currentHP = min(revivedTarget.snapshot.maxHP, appliedHeal)
+            revivedTarget.statusEffects = []
+            revivedTarget.guardActive = false
+
+            context.updateActor(rescuer, side: side, index: candidateIndex)
+            context.updateActor(revivedTarget, side: side, index: fallenIndex)
+
+            let rescuerIdx = context.actorIndex(for: side, arrayIndex: candidateIndex)
+            let targetIdx = context.actorIndex(for: side, arrayIndex: fallenIndex)
+            context.appendSimpleEntry(kind: .rescue,
+                                      actorId: rescuerIdx,
+                                      targetId: targetIdx,
+                                      value: UInt32(appliedHeal),
+                                      effectKind: .rescue)
+            return true
+        }
+
+        return false
+    }
+
+    @discardableResult
+    nonisolated static func attemptInstantResurrectionIfNeeded(of fallenIndex: Int,
+                                                   side: ActorSide,
+                                                   context: inout BattleContext) -> Bool {
+        guard var target = context.actor(for: side, index: fallenIndex), !target.isAlive else {
+            return false
+        }
+
+        applyEndOfTurnResurrectionIfNeeded(for: side, index: fallenIndex, actor: &target, context: &context, allowVitalize: true)
+        guard target.isAlive else { return false }
+
+        context.updateActor(target, side: side, index: fallenIndex)
+        return true
+    }
+
+    nonisolated static func availableRescueCapabilities(for actor: BattleActor) -> [BattleActor.SkillEffects.RescueCapability] {
+        let level = actor.level ?? 0
+        return actor.skillEffects.resurrection.rescueCapabilities.filter { level >= $0.minLevel }
+    }
+
+    nonisolated static func rescueChance(for actor: BattleActor) -> Int {
+        return max(0, min(100, actor.actionRates.priestMagic))
+    }
+
+    nonisolated static func canAttemptRescue(_ actor: BattleActor, turn: Int) -> Bool {
+        guard actor.isAlive else { return false }
+        guard actor.rescueActionCapacity > 0 else { return false }
+        if actor.rescueActionsUsed >= actor.rescueActionCapacity,
+           !actor.skillEffects.resurrection.rescueModifiers.ignoreActionCost {
+            return false
+        }
+        return true
+    }
+
+    // MARK: - Spell Charge Recovery
+
+    nonisolated static func applySpellChargeRecovery(_ context: inout BattleContext) {
+        applySpellChargeRecoveryForSide(.player, context: &context)
+        applySpellChargeRecoveryForSide(.enemy, context: &context)
+    }
+
+    private nonisolated static func applySpellChargeRecoveryForSide(_ side: ActorSide, context: inout BattleContext) {
+        var actors: [BattleActor] = side == .player ? context.players : context.enemies
+        guard !actors.isEmpty else { return }
+
+        for index in actors.indices {
+            var actor = actors[index]
+            guard actor.isAlive else { continue }
+
+            let recoveries = actor.skillEffects.spell.chargeRecoveries
+            guard !recoveries.isEmpty else { continue }
+
+            for recovery in recoveries {
+                let chance = max(0.0, min(100.0, recovery.baseChancePercent))
+                guard chance > 0 else { continue }
+                let probability = chance / 100.0
+                guard context.random.nextBool(probability: probability) else { continue }
+
+                // 回復対象の呪文を取得
+                let targetSpells: [SpellDefinition]
+                if let schoolIndex = recovery.school {
+                    // 特定スクール
+                    if schoolIndex == 0 {
+                        targetSpells = actor.spells.mage
+                    } else {
+                        targetSpells = actor.spells.priest
+                    }
+                } else {
+                    // 全呪文
+                    targetSpells = actor.spells.mage + actor.spells.priest
+                }
+
+                // チャージが最大未満の呪文をフィルタ
+                let recoverableSpells = targetSpells.filter { spell in
+                    guard let state = actor.actionResources.spellChargeState(for: spell.id) else { return false }
+                    return state.current < state.max
+                }
+
+                guard !recoverableSpells.isEmpty else { continue }
+
+                // ランダムに1つ選んで回復
+                let randomIndex = context.random.nextInt(in: 0...(recoverableSpells.count - 1))
+                let targetSpell = recoverableSpells[randomIndex]
+                _ = actor.actionResources.addCharges(forSpellId: targetSpell.id, amount: 1, cap: Int.max)
+
+                // ログ出力（オプション）
+                let actorIdx = context.actorIndex(for: side, arrayIndex: index)
+                context.appendSimpleEntry(kind: .spellChargeRecover,
+                                          actorId: actorIdx,
+                                          value: UInt32(targetSpell.id),
+                                          effectKind: .spellChargeRecover)
+            }
+
+            actors[index] = actor
+        }
+
+        if side == .player {
+            context.players = actors
+        } else {
+            context.enemies = actors
+        }
+    }
+}

@@ -571,6 +571,7 @@ actor ExplorationProgressService {
     }
 
     enum BattleLogArchiveDecodingError: Error {
+        case unsupportedVersion(UInt8)
         case malformedData
     }
 
@@ -584,7 +585,8 @@ actor ExplorationProgressService {
     ) -> Data {
         var data = Data()
 
-        // Header: outcome(1) + turns(1) = 2 bytes
+        // Header: version(1) + outcome(1) + turns(1) = 3 bytes
+        data.append(BattleLog.currentVersion)
         data.append(outcome)
         data.append(turns)
 
@@ -706,7 +708,7 @@ actor ExplorationProgressService {
 
     /// バイナリ形式から戦闘ログデータをデコード
     nonisolated static func decodeBattleLogData(_ data: Data) throws -> DecodedBattleLogData {
-        guard data.count >= 2 else {
+        guard data.count >= 3 else {
             throw BattleLogArchiveDecodingError.malformedData
         }
 
@@ -745,6 +747,10 @@ actor ExplorationProgressService {
         }
 
         // Header
+        let version = try readUInt8()
+        guard version == BattleLog.currentVersion else {
+            throw BattleLogArchiveDecodingError.unsupportedVersion(version)
+        }
         let outcome = try readUInt8()
         let turns = try readUInt8()
 
@@ -794,7 +800,7 @@ actor ExplorationProgressService {
                 let statusId: UInt16? = hasStatus == 1 ? try readUInt16() : nil
 
                 let hasEffectExtra = try readUInt8()
-                let effectExtra: UInt32? = hasEffectExtra == 1 ? try readUInt32() : nil
+                let effectExtra: UInt16? = hasEffectExtra == 1 ? try readUInt16() : nil
 
                 effects.append(BattleActionEntry.Effect(kind: effectKind,
                                                         target: target,

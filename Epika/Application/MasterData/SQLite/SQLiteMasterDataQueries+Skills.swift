@@ -54,7 +54,7 @@ extension SQLiteMasterDataManager {
         }
 
         // 2. エフェクト基本情報を取得
-        let effectSQL = "SELECT skill_id, effect_index, kind FROM skill_effects ORDER BY skill_id, effect_index;"
+        let effectSQL = "SELECT skill_id, effect_index, kind, family_id FROM skill_effects ORDER BY skill_id, effect_index;"
         let effectStatement = try prepare(effectSQL)
         defer { sqlite3_finalize(effectStatement) }
 
@@ -65,6 +65,7 @@ extension SQLiteMasterDataManager {
         }
         struct EffectData {
             let effectType: SkillEffectType
+            let familyId: UInt16?
         }
         var effectDataMap: [EffectKey: EffectData] = [:]
 
@@ -72,12 +73,17 @@ extension SQLiteMasterDataManager {
             let skillId = UInt16(sqlite3_column_int(effectStatement, 0))
             let effectIndex = Int(sqlite3_column_int(effectStatement, 1))
             let kindRaw = UInt8(sqlite3_column_int(effectStatement, 2))
+            let familyId: UInt16? = sqlite3_column_type(effectStatement, 3) == SQLITE_NULL
+                ? nil
+                : UInt16(sqlite3_column_int(effectStatement, 3))
+
             guard let effectType = SkillEffectType(rawValue: kindRaw) else {
                 throw SQLiteMasterDataError.executionFailed("未知の SkillEffect kind \(kindRaw) (skill_id=\(skillId), index=\(effectIndex))")
             }
 
             effectDataMap[EffectKey(skillId: skillId, effectIndex: effectIndex)] = EffectData(
-                effectType: effectType
+                effectType: effectType,
+                familyId: familyId
             )
         }
 
@@ -167,6 +173,7 @@ extension SQLiteMasterDataManager {
             let effect = SkillDefinition.Effect(
                 index: key.effectIndex,
                 effectType: effectData.effectType,
+                familyId: effectData.familyId,
                 parameters: paramMap[key] ?? [:],
                 values: valueMap[key] ?? [:],
                 arrayValues: arrayMap[key] ?? [:]

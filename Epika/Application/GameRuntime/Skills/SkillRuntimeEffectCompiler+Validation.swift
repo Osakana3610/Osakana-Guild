@@ -31,6 +31,7 @@ import Foundation
 extension SkillRuntimeEffectCompiler {
     nonisolated static func decodePayload(from effect: SkillDefinition.Effect, skillId: UInt16) throws -> DecodedSkillEffectPayload {
         return DecodedSkillEffectPayload(
+            familyId: effect.familyId,
             effectType: effect.effectType,
             parameters: effect.parameters,
             value: effect.values,
@@ -184,6 +185,7 @@ let requiredFields: [SkillEffectType: SkillEffectValidationRequirement] = [
 
 // MARK: - Decoded Payload
 struct DecodedSkillEffectPayload: Sendable, Hashable {
+    let familyId: UInt16?
     let effectType: SkillEffectType
     let parameters: [EffectParamKey: Int]
     let value: [EffectValueKey: Double]

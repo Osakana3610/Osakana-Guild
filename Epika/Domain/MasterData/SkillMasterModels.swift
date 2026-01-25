@@ -25,6 +25,7 @@
 //   - SkillDefinition.Effect: スキル効果
 //     - index: 効果順序
 //     - effectType: SkillEffectType（別ファイルで定義）
+//     - familyId: 効果ファミリーID
 //     - parameters: パラメータ辞書
 //     - values: 数値辞書
 //     - arrayValues: 配列辞書
@@ -32,7 +33,7 @@
 // 【使用箇所】
 //   - SkillRuntimeEffects: スキル効果のコンパイル・適用
 //   - CachedCharacterFactory: キャラクタースキル効果の集計
-//   - BattleEngine: 戦闘中のスキル発動
+//   - BattleTurnEngine: 戦闘中のスキル発動
 //
 // ==============================================================================
 
@@ -101,6 +102,7 @@ struct SkillDefinition: Identifiable, Sendable, Hashable {
     struct Effect: Sendable, Hashable {
         let index: Int
         let effectType: SkillEffectType
+        let familyId: UInt16?
         /// param_type → int_value
         let parameters: [EffectParamKey: Int]
         /// value_type → value

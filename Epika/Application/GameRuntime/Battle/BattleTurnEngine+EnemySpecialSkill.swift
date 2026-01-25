@@ -1,5 +1,5 @@
 // ==============================================================================
-// BattleEngine+EnemySpecialSkill.swift
+// BattleTurnEngine.EnemySpecialSkill.swift
 // Epika
 // ==============================================================================
 //
@@ -9,47 +9,63 @@
 //   - 敵スキルのターゲット選択
 //   - スキル使用回数管理
 //
+// 【本体との関係】
+//   - BattleTurnEngineの拡張ファイル
+//   - 敵の特殊行動に特化した機能を提供
+//
+// 【主要機能】
+//   - executeEnemySpecialSkill: 敵専用技の実行
+//   - スキルタイプ別実行関数（Physical、Magical、Breath、Status、Heal、Buff）
+//   - スキルダメージ計算
+//
+// 【使用箇所】
+//   - BattleTurnEngine.TurnLoop（行動選択時）
+//
 // ==============================================================================
 
 import Foundation
 
 // MARK: - Enemy Special Skills
-extension BattleEngine {
+extension BattleTurnEngine {
     @discardableResult
     nonisolated static func executeEnemySpecialSkill(for side: ActorSide,
-                                                     actorIndex: Int,
-                                                     state: inout BattleState,
-                                                     forcedTargets _: SacrificeTargets) -> Bool {
+                                         actorIndex: Int,
+                                         context: inout BattleContext,
+                                         forcedTargets: BattleContext.SacrificeTargets) -> Bool {
         guard side == .enemy else { return false }
-        guard let actor = state.actor(for: side, index: actorIndex), actor.isAlive else { return false }
+        guard let actor = context.actor(for: side, index: actorIndex), actor.isAlive else { return false }
 
-        let allies = state.enemies
-        let opponents = state.players
+        let allies = context.enemies
+        let opponents = context.players
 
+        // スキルを再選択（selectActionと同じロジック）
         guard let skillId = selectEnemySpecialSkill(for: actor,
                                                     allies: allies,
                                                     opponents: opponents,
-                                                    state: &state),
-              let skill = state.enemySkillDefinition(for: skillId) else {
+                                                    context: &context),
+              let skill = context.enemySkillDefinition(for: skillId) else {
             return false
         }
 
-        state.incrementEnemySkillUsage(actorIdentifier: actor.identifier, skillId: skillId)
+        // 使用回数を記録
+        context.incrementEnemySkillUsage(actorIdentifier: actor.identifier, skillId: skillId)
 
-        let actorIdx = state.actorIndex(for: side, arrayIndex: actorIndex)
-        let entryBuilder = state.makeActionEntryBuilder(actorId: actorIdx,
-                                                        kind: .enemySpecialSkill,
-                                                        skillIndex: skillId)
+        // スキル発動ログ
+        let actorIdx = context.actorIndex(for: side, arrayIndex: actorIndex)
+        let entryBuilder = context.makeActionEntryBuilder(actorId: actorIdx,
+                                                          kind: .enemySpecialSkill,
+                                                          skillIndex: skillId)
         var defeatedTargets: [(ActorSide, Int)] = []
         var pendingSkillEffectLogs: [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)] = []
         var pendingBarrierLogs: [(actorId: UInt16, kind: SkillEffectLogKind)] = []
 
+        // スキルタイプに応じて実行
         switch skill.type {
         case .physical:
             executeEnemyPhysicalSkill(skill: skill,
                                       attackerSide: side,
                                       attackerIndex: actorIndex,
-                                      state: &state,
+                                      context: &context,
                                       entryBuilder: entryBuilder,
                                       defeatedTargets: &defeatedTargets,
                                       pendingBarrierLogs: &pendingBarrierLogs)
@@ -57,7 +73,7 @@ extension BattleEngine {
             executeEnemyMagicalSkill(skill: skill,
                                      attackerSide: side,
                                      attackerIndex: actorIndex,
-                                     state: &state,
+                                     context: &context,
                                      entryBuilder: entryBuilder,
                                      defeatedTargets: &defeatedTargets,
                                      pendingSkillEffectLogs: &pendingSkillEffectLogs,
@@ -66,37 +82,37 @@ extension BattleEngine {
             executeEnemyBreathSkill(skill: skill,
                                     attackerSide: side,
                                     attackerIndex: actorIndex,
-                                    state: &state,
+                                    context: &context,
                                     entryBuilder: entryBuilder,
                                     defeatedTargets: &defeatedTargets,
                                     pendingBarrierLogs: &pendingBarrierLogs)
         case .status:
             executeEnemyStatusSkill(skill: skill,
-                                   attackerSide: side,
-                                   attackerIndex: actorIndex,
-                                   state: &state,
-                                   entryBuilder: entryBuilder)
+                                    attackerSide: side,
+                                    attackerIndex: actorIndex,
+                                    context: &context,
+                                    entryBuilder: entryBuilder)
         case .heal:
             executeEnemyHealSkill(skill: skill,
-                                 casterSide: side,
-                                 casterIndex: actorIndex,
-                                 state: &state,
-                                 entryBuilder: entryBuilder)
+                                  casterSide: side,
+                                  casterIndex: actorIndex,
+                                  context: &context,
+                                  entryBuilder: entryBuilder)
         case .buff:
             executeEnemyBuffSkill(skill: skill,
-                                 casterSide: side,
-                                 casterIndex: actorIndex,
-                                 state: &state,
-                                 entryBuilder: entryBuilder)
+                                  casterSide: side,
+                                  casterIndex: actorIndex,
+                                  context: &context,
+                                  entryBuilder: entryBuilder)
         }
 
-        state.appendActionEntry(entryBuilder.build())
+        context.appendActionEntry(entryBuilder.build())
         if !pendingSkillEffectLogs.isEmpty {
-            appendSkillEffectLogs(pendingSkillEffectLogs, state: &state, turnOverride: state.turn)
+            appendSkillEffectLogs(pendingSkillEffectLogs, context: &context, turnOverride: context.turn)
         }
         if !pendingBarrierLogs.isEmpty {
             let events = pendingBarrierLogs.map { (kind: $0.kind, actorId: $0.actorId, targetId: UInt16?.none) }
-            appendSkillEffectLogs(events, state: &state, turnOverride: state.turn)
+            appendSkillEffectLogs(events, context: &context, turnOverride: context.turn)
         }
 
         for targetRef in defeatedTargets {
@@ -104,7 +120,7 @@ extension BattleEngine {
                                   targetIndex: targetRef.1,
                                   killerSide: side,
                                   killerIndex: actorIndex,
-                                  state: &state,
+                                  context: &context,
                                   reactionDepth: 0,
                                   allowsReactionEvents: true)
         }
@@ -115,27 +131,28 @@ extension BattleEngine {
     // MARK: - Physical Skill
 
     private nonisolated static func executeEnemyPhysicalSkill(skill: EnemySkillDefinition,
-                                                              attackerSide: ActorSide,
-                                                              attackerIndex: Int,
-                                                              state: inout BattleState,
-                                                              entryBuilder: BattleActionEntry.Builder,
-                                                              defeatedTargets: inout [(ActorSide, Int)],
-                                                              pendingBarrierLogs: inout [(actorId: UInt16, kind: SkillEffectLogKind)]) {
-        guard var attacker = state.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
+                                                  attackerSide: ActorSide,
+                                                  attackerIndex: Int,
+                                                  context: inout BattleContext,
+                                                  entryBuilder: BattleActionEntry.Builder,
+                                                  defeatedTargets: inout [(ActorSide, Int)],
+                                                  pendingBarrierLogs: inout [(actorId: UInt16, kind: SkillEffectLogKind)]) {
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
                                               attackerIndex: attackerIndex,
-                                              state: &state)
+                                              context: &context)
 
         let hitCount = skill.hitCount ?? 1
         let damageMultiplier = skill.damageDealtMultiplier ?? 1.0
 
+        // damageDealtMultiplierを攻撃者のskillEffects.damage.dealtに適用
         attacker.skillEffects.damage.dealt.physical *= damageMultiplier
 
         for (targetSide, targetIndex) in targets {
             guard attacker.isAlive else { break }
-            guard var target = state.actor(for: targetSide, index: targetIndex),
+            guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
             var totalDamage = 0
@@ -144,18 +161,20 @@ extension BattleEngine {
             for hitIndex in 1...hitCount {
                 guard target.isAlive else { break }
 
+                // 命中判定（通常物理攻撃と同じパイプライン）
                 let hitChance = computeHitChance(attacker: attacker,
                                                  defender: target,
                                                  hitIndex: hitIndex,
                                                  accuracyMultiplier: 1.0,
-                                                 state: &state)
-                let roll = state.random.nextDouble()
+                                                 context: &context)
+                let roll = context.random.nextDouble()
                 guard roll <= hitChance else {
-                    let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                    let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
                     entryBuilder.addEffect(kind: .physicalEvade, target: targetIdx)
                     continue
                 }
 
+                // ダメージ計算（通常物理攻撃と同じパイプライン）
                 let barrierKey = barrierKey(for: .physical)
                 let guardActive = target.guardActive
                 let guardBefore = target.guardBarrierCharges[barrierKey] ?? 0
@@ -164,10 +183,10 @@ extension BattleEngine {
                 let (rawDamage, _) = computePhysicalDamage(attacker: attacker,
                                                            defender: &target,
                                                            hitIndex: hitIndex,
-                                                           state: &state)
+                                                           context: &context)
                 let guardAfter = target.guardBarrierCharges[barrierKey] ?? 0
                 let barrierAfter = target.barrierCharges[barrierKey] ?? 0
-                let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
                 if guardActive && guardAfter < guardBefore {
                     let diff = guardBefore - guardAfter
                     for _ in 0..<diff {
@@ -182,34 +201,36 @@ extension BattleEngine {
                 totalRawDamage += rawDamage
                 let applied = applyDamage(amount: rawDamage, to: &target)
                 totalDamage += applied
-                state.updateActor(target, side: targetSide, index: targetIndex)
+                context.updateActor(target, side: targetSide, index: targetIndex)
 
-                if let updated = state.actor(for: targetSide, index: targetIndex) {
+                // ターゲットを更新
+                if let updated = context.actor(for: targetSide, index: targetIndex) {
                     target = updated
                 }
             }
 
             if totalDamage > 0 {
-                let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
                 entryBuilder.addEffect(kind: .enemySpecialDamage,
                                        target: targetIdx,
                                        value: UInt32(totalDamage),
-                                       extra: UInt32(clamping: totalRawDamage))
+                                       extra: UInt16(clamping: totalRawDamage))
             }
 
             if handleEnemySkillDefeat(targetSide: targetSide,
                                       targetIndex: targetIndex,
-                                      state: &state,
+                                      context: &context,
                                       entryBuilder: entryBuilder) {
                 defeatedTargets.append((targetSide, targetIndex))
             }
 
+            // 状態異常付与
             if let statusId = skill.statusId, let statusChance = skill.statusChance {
                 attemptEnemySkillStatusInflict(statusId: statusId,
                                                chancePercent: statusChance,
                                                targetSide: targetSide,
                                                targetIndex: targetIndex,
-                                               state: &state,
+                                               context: &context,
                                                entryBuilder: entryBuilder)
             }
         }
@@ -218,43 +239,44 @@ extension BattleEngine {
     // MARK: - Magical Skill
 
     private nonisolated static func executeEnemyMagicalSkill(skill: EnemySkillDefinition,
-                                                             attackerSide: ActorSide,
-                                                             attackerIndex: Int,
-                                                             state: inout BattleState,
-                                                             entryBuilder: BattleActionEntry.Builder,
-                                                             defeatedTargets: inout [(ActorSide, Int)],
-                                                             pendingSkillEffectLogs: inout [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)],
-                                                             pendingBarrierLogs: inout [(actorId: UInt16, kind: SkillEffectLogKind)]) {
-        guard var attacker = state.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
+                                                 attackerSide: ActorSide,
+                                                 attackerIndex: Int,
+                                                 context: inout BattleContext,
+                                                 entryBuilder: BattleActionEntry.Builder,
+                                                 defeatedTargets: inout [(ActorSide, Int)],
+                                                 pendingSkillEffectLogs: inout [(kind: SkillEffectLogKind, actorId: UInt16, targetId: UInt16?)],
+                                                 pendingBarrierLogs: inout [(actorId: UInt16, kind: SkillEffectLogKind)]) {
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
                                               attackerIndex: attackerIndex,
-                                              state: &state)
+                                              context: &context)
 
         let hitCount = skill.hitCount ?? 1
         let damageMultiplier = skill.damageDealtMultiplier ?? 1.0
 
+        // damageDealtMultiplierを攻撃者のskillEffects.damage.dealtに適用
         attacker.skillEffects.damage.dealt.magical *= damageMultiplier
 
         for (targetSide, targetIndex) in targets {
             guard attacker.isAlive else { break }
-            guard var target = state.actor(for: targetSide, index: targetIndex),
+            guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
             var totalDamage = 0
             var totalRawDamage = 0
-            let attackerIdx = state.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
-            let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
-
+            let attackerIdx = context.actorIndex(for: attackerSide, arrayIndex: attackerIndex)
+            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             for _ in 0..<hitCount {
                 guard target.isAlive else { break }
 
+                // ダメージ計算（通常魔法攻撃と同じパイプライン）
                 let result = computeMagicalDamage(attacker: attacker,
                                                   defender: &target,
                                                   spellId: nil,
                                                   allowMagicCritical: false,
-                                                  state: &state)
+                                                  context: &context)
                 if result.wasNullified {
                     pendingSkillEffectLogs.append((kind: .magicNullify,
                                                    actorId: targetIdx,
@@ -263,7 +285,7 @@ extension BattleEngine {
                 if result.wasCritical {
                     entryBuilder.addEffect(kind: .skillEffect,
                                            target: targetIdx,
-                                           extra: UInt32(SkillEffectLogKind.magicCritical.rawValue))
+                                           extra: SkillEffectLogKind.magicCritical.rawValue)
                 }
                 if result.guardBarrierConsumed > 0 {
                     for _ in 0..<result.guardBarrierConsumed {
@@ -278,9 +300,9 @@ extension BattleEngine {
                 totalRawDamage += result.damage
                 let applied = applyDamage(amount: result.damage, to: &target)
                 totalDamage += applied
-                state.updateActor(target, side: targetSide, index: targetIndex)
+                context.updateActor(target, side: targetSide, index: targetIndex)
 
-                if let updated = state.actor(for: targetSide, index: targetIndex) {
+                if let updated = context.actor(for: targetSide, index: targetIndex) {
                     target = updated
                 }
             }
@@ -289,12 +311,12 @@ extension BattleEngine {
                 entryBuilder.addEffect(kind: .enemySpecialDamage,
                                        target: targetIdx,
                                        value: UInt32(totalDamage),
-                                       extra: UInt32(clamping: totalRawDamage))
+                                       extra: UInt16(clamping: totalRawDamage))
             }
 
             if handleEnemySkillDefeat(targetSide: targetSide,
                                       targetIndex: targetIndex,
-                                      state: &state,
+                                      context: &context,
                                       entryBuilder: entryBuilder) {
                 defeatedTargets.append((targetSide, targetIndex))
             }
@@ -304,32 +326,34 @@ extension BattleEngine {
     // MARK: - Breath Skill
 
     private nonisolated static func executeEnemyBreathSkill(skill: EnemySkillDefinition,
-                                                            attackerSide: ActorSide,
-                                                            attackerIndex: Int,
-                                                            state: inout BattleState,
-                                                            entryBuilder: BattleActionEntry.Builder,
-                                                            defeatedTargets: inout [(ActorSide, Int)],
-                                                            pendingBarrierLogs: inout [(actorId: UInt16, kind: SkillEffectLogKind)]) {
-        guard var attacker = state.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
+                                               attackerSide: ActorSide,
+                                               attackerIndex: Int,
+                                               context: inout BattleContext,
+                                               entryBuilder: BattleActionEntry.Builder,
+                                               defeatedTargets: inout [(ActorSide, Int)],
+                                               pendingBarrierLogs: inout [(actorId: UInt16, kind: SkillEffectLogKind)]) {
+        guard var attacker = context.actor(for: attackerSide, index: attackerIndex), attacker.isAlive else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
                                               attackerIndex: attackerIndex,
-                                              state: &state)
+                                              context: &context)
 
         let damageMultiplier = skill.damageDealtMultiplier ?? 1.0
 
+        // damageDealtMultiplierを攻撃者のskillEffects.damage.dealtに適用
         attacker.skillEffects.damage.dealt.breath *= damageMultiplier
 
         for (targetSide, targetIndex) in targets {
             guard attacker.isAlive else { break }
-            guard var target = state.actor(for: targetSide, index: targetIndex),
+            guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
+            // ダメージ計算（通常ブレス攻撃と同じパイプライン）
             let result = computeBreathDamage(attacker: attacker,
                                              defender: &target,
-                                             state: &state)
-            let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+                                             context: &context)
+            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             if result.guardBarrierConsumed > 0 {
                 for _ in 0..<result.guardBarrierConsumed {
                     pendingBarrierLogs.append((actorId: targetIdx, kind: .barrierGuardBreath))
@@ -340,16 +364,16 @@ extension BattleEngine {
                 }
             }
             let applied = applyDamage(amount: result.damage, to: &target)
-            state.updateActor(target, side: targetSide, index: targetIndex)
+            context.updateActor(target, side: targetSide, index: targetIndex)
 
             entryBuilder.addEffect(kind: .enemySpecialDamage,
                                    target: targetIdx,
                                    value: UInt32(applied),
-                                   extra: UInt32(clamping: result.damage))
+                                   extra: UInt16(clamping: result.damage))
 
             if handleEnemySkillDefeat(targetSide: targetSide,
                                       targetIndex: targetIndex,
-                                      state: &state,
+                                      context: &context,
                                       entryBuilder: entryBuilder) {
                 defeatedTargets.append((targetSide, targetIndex))
             }
@@ -359,17 +383,17 @@ extension BattleEngine {
     // MARK: - Status Skill
 
     private nonisolated static func executeEnemyStatusSkill(skill: EnemySkillDefinition,
-                                                            attackerSide: ActorSide,
-                                                            attackerIndex: Int,
-                                                            state: inout BattleState,
-                                                            entryBuilder: BattleActionEntry.Builder) {
-        guard state.actor(for: attackerSide, index: attackerIndex) != nil else { return }
+                                                attackerSide: ActorSide,
+                                                attackerIndex: Int,
+                                                context: inout BattleContext,
+                                                entryBuilder: BattleActionEntry.Builder) {
+        guard let _ = context.actor(for: attackerSide, index: attackerIndex) else { return }
         guard let statusId = skill.statusId else { return }
 
         let targets = selectEnemySkillTargets(skill: skill,
                                               attackerSide: attackerSide,
                                               attackerIndex: attackerIndex,
-                                              state: &state)
+                                              context: &context)
 
         let chancePercent = skill.statusChance ?? skill.chancePercent
 
@@ -378,7 +402,7 @@ extension BattleEngine {
                                            chancePercent: chancePercent,
                                            targetSide: targetSide,
                                            targetIndex: targetIndex,
-                                           state: &state,
+                                           context: &context,
                                            entryBuilder: entryBuilder)
         }
     }
@@ -386,19 +410,19 @@ extension BattleEngine {
     // MARK: - Heal Skill
 
     private nonisolated static func executeEnemyHealSkill(skill: EnemySkillDefinition,
-                                                          casterSide: ActorSide,
-                                                          casterIndex: Int,
-                                                          state: inout BattleState,
-                                                          entryBuilder: BattleActionEntry.Builder) {
-        guard state.actor(for: casterSide, index: casterIndex)?.isAlive == true else { return }
+                                              casterSide: ActorSide,
+                                              casterIndex: Int,
+                                              context: inout BattleContext,
+                                              entryBuilder: BattleActionEntry.Builder) {
+        guard let caster = context.actor(for: casterSide, index: casterIndex), caster.isAlive else { return }
         guard let healPercent = skill.healPercent else { return }
 
         let targets: [(ActorSide, Int)]
         switch skill.targeting {
-        case .self:
+        case .`self`:
             targets = [(casterSide, casterIndex)]
         case .allAllies:
-            targets = state.enemies.enumerated()
+            targets = context.enemies.enumerated()
                 .filter { $0.element.isAlive }
                 .map { (ActorSide.enemy, $0.offset) }
         default:
@@ -406,16 +430,16 @@ extension BattleEngine {
         }
 
         for (targetSide, targetIndex) in targets {
-            guard var target = state.actor(for: targetSide, index: targetIndex),
+            guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
             let healAmount = (target.snapshot.maxHP * healPercent) / 100
             let missing = target.snapshot.maxHP - target.currentHP
             let applied = min(healAmount, missing)
             target.currentHP += applied
-            state.updateActor(target, side: targetSide, index: targetIndex)
+            context.updateActor(target, side: targetSide, index: targetIndex)
 
-            let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialHeal, target: targetIdx, value: UInt32(applied))
         }
     }
@@ -423,19 +447,19 @@ extension BattleEngine {
     // MARK: - Buff Skill
 
     private nonisolated static func executeEnemyBuffSkill(skill: EnemySkillDefinition,
-                                                          casterSide: ActorSide,
-                                                          casterIndex: Int,
-                                                          state: inout BattleState,
-                                                          entryBuilder: BattleActionEntry.Builder) {
-        guard state.actor(for: casterSide, index: casterIndex) != nil else { return }
+                                              casterSide: ActorSide,
+                                              casterIndex: Int,
+                                              context: inout BattleContext,
+                                              entryBuilder: BattleActionEntry.Builder) {
+        guard let _ = context.actor(for: casterSide, index: casterIndex) else { return }
         guard let buffType = skill.buffType else { return }
 
         let targets: [(ActorSide, Int)]
         switch skill.targeting {
-        case .self:
+        case .`self`:
             targets = [(casterSide, casterIndex)]
         case .allAllies:
-            targets = state.enemies.enumerated()
+            targets = context.enemies.enumerated()
                 .filter { $0.element.isAlive }
                 .map { (ActorSide.enemy, $0.offset) }
         default:
@@ -445,37 +469,37 @@ extension BattleEngine {
         let multiplier = skill.buffMultiplier ?? 1.5
 
         for (targetSide, targetIndex) in targets {
-            guard var target = state.actor(for: targetSide, index: targetIndex),
+            guard var target = context.actor(for: targetSide, index: targetIndex),
                   target.isAlive else { continue }
 
             applyEnemyBuff(buffType: buffType, multiplier: multiplier, to: &target)
-            state.updateActor(target, side: targetSide, index: targetIndex)
+            context.updateActor(target, side: targetSide, index: targetIndex)
 
-            let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+            let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
             entryBuilder.addEffect(kind: .enemySpecialBuff,
                                    target: targetIdx,
-                                   extra: UInt32(buffType))
+                                   extra: UInt16(buffType))
         }
     }
 
     // MARK: - Helper Functions
 
     private nonisolated static func selectEnemySkillTargets(skill: EnemySkillDefinition,
-                                                            attackerSide: ActorSide,
-                                                            attackerIndex: Int,
-                                                            state: inout BattleState) -> [(ActorSide, Int)] {
+                                                attackerSide: ActorSide,
+                                                attackerIndex: Int,
+                                                context: inout BattleContext) -> [(ActorSide, Int)] {
         let opponentSide: ActorSide = attackerSide == .player ? .enemy : .player
-        let opponents = attackerSide == .player ? state.enemies : state.players
+        let opponents = attackerSide == .player ? context.enemies : context.players
 
         switch skill.targeting {
         case .single:
-            let attacker = state.actor(for: attackerSide, index: attackerIndex)
-            let forcedTargets = SacrificeTargets()
+            let attacker = context.actor(for: attackerSide, index: attackerIndex)
+            let forcedTargets = BattleContext.SacrificeTargets(playerTarget: nil, enemyTarget: nil)
             if let (targetSide, targetIndex) = selectOffensiveTarget(attackerSide: attackerSide,
-                                                                     state: &state,
-                                                                     allowFriendlyTargets: false,
-                                                                     attacker: attacker,
-                                                                     forcedTargets: forcedTargets) {
+                                                                      context: &context,
+                                                                      allowFriendlyTargets: false,
+                                                                      attacker: attacker,
+                                                                      forcedTargets: forcedTargets) {
                 return [(targetSide, targetIndex)]
             }
             return []
@@ -485,7 +509,7 @@ extension BattleEngine {
             let hitCount = skill.hitCount ?? 1
             var targets: [(ActorSide, Int)] = []
             for _ in 0..<hitCount {
-                let randomIndex = state.random.nextInt(in: 0...(alive.count - 1))
+                let randomIndex = context.random.nextInt(in: 0...(alive.count - 1))
                 let target = alive[randomIndex]
                 targets.append((opponentSide, target.offset))
             }
@@ -494,10 +518,10 @@ extension BattleEngine {
             return opponents.enumerated()
                 .filter { $0.element.isAlive }
                 .map { (opponentSide, $0.offset) }
-        case .self:
+        case .`self`:
             return [(attackerSide, attackerIndex)]
         case .allAllies:
-            let allies = attackerSide == .player ? state.players : state.enemies
+            let allies = attackerSide == .player ? context.players : context.enemies
             return allies.enumerated()
                 .filter { $0.element.isAlive }
                 .map { (attackerSide, $0.offset) }
@@ -506,43 +530,44 @@ extension BattleEngine {
 
     @discardableResult
     private nonisolated static func handleEnemySkillDefeat(targetSide: ActorSide,
-                                                          targetIndex: Int,
-                                                          state: inout BattleState,
-                                                          entryBuilder: BattleActionEntry.Builder) -> Bool {
-        guard let target = state.actor(for: targetSide, index: targetIndex),
+                                               targetIndex: Int,
+                                               context: inout BattleContext,
+                                               entryBuilder: BattleActionEntry.Builder) -> Bool {
+        guard let target = context.actor(for: targetSide, index: targetIndex),
               !target.isAlive else { return false }
 
         appendDefeatLog(for: target,
                         side: targetSide,
                         index: targetIndex,
-                        state: &state,
+                        context: &context,
                         entryBuilder: entryBuilder)
         return true
     }
 
     private nonisolated static func attemptEnemySkillStatusInflict(statusId: UInt8,
-                                                                   chancePercent: Int,
-                                                                   targetSide: ActorSide,
-                                                                   targetIndex: Int,
-                                                                   state: inout BattleState,
-                                                                   entryBuilder: BattleActionEntry.Builder) {
-        guard var target = state.actor(for: targetSide, index: targetIndex),
+                                                       chancePercent: Int,
+                                                       targetSide: ActorSide,
+                                                       targetIndex: Int,
+                                                       context: inout BattleContext,
+                                                       entryBuilder: BattleActionEntry.Builder) {
+        guard var target = context.actor(for: targetSide, index: targetIndex),
               target.isAlive else { return }
-        guard let statusDef = state.statusDefinitions[statusId] else { return }
+        guard let statusDef = context.statusDefinitions[statusId] else { return }
 
-        let targetIdx = state.actorIndex(for: targetSide, arrayIndex: targetIndex)
+        let targetIdx = context.actorIndex(for: targetSide, arrayIndex: targetIndex)
 
         let applied = attemptApplyStatus(statusId: statusId,
                                          baseChancePercent: Double(chancePercent),
                                          durationTurns: statusDef.durationTurns,
                                          sourceId: nil,
                                          to: &target,
-                                         state: &state)
-        state.updateActor(target, side: targetSide, index: targetIndex)
+                                         context: &context)
+        context.updateActor(target, side: targetSide, index: targetIndex)
 
         if applied {
             entryBuilder.addEffect(kind: .statusInflict, target: targetIdx, statusId: UInt16(statusId))
-            applyAutoStatusCureIfNeeded(for: targetSide, targetIndex: targetIndex, state: &state)
+            // autoStatusCureOnAlly判定
+            applyAutoStatusCureIfNeeded(for: targetSide, targetIndex: targetIndex, context: &context)
         } else {
             entryBuilder.addEffect(kind: .statusResist, target: targetIdx, statusId: UInt16(statusId))
         }
@@ -552,12 +577,16 @@ extension BattleEngine {
         guard let type = SpellBuffType(rawValue: buffType) else { return }
         switch type {
         case .physicalDamageDealt, .combat, .damage:
+            // 与ダメージ倍率は戦闘効果として後で適用されるため、ここでは物理攻撃力を上げる
             actor.snapshot.physicalAttackScore = Int(Double(actor.snapshot.physicalAttackScore) * multiplier)
         case .physicalDamageTaken:
+            // 被物理ダメージ減少 = 防御力上昇
             actor.snapshot.physicalDefenseScore = Int(Double(actor.snapshot.physicalDefenseScore) * multiplier)
         case .magicalDamageTaken:
+            // 被魔法ダメージ減少 = 魔法防御力上昇
             actor.snapshot.magicalDefenseScore = Int(Double(actor.snapshot.magicalDefenseScore) * multiplier)
         case .breathDamageTaken:
+            // ブレス耐性は直接ステータスにないのでスキップ
             break
         case .physicalAttackScore:
             actor.snapshot.physicalAttackScore = Int(Double(actor.snapshot.physicalAttackScore) * multiplier)
