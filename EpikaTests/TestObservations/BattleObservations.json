@@ -12891,6 +12891,1284 @@
       "toleranceBasis": "決定的（price=2500, level=10, floor=3）",
       "testFile": "BattleRewardCalculatorTests.swift",
       "testMethod": "testTrapDifficultyUsesBasePriceOver1000"
+    },
+    {
+      "id": "SKILL-EFFECT-001",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "damageDealtPercent"
+      ],
+      "description": "damageDealtPercent(physical, +10%) が 1.1 になるか",
+      "formula": "1.0 + 10% = 1.1",
+      "expectedRange": {
+        "min": 1.1,
+        "max": 1.1
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-002",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "damageDealtMultiplier"
+      ],
+      "description": "damageDealtMultiplier(physical) が 1.5 になるか",
+      "formula": "multiplier=1.5",
+      "expectedRange": {
+        "min": 1.5,
+        "max": 1.5
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-003",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "damageTakenPercent"
+      ],
+      "description": "damageTakenPercent(breath, -20%) が 0.8 になるか",
+      "formula": "1.0 - 20% = 0.8",
+      "expectedRange": {
+        "min": 0.8,
+        "max": 0.8
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-004",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "damageTakenMultiplier"
+      ],
+      "description": "damageTakenMultiplier(magical) が 0.7 になるか",
+      "formula": "multiplier=0.7",
+      "expectedRange": {
+        "min": 0.7,
+        "max": 0.7
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-005",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "damageDealtMultiplierAgainst"
+      ],
+      "description": "damageDealtMultiplierAgainst(raceId=3) が 1.25 になるか",
+      "formula": "multiplier=1.25",
+      "expectedRange": {
+        "min": 1.25,
+        "max": 1.25
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-006",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "criticalDamagePercent"
+      ],
+      "description": "criticalDamagePercent が 30 になるか",
+      "formula": "valuePercent=30",
+      "expectedRange": {
+        "min": 30,
+        "max": 30
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-007",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "criticalDamageMultiplier"
+      ],
+      "description": "criticalDamageMultiplier が 1.4 になるか",
+      "formula": "multiplier=1.4",
+      "expectedRange": {
+        "min": 1.4,
+        "max": 1.4
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-008",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "criticalDamageTakenMultiplier"
+      ],
+      "description": "criticalDamageTakenMultiplier が 0.9 になるか",
+      "formula": "multiplier=0.9",
+      "expectedRange": {
+        "min": 0.9,
+        "max": 0.9
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-009",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "penetrationDamageTakenMultiplier"
+      ],
+      "description": "penetrationDamageTakenMultiplier が 0.6 になるか",
+      "formula": "multiplier=0.6",
+      "expectedRange": {
+        "min": 0.6,
+        "max": 0.6
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-010",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "martialBonusPercent"
+      ],
+      "description": "martialBonusPercent が 12 になるか",
+      "formula": "valuePercent=12",
+      "expectedRange": {
+        "min": 12,
+        "max": 12
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-011",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "martialBonusMultiplier"
+      ],
+      "description": "martialBonusMultiplier が 1.3 になるか",
+      "formula": "multiplier=1.3",
+      "expectedRange": {
+        "min": 1.3,
+        "max": 1.3
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-012",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "minHitScale"
+      ],
+      "description": "minHitScale が 0.6 になるか",
+      "formula": "minHitScale=0.6",
+      "expectedRange": {
+        "min": 0.6,
+        "max": 0.6
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-013",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "magicNullifyChancePercent"
+      ],
+      "description": "magicNullifyChancePercent が 15 になるか",
+      "formula": "chancePercent=15",
+      "expectedRange": {
+        "min": 15,
+        "max": 15
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-014",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "levelComparisonDamageTaken"
+      ],
+      "description": "levelComparisonDamageTakenPercent が -5 になるか",
+      "formula": "valuePercent=-5",
+      "expectedRange": {
+        "min": -5,
+        "max": -5
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-015",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "damageDealtMultiplierByTargetHP"
+      ],
+      "description": "damageDealtMultiplierByTargetHP が1件で一致するか",
+      "formula": "count=1, hpThresholdPercent=30, multiplier=1.5",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-016",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "absorption"
+      ],
+      "description": "absorption が吸収率/上限を保持できるか",
+      "formula": "absorptionPercent=20, capPercent=50",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-017",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "procMultiplier"
+      ],
+      "description": "procMultiplier が 1.2 になるか",
+      "formula": "multiplier=1.2",
+      "expectedRange": {
+        "min": 1.2,
+        "max": 1.2
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-018",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "procRate.add"
+      ],
+      "description": "procRate(add) target=2 が 15 になるか",
+      "formula": "addPercent=15",
+      "expectedRange": {
+        "min": 15,
+        "max": 15
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-019",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "procRate.multiply"
+      ],
+      "description": "procRate(multiply) target=2 が 1.5 になるか",
+      "formula": "multiplier=1.5",
+      "expectedRange": {
+        "min": 1.5,
+        "max": 1.5
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-020",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "extraAction"
+      ],
+      "description": "extraAction が1件で一致するか",
+      "formula": "count=1, chancePercent=25, count=2, trigger=battleStart, triggerTurn=1, duration=3",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-021",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "reactionNextTurn"
+      ],
+      "description": "reactionNextTurn が 2 になるか",
+      "formula": "count=2",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-022",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "actionOrderMultiplier"
+      ],
+      "description": "actionOrderMultiplier が 1.1 になるか",
+      "formula": "multiplier=1.1",
+      "expectedRange": {
+        "min": 1.1,
+        "max": 1.1
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-023",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "actionOrderShuffle"
+      ],
+      "description": "actionOrderShuffle が有効になるか",
+      "formula": "actionOrderShuffle=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-024",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "actionOrderShuffleEnemy"
+      ],
+      "description": "actionOrderShuffleEnemy が有効になるか",
+      "formula": "actionOrderShuffleEnemy=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-025",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "counterAttackEvasionMultiplier"
+      ],
+      "description": "counterAttackEvasionMultiplier が 1.3 になるか",
+      "formula": "multiplier=1.3",
+      "expectedRange": {
+        "min": 1.3,
+        "max": 1.3
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-026",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "parry"
+      ],
+      "description": "parry が有効かつ bonusPercent=10 か",
+      "formula": "parryEnabled=true, bonusPercent=10",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-027",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "shieldBlock"
+      ],
+      "description": "shieldBlock が有効かつ bonusPercent=15 か",
+      "formula": "shieldBlockEnabled=true, bonusPercent=15",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-028",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "barrier"
+      ],
+      "description": "barrier(physical) の charges が 2 か",
+      "formula": "charges=2",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-029",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "barrierOnGuard"
+      ],
+      "description": "barrierOnGuard(magical) の charges が 3 か",
+      "formula": "charges=3",
+      "expectedRange": {
+        "min": 3,
+        "max": 3
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-030",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "enemyActionDebuffChance"
+      ],
+      "description": "enemyActionDebuffChance が1件で一致するか",
+      "formula": "count=1, chancePercent=40, reduction=2",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-031",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "cumulativeHitDamageBonus"
+      ],
+      "description": "cumulativeHitDamageBonus が一致するか",
+      "formula": "damagePercentPerHit=5, hitScorePerHit=2",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-032",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "enemySingleActionSkipChance"
+      ],
+      "description": "enemySingleActionSkipChancePercent が 30 か",
+      "formula": "chancePercent=30",
+      "expectedRange": {
+        "min": 30,
+        "max": 30
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-033",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "firstStrike"
+      ],
+      "description": "firstStrike が有効か",
+      "formula": "firstStrike=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-034",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "statDebuff"
+      ],
+      "description": "statDebuff が1件で一致するか",
+      "formula": "count=1, stat=1, multiplier=0.9",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-035",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "attackCountAdditive"
+      ],
+      "description": "attackCountAdditive が有効か",
+      "formula": "hasAttackCountAdditive=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-036",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "targetingWeight"
+      ],
+      "description": "targetingWeight が 0.7 か",
+      "formula": "weight=0.7",
+      "expectedRange": {
+        "min": 0.7,
+        "max": 0.7
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-037",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "coverRowsBehind"
+      ],
+      "description": "coverRowsBehind が条件付きで有効か",
+      "formula": "coverRowsBehind=true, condition=allyHPBelow50",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-038",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "spellPowerPercent"
+      ],
+      "description": "spellPowerPercent が 15 か",
+      "formula": "valuePercent=15",
+      "expectedRange": {
+        "min": 15,
+        "max": 15
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-039",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "spellPowerMultiplier"
+      ],
+      "description": "spellPowerMultiplier が 1.2 か",
+      "formula": "multiplier=1.2",
+      "expectedRange": {
+        "min": 1.2,
+        "max": 1.2
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-040",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "spellSpecificMultiplier"
+      ],
+      "description": "spellSpecificMultiplier(spellId=2) が 1.4 か",
+      "formula": "multiplier=1.4",
+      "expectedRange": {
+        "min": 1.4,
+        "max": 1.4
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-041",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "spellSpecificTakenMultiplier"
+      ],
+      "description": "spellSpecificTakenMultiplier(spellId=2) が 0.8 か",
+      "formula": "multiplier=0.8",
+      "expectedRange": {
+        "min": 0.8,
+        "max": 0.8
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-042",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "spellCharges"
+      ],
+      "description": "spellCharges の各値が一致するか",
+      "formula": "max=5, initial=2, initialBonus=1, regen(every=2,amount=1,cap=1,maxTriggers=3), gainOnPhysicalHit=1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-043",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "magicCriticalEnable"
+      ],
+      "description": "magicCriticalEnable が有効か",
+      "formula": "magicCriticalEnabled=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-044",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "spellChargeRecoveryChance"
+      ],
+      "description": "spellChargeRecoveryChance が1件で一致するか",
+      "formula": "count=1, chancePercent=20, school=1",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-045",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "breathVariant"
+      ],
+      "description": "breathVariant の extraCharges が 2 か",
+      "formula": "extraCharges=2",
+      "expectedRange": {
+        "min": 2,
+        "max": 2
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-046",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "statusResistancePercent"
+      ],
+      "description": "statusResistancePercent(status=2) が 15 か",
+      "formula": "valuePercent=15",
+      "expectedRange": {
+        "min": 15,
+        "max": 15
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-047",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "statusResistanceMultiplier"
+      ],
+      "description": "statusResistanceMultiplier(status=3) が 0.7 か",
+      "formula": "multiplier=0.7",
+      "expectedRange": {
+        "min": 0.7,
+        "max": 0.7
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-048",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "statusInflict"
+      ],
+      "description": "statusInflict が1件で一致するか",
+      "formula": "count=1, statusId=1, chancePercent=25",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-049",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "berserk"
+      ],
+      "description": "berserkChancePercent が 10 か",
+      "formula": "chancePercent=10",
+      "expectedRange": {
+        "min": 10,
+        "max": 10
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-050",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "autoStatusCureOnAlly"
+      ],
+      "description": "autoStatusCureOnAlly が有効か",
+      "formula": "autoStatusCureOnAlly=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-051",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "resurrectionSave"
+      ],
+      "description": "resurrectionSave が1件で一致するか",
+      "formula": "count=1, usesPriestMagic=true, minLevel=3, guaranteed=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-052",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "resurrectionActive"
+      ],
+      "description": "resurrectionActive が1件で一致するか",
+      "formula": "count=1, chancePercent=30, hpScale=maxHP5Percent, maxTriggers=2, ignoreActionCost=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-053",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "resurrectionBuff"
+      ],
+      "description": "resurrectionBuff の maxTriggers が 3 か",
+      "formula": "maxTriggers=3",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-054",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "resurrectionVitalize"
+      ],
+      "description": "resurrectionVitalize の各値が一致するか",
+      "formula": "removePenalties=true, rememberSkills=true, removeSkillIds=[10], grantSkillIds=[20]",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-055",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "resurrectionSummon"
+      ],
+      "description": "resurrectionSummon interval が 3 か",
+      "formula": "everyTurns=3",
+      "expectedRange": {
+        "min": 3,
+        "max": 3
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-056",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "resurrectionPassive"
+      ],
+      "description": "resurrectionPassive が有効か",
+      "formula": "passiveBetweenFloors=true, chancePercent=15",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-057",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "sacrificeRite"
+      ],
+      "description": "sacrificeRite interval が 4 か",
+      "formula": "everyTurns=4",
+      "expectedRange": {
+        "min": 4,
+        "max": 4
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-058",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "rowProfile"
+      ],
+      "description": "rowProfile が一致するか",
+      "formula": "profile=far, nearApt=true, farApt=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-059",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "endOfTurnHealing"
+      ],
+      "description": "endOfTurnHealingPercent が 5 か",
+      "formula": "valuePercent=5",
+      "expectedRange": {
+        "min": 5,
+        "max": 5
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-060",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "endOfTurnSelfHPPercent"
+      ],
+      "description": "endOfTurnSelfHPPercent が -10 か",
+      "formula": "valuePercent=-10",
+      "expectedRange": {
+        "min": -10,
+        "max": -10
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-061",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "partyAttackFlag"
+      ],
+      "description": "partyAttackFlag が一致するか",
+      "formula": "hostileAll=true, vampiricImpulse=true, vampiricSuppression=false",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-062",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "partyAttackTarget"
+      ],
+      "description": "partyAttackTarget が一致するか",
+      "formula": "targetId=7 in hostile/protected",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-063",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "reverseHealing"
+      ],
+      "description": "reverseHealing が有効か",
+      "formula": "reverseHealingEnabled=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-064",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "equipmentStatMultiplier"
+      ],
+      "description": "equipmentStatMultiplier(equipmentType=2) が 1.1 か",
+      "formula": "multiplier=1.1",
+      "expectedRange": {
+        "min": 1.1,
+        "max": 1.1
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-065",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "dodgeCap"
+      ],
+      "description": "dodgeCap が一致するか",
+      "formula": "dodgeCapMax=0.8, minHitScale=0.6",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-066",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "degradationRepair"
+      ],
+      "description": "degradationRepair が一致するか",
+      "formula": "minPercent=5, maxPercent=10",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-067",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "degradationRepairBoost"
+      ],
+      "description": "degradationRepairBoost が 12 か",
+      "formula": "valuePercent=12",
+      "expectedRange": {
+        "min": 12,
+        "max": 12
+      },
+      "toleranceBasis": "決定的（入力値=出力値）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-068",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "autoDegradationRepair"
+      ],
+      "description": "autoDegradationRepair が有効か",
+      "formula": "autoDegradationRepair=true",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-069",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "runawayMagic"
+      ],
+      "description": "runawayMagic が一致するか",
+      "formula": "thresholdPercent=30, chancePercent=20",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-070",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "runawayDamage"
+      ],
+      "description": "runawayDamage が一致するか",
+      "formula": "thresholdPercent=25, chancePercent=15",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
+    },
+    {
+      "id": "SKILL-EFFECT-071",
+      "category": [
+        "スキル",
+        "ランタイム",
+        "効果",
+        "retreatAtTurn"
+      ],
+      "description": "retreatAtTurn が一致するか",
+      "formula": "turn=5, chancePercent=40",
+      "expectedRange": {
+        "min": 1,
+        "max": 1
+      },
+      "toleranceBasis": "決定的（条件一致）",
+      "testFile": "SkillRuntimeEffectExpectationTests.swift",
+      "testMethod": "testSkillEffectExpectations"
     }
   ]
 }
