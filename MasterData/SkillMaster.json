@@ -2838,53 +2838,6 @@
       },
       {
         "effectTemplate": {
-          "kind": "criticalChancePercentMaxAbsolute"
-        },
-        "variants": [
-          {
-            "id": 310,
-            "label": "[最大50%] 必殺率上限",
-            "description": "必殺率の上限が50%になる。",
-            "overrides": {
-              "maxPercent": 50
-            }
-          },
-          {
-            "id": 311,
-            "label": "[最大60%] 必殺率上限",
-            "description": "必殺率の上限が60%になる。",
-            "overrides": {
-              "maxPercent": 60
-            }
-          },
-          {
-            "id": 312,
-            "label": "[最大70%] 必殺率上限",
-            "description": "必殺率の上限が70%になる。",
-            "overrides": {
-              "maxPercent": 70
-            }
-          },
-          {
-            "id": 313,
-            "label": "[最大80%] 必殺率上限",
-            "description": "必殺率の上限が80%になる。",
-            "overrides": {
-              "maxPercent": 80
-            }
-          },
-          {
-            "id": 314,
-            "label": "[最大90%] 必殺率上限",
-            "description": "必殺率の上限が90%になる。",
-            "overrides": {
-              "maxPercent": 90
-            }
-          }
-        ]
-      },
-      {
-        "effectTemplate": {
           "kind": "criticalChancePercentMaxDelta"
         },
         "variants": [

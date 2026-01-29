@@ -10,7 +10,6 @@
 // 【公開API】
 //   - CriticalChancePercentAdditiveHandler: 必殺率加算
 //   - CriticalChancePercentCapHandler: 必殺率上限
-//   - CriticalChancePercentMaxAbsoluteHandler: 必殺率絶対最大値
 //   - CriticalChancePercentMaxDeltaHandler: 必殺率最大値増分
 //   - EquipmentSlotAdditiveHandler: 装備スロット加算
 //   - EquipmentSlotMultiplierHandler: 装備スロット倍率
@@ -53,11 +52,6 @@ enum CriticalChancePercentAdditiveHandler: SkillEffectHandler {
 
 enum CriticalChancePercentCapHandler: SkillEffectHandler {
     nonisolated static let effectType = SkillEffectType.criticalChancePercentCap
-    nonisolated static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
-}
-
-enum CriticalChancePercentMaxAbsoluteHandler: SkillEffectHandler {
-    nonisolated static let effectType = SkillEffectType.criticalChancePercentMaxAbsolute
     nonisolated static func apply(payload: DecodedSkillEffectPayload, to accumulator: inout ActorEffectsAccumulator, context: SkillEffectContext) throws {}
 }
 

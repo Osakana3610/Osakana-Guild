@@ -3813,40 +3813,6 @@
       "testMethod": "testAllSkillRuntimeExpectations"
     },
     {
-      "id": "SKILL-RUNTIME-310",
-      "category": [
-        "スキル",
-        "ランタイム",
-        "criticalChancePercentMaxAbsolute"
-      ],
-      "description": "[最大50%] 必殺率上限 (criticalChancePercent.max)",
-      "formula": "ランタイム検証: passed=1",
-      "expectedRange": {
-        "min": 1,
-        "max": 1
-      },
-      "toleranceBasis": "pass/fail",
-      "testFile": "SkillRuntimeExpectationTests.swift",
-      "testMethod": "testAllSkillRuntimeExpectations"
-    },
-    {
-      "id": "SKILL-RUNTIME-314",
-      "category": [
-        "スキル",
-        "ランタイム",
-        "criticalChancePercentMaxAbsolute"
-      ],
-      "description": "[最大90%] 必殺率上限 (criticalChancePercent.max)",
-      "formula": "ランタイム検証: passed=1",
-      "expectedRange": {
-        "min": 1,
-        "max": 1
-      },
-      "toleranceBasis": "pass/fail",
-      "testFile": "SkillRuntimeExpectationTests.swift",
-      "testMethod": "testAllSkillRuntimeExpectations"
-    },
-    {
       "id": "SKILL-RUNTIME-316",
       "category": [
         "スキル",

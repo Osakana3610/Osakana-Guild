@@ -494,14 +494,6 @@ private struct SkillEffectAggregator {
                             critical.cap = cap
                         }
                     }
-                case .criticalChancePercentMaxAbsolute:
-                    if let cap = payload.value[.cap] ?? payload.value[.maxPercent] {
-                        if let current = critical.cap {
-                            critical.cap = min(current, cap)
-                        } else {
-                            critical.cap = cap
-                        }
-                    }
                 case .criticalChancePercentMaxDelta:
                     if let delta = payload.value[.deltaPercent] {
                         critical.capDelta += delta

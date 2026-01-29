@@ -71,7 +71,6 @@ private extension SkillRuntimeCoverageTests {
     static let passthroughTypes: Set<SkillEffectType> = [
         .criticalChancePercentAdditive,
         .criticalChancePercentCap,
-        .criticalChancePercentMaxAbsolute,
         .criticalChancePercentMaxDelta,
         .equipmentSlotAdditive,
         .equipmentSlotMultiplier,
@@ -143,7 +142,6 @@ private extension SkillRuntimeCoverageTests {
         .statConversionLinear,
         .criticalChancePercentAdditive,
         .criticalChancePercentCap,
-        .criticalChancePercentMaxAbsolute,
         .criticalChancePercentMaxDelta,
         .criticalDamagePercent,
         .criticalDamageMultiplier,

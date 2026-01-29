@@ -54,7 +54,6 @@ extension SkillRuntimeEffectCompiler {
                      .criticalDamageTakenMultiplier,
                      .criticalChancePercentAdditive,
                      .criticalChancePercentCap,
-                     .criticalChancePercentMaxAbsolute,
                      .criticalChancePercentMaxDelta,
                      .damageDealtMultiplier,
                      .damageDealtMultiplierAgainst,

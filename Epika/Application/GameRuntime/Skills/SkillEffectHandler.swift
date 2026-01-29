@@ -212,7 +212,6 @@ enum SkillEffectHandlerRegistry {
             // MARK: Passthrough Handlers (Actor.swiftでは処理しないが登録は必要)
             CriticalChancePercentAdditiveHandler.self,
             CriticalChancePercentCapHandler.self,
-            CriticalChancePercentMaxAbsoluteHandler.self,
             CriticalChancePercentMaxDeltaHandler.self,
             EquipmentSlotAdditiveHandler.self,
             EquipmentSlotMultiplierHandler.self,

@@ -135,7 +135,6 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
     // MARK: - Passthrough系 (150-199)
     case criticalChancePercentAdditive = 150
     case criticalChancePercentCap = 151
-    case criticalChancePercentMaxAbsolute = 152
     case criticalChancePercentMaxDelta = 153
     case equipmentSlotAdditive = 154
     case equipmentSlotMultiplier = 155
@@ -254,7 +253,6 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         // Passthrough系
         case "criticalChancePercentAdditive": self = .criticalChancePercentAdditive
         case "criticalChancePercentCap": self = .criticalChancePercentCap
-        case "criticalChancePercentMaxAbsolute": self = .criticalChancePercentMaxAbsolute
         case "criticalChancePercentMaxDelta": self = .criticalChancePercentMaxDelta
         case "equipmentSlotAdditive": self = .equipmentSlotAdditive
         case "equipmentSlotMultiplier": self = .equipmentSlotMultiplier
@@ -374,7 +372,6 @@ enum SkillEffectType: UInt8, CaseIterable, Sendable, Hashable {
         // Passthrough系
         case .criticalChancePercentAdditive: return "criticalChancePercentAdditive"
         case .criticalChancePercentCap: return "criticalChancePercentCap"
-        case .criticalChancePercentMaxAbsolute: return "criticalChancePercentMaxAbsolute"
         case .criticalChancePercentMaxDelta: return "criticalChancePercentMaxDelta"
         case .equipmentSlotAdditive: return "equipmentSlotAdditive"
         case .equipmentSlotMultiplier: return "equipmentSlotMultiplier"
