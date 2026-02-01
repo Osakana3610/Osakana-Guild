@@ -194,7 +194,7 @@ extension BattleEngine {
         }
         guard !skillIds.isEmpty else { return }
 
-        let definitions: [SkillDefinition] = skillIds.compactMap { skillId in
+        let definitions: [SkillDefinition] = skillIds.sorted().compactMap { skillId in
             state.skillDefinitions[skillId]
         }
         guard !definitions.isEmpty else { return }
@@ -208,8 +208,11 @@ extension BattleEngine {
                 agility: actor.agility,
                 luck: actor.luck
             )
-            let skillCompiler = try UnifiedSkillEffectCompiler(skills: definitions, stats: stats)
-            let effects = skillCompiler.actorEffects
+            let aggregation = try SkillEffectAggregationService.aggregate(
+                input: SkillEffectAggregationInput(skills: definitions, actorStats: stats),
+                options: []
+            )
+            let effects = aggregation.battleEffects
             actor.skillEffects = effects
 
             for (key, value) in effects.combat.barrierCharges {

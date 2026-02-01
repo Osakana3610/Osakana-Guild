@@ -146,9 +146,8 @@ enum EquipmentStatMultiplierHandler: SkillEffectHandler {
         to accumulator: inout ActorEffectsAccumulator,
         context: SkillEffectContext
     ) throws {
-        // 両方のパラメータ名をサポート: equipmentType (JSON) と equipmentCategory (DB)
-        guard let category = payload.parameters[.equipmentType] ?? payload.parameters[.equipmentCategory] else {
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) equipmentStatMultiplier の equipmentType/equipmentCategory が不足しています")
+        guard let category = payload.parameters[.equipmentType] else {
+            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) equipmentStatMultiplier の equipmentType が不足しています")
         }
         let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
         accumulator.misc.equipmentStatMultipliers[category, default: 1.0] *= multiplier

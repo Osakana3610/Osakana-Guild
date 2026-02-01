@@ -538,6 +538,7 @@ private extension CombatStatCalculatorObservationTests {
             combatCoefficients: coefficients,
             learnedSkillIds: []
         )
+        let skillEffects = try CombatStatSkillEffectInputs(skills: skills)
         let context = CombatStatCalculator.Context(
             raceId: 1,
             jobId: 1,
@@ -548,7 +549,7 @@ private extension CombatStatCalculatorObservationTests {
             race: race,
             job: job,
             personalitySecondary: nil,
-            learnedSkills: skills,
+            skillEffects: skillEffects,
             loadout: CachedCharacter.Loadout(items: [], titles: [], superRareTitles: [])
         )
         return try CombatStatCalculator.calculate(for: context).combat

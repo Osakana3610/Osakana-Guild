@@ -10,7 +10,7 @@
 // 【View構成】
 //   - 1行表示: "Lv{N} Exp {累計経験値} (×{倍率}) 次のLvまで{残り経験値}"
 //   - CharacterExperienceTableで経験値計算
-//   - SkillRuntimeEffectCompilerで経験値倍率を計算
+//   - CachedCharacter.rewardComponentsで経験値倍率を計算
 //   - FormatStyleを使って数値を3桁区切りで整形
 //   - レベルキャップ到達時は「次のLvまで0」
 //
@@ -102,10 +102,7 @@ private extension CharacterLevelSection {
     }
 
     func experienceMultiplier() throws -> Double {
-        // 新構造では装備から付与されるスキルのみがlearnedSkillsに含まれる
-        guard !character.learnedSkills.isEmpty else { return 1.0 }
-        let components = try SkillRuntimeEffectCompiler.rewardComponents(from: character.learnedSkills)
-        return components.experienceScale()
+        return character.rewardComponents.experienceScale()
     }
 
     func formatMultiplier(_ value: Double) -> String {

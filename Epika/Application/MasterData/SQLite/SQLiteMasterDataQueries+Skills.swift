@@ -184,6 +184,6 @@ extension SQLiteMasterDataManager {
             )
         }
 
-        return skills.values.sorted { $0.name < $1.name }
+        return skills.values.sorted { $0.id < $1.id }
     }
 }

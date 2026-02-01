@@ -38,12 +38,6 @@ extension SkillRuntimeEffectCompiler {
         )
     }
 
-    /// 代替パラメータ名のマッピング（キー: 主要名, 値: 代替名のリスト）
-    private static let parameterAliases: [EffectParamKey: [EffectParamKey]] = [
-        .statusType: [.status],
-        .equipmentType: [.equipmentCategory]
-    ]
-
     nonisolated static func validatePayload(_ payload: DecodedSkillEffectPayload,
                                            skillId: UInt16,
                                            effectIndex: Int) throws {

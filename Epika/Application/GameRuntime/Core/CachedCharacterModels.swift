@@ -72,6 +72,11 @@ struct CachedCharacter: Identifiable, Sendable, Hashable {
     nonisolated let maxHP: Int
     nonisolated let combat: Combat
     nonisolated let equipmentCapacity: Int
+    nonisolated let skillEffects: BattleActor.SkillEffects
+    nonisolated let rewardComponents: SkillRuntimeEffects.RewardComponents
+    nonisolated let explorationModifiers: SkillRuntimeEffects.ExplorationModifiers
+    nonisolated let equipmentSlots: SkillRuntimeEffects.EquipmentSlots
+    nonisolated let modifierSummary: SkillModifierSummary
 
     // isMartialEligibleはcombatから取得
     nonisolated var isMartialEligible: Bool { combat.isMartialEligible }

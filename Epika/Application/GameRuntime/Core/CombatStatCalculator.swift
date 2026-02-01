@@ -13,7 +13,7 @@
 //   - Result: 計算結果（attributes/hitPoints/combat）
 //
 // 【計算フロー】
-//   1. SkillEffectAggregatorでスキル効果を集約
+//   1. CombatStatSkillEffectInputsでスキル効果を集約
 //   2. BaseStatAccumulatorで基礎ステータス計算
 //      - 種族基礎値 + レベルボーナス + 性格 + 装備
 //   3. CombatAccumulatorで戦闘ステータス計算
@@ -64,7 +64,7 @@ struct CombatStatCalculator {
         let race: RaceDefinition
         let job: JobDefinition
         let personalitySecondary: PersonalitySecondaryDefinition?
-        let learnedSkills: [SkillDefinition]
+        let skillEffects: CombatStatSkillEffectInputs
         let loadout: CachedCharacter.Loadout
 
         nonisolated init(raceId: UInt8,
@@ -76,7 +76,7 @@ struct CombatStatCalculator {
                          race: RaceDefinition,
                          job: JobDefinition,
                          personalitySecondary: PersonalitySecondaryDefinition?,
-                         learnedSkills: [SkillDefinition],
+                         skillEffects: CombatStatSkillEffectInputs,
                          loadout: CachedCharacter.Loadout) {
             self.raceId = raceId
             self.jobId = jobId
@@ -87,7 +87,7 @@ struct CombatStatCalculator {
             self.race = race
             self.job = job
             self.personalitySecondary = personalitySecondary
-            self.learnedSkills = learnedSkills
+            self.skillEffects = skillEffects
             self.loadout = loadout
         }
     }
@@ -103,7 +103,7 @@ struct CombatStatCalculator {
         let race = context.race
         let job = context.job
 
-        let skillEffects = try SkillEffectAggregator(skills: context.learnedSkills)
+        let skillEffects = context.skillEffects
 
         var base = BaseStatAccumulator()
         base.apply(raceBase: race)
@@ -281,301 +281,6 @@ private struct BaseStatAccumulator {
     }
 }
 
-// MARK: - Skill Aggregation
-
-private struct SkillEffectAggregator {
-    struct TalentModifiers {
-        private var multipliers: [CombatStatKey: Double] = [:]
-        private var talentFlags: Set<CombatStatKey> = []
-        private var incompetenceFlags: Set<CombatStatKey> = []
-
-        nonisolated init() {
-            for key in CombatStatKey.allCases {
-                multipliers[key] = 1.0
-            }
-        }
-
-        nonisolated mutating func applyTalent(stat: CombatStatKey, value: Double) {
-            talentFlags.insert(stat)
-            multipliers[stat, default: 1.0] *= value
-        }
-
-        nonisolated mutating func applyIncompetence(stat: CombatStatKey, value: Double) {
-            incompetenceFlags.insert(stat)
-            multipliers[stat, default: 1.0] *= value
-        }
-
-        nonisolated func multiplier(for stat: CombatStatKey) -> Double {
-            if talentFlags.contains(stat) && incompetenceFlags.contains(stat) {
-                return 1.0
-            }
-            return multipliers[stat, default: 1.0]
-        }
-
-        nonisolated func hasTalent(for stat: CombatStatKey) -> Bool {
-            talentFlags.contains(stat)
-        }
-
-        nonisolated func hasIncompetence(for stat: CombatStatKey) -> Bool {
-            incompetenceFlags.contains(stat)
-        }
-    }
-
-    struct PassiveMultipliers {
-        private var multipliers: [CombatStatKey: Double] = [:]
-
-        nonisolated init() {
-            for key in CombatStatKey.allCases {
-                multipliers[key] = 1.0
-            }
-        }
-
-        nonisolated mutating func multiply(stat: CombatStatKey, value: Double) {
-            multipliers[stat, default: 1.0] *= value
-        }
-
-        nonisolated func multiplier(for stat: CombatStatKey) -> Double {
-            multipliers[stat, default: 1.0]
-        }
-    }
-
-    struct AdditiveBonuses {
-        private var bonuses: [CombatStatKey: Double] = [:]
-
-        nonisolated mutating func add(stat: CombatStatKey, value: Double) {
-            bonuses[stat, default: 0.0] += value
-        }
-
-        nonisolated func value(for stat: CombatStatKey) -> Double {
-            bonuses[stat, default: 0.0]
-        }
-    }
-
-    struct BaseStatMultipliers {
-        private var multipliers: [BaseStat: Double] = [:]
-
-        nonisolated init() {
-            for stat in BaseStat.allCases {
-                multipliers[stat] = 1.0
-            }
-        }
-
-        nonisolated mutating func multiply(stat: BaseStat, value: Double) {
-            multipliers[stat, default: 1.0] *= value
-        }
-
-        nonisolated func apply(to attributes: inout CharacterValues.CoreAttributes) {
-            attributes.strength = Int((Double(attributes.strength) * (multipliers[.strength] ?? 1.0)).rounded(.towardZero))
-            attributes.wisdom = Int((Double(attributes.wisdom) * (multipliers[.wisdom] ?? 1.0)).rounded(.towardZero))
-            attributes.spirit = Int((Double(attributes.spirit) * (multipliers[.spirit] ?? 1.0)).rounded(.towardZero))
-            attributes.vitality = Int((Double(attributes.vitality) * (multipliers[.vitality] ?? 1.0)).rounded(.towardZero))
-            attributes.agility = Int((Double(attributes.agility) * (multipliers[.agility] ?? 1.0)).rounded(.towardZero))
-            attributes.luck = Int((Double(attributes.luck) * (multipliers[.luck] ?? 1.0)).rounded(.towardZero))
-        }
-    }
-
-    struct CriticalParameters {
-        var flatBonus: Double = 0.0
-        var cap: Double? = nil
-        var capDelta: Double = 0.0
-        var damagePercent: Double = 0.0
-        var damageMultiplier: Double = 1.0
-    }
-
-    var talents: TalentModifiers
-    let baseMultipliers: BaseStatMultipliers
-    let passives: PassiveMultipliers
-    let additives: AdditiveBonuses
-    let critical: CriticalParameters
-    let martialBonuses: MartialBonuses
-    let growthMultiplier: Double
-    let statConversions: [CombatStatKey: [StatConversion]]
-    let forcedToOne: Set<CombatStatKey>
-    let equipmentMultipliers: [Int: Double]
-    let itemStatMultipliers: [CombatStatKey: Double]
-
-    nonisolated init(skills: [SkillDefinition]) throws {
-        var talents = TalentModifiers()
-        var baseMultipliers = BaseStatMultipliers()
-        var passives = PassiveMultipliers()
-        var additives = AdditiveBonuses()
-        var critical = CriticalParameters()
-        var martial = MartialBonuses()
-        var growthMultiplierProduct: Double = 1.0
-        var conversions: [CombatStatKey: [StatConversion]] = [:]
-        var forcedToOne: Set<CombatStatKey> = []
-        var equipmentMultipliers: [Int: Double] = [:]
-        var itemStatMultipliers: [CombatStatKey: Double] = [:]
-
-        for skill in skills {
-            for effect in skill.effects {
-                let payload = SkillEffectAggregator.payload(from: effect)
-                switch payload.effectType {
-                case .additionalDamageScoreAdditive:
-                    if let value = payload.value[.additive] {
-                        additives.add(stat: .additionalDamageScore, value: value)
-                    }
-                case .additionalDamageScoreMultiplier:
-                    if let value = payload.value[.multiplier] {
-                        passives.multiply(stat: .additionalDamageScore, value: value)
-                    }
-                case .statAdditive:
-                    if let statRaw = payload.parameters[.stat],
-                       let statKey = CombatStatKey(statRaw),
-                       let additive = payload.value[.additive] {
-                        additives.add(stat: statKey, value: additive)
-                    }
-                case .statMultiplier:
-                    if let statRaw = payload.parameters[.stat] ?? payload.parameters[.statType],
-                       let multiplier = payload.value[.multiplier] {
-                        if statRaw == CombatStatKey.allRawValue {
-                            for key in CombatStatKey.allCases {
-                                passives.multiply(stat: key, value: multiplier)
-                            }
-                        } else if let statKey = CombatStatKey(statRaw) {
-                            passives.multiply(stat: statKey, value: multiplier)
-                        } else if let baseStat = BaseStat(rawValue: UInt8(clamping: statRaw)) {
-                            baseMultipliers.multiply(stat: baseStat, value: multiplier)
-                        }
-                    }
-                case .attackCountAdditive:
-                    if let additive = payload.value[.additive] {
-                        additives.add(stat: .attackCount, value: additive)
-                    }
-                case .growthMultiplier:
-                    if let multiplier = payload.value[.multiplier] {
-                        growthMultiplierProduct *= multiplier
-                    }
-                case .attackCountMultiplier:
-                    if let multiplier = payload.value[.multiplier] {
-                        passives.multiply(stat: .attackCount, value: multiplier)
-                    }
-                case .equipmentStatMultiplier:
-                    if let category = payload.parameters[.equipmentCategory] ?? payload.parameters[.equipmentType],
-                       let multiplier = payload.value[.multiplier] {
-                        equipmentMultipliers[category, default: 1.0] *= multiplier
-                    }
-                case .itemStatMultiplier:
-                    guard let statTypeRaw = payload.parameters[.statType] else {
-                        throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing statType")
-                    }
-                    guard let statKey = CombatStatKey(statTypeRaw) else {
-                        throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): invalid statType '\(statTypeRaw)'")
-                    }
-                    guard let multiplier = payload.value[.multiplier] else {
-                        throw CombatStatCalculator.CalculationError.invalidSkillPayload("\(skill.id)#\(effect.index): missing multiplier")
-                    }
-                    itemStatMultipliers[statKey, default: 1.0] *= multiplier
-                case .statConversionPercent:
-                    guard let sourceRaw = payload.parameters[.sourceStat],
-                          let sourceKey = CombatStatKey(sourceRaw),
-                          let targetRaw = payload.parameters[.targetStat],
-                          let targetKey = CombatStatKey(targetRaw),
-                          let percent = payload.value[.valuePercent] else { continue }
-                    let entry = StatConversion(source: sourceKey, ratio: percent / 100.0)
-                    conversions[targetKey, default: []].append(entry)
-                case .statConversionLinear:
-                    guard let sourceRaw = payload.parameters[.sourceStat],
-                          let sourceKey = CombatStatKey(sourceRaw),
-                          let targetRaw = payload.parameters[.targetStat],
-                          let targetKey = CombatStatKey(targetRaw),
-                          let ratio = payload.value[.valuePerUnit] else { continue }
-                    let entry = StatConversion(source: sourceKey, ratio: ratio)
-                    conversions[targetKey, default: []].append(entry)
-                case .criticalChancePercentAdditive:
-                    if let points = payload.value[.points] {
-                        critical.flatBonus += points
-                    }
-                case .criticalChancePercentCap:
-                    if let cap = payload.value[.cap] ?? payload.value[.maxPercent] {
-                        if let current = critical.cap {
-                            critical.cap = min(current, cap)
-                        } else {
-                            critical.cap = cap
-                        }
-                    }
-                case .criticalChancePercentMaxDelta:
-                    if let delta = payload.value[.deltaPercent] {
-                        critical.capDelta += delta
-                    }
-                case .criticalDamagePercent:
-                    if let value = payload.value[.valuePercent] {
-                        critical.damagePercent += value
-                    }
-                case .criticalDamageMultiplier:
-                    if let multiplier = payload.value[.multiplier] {
-                        critical.damageMultiplier *= multiplier
-                    }
-                case .martialBonusPercent:
-                    if let value = payload.value[.valuePercent] {
-                        martial.percent += value
-                    }
-                case .martialBonusMultiplier:
-                    if let multiplier = payload.value[.multiplier] {
-                        martial.multiplier *= multiplier
-                    }
-                case .talentStat:
-                    if let statRaw = payload.parameters[.stat],
-                       let statKey = CombatStatKey(statRaw) {
-                        let multiplier = payload.value[.multiplier] ?? 1.5
-                        talents.applyTalent(stat: statKey, value: multiplier)
-                    }
-                case .incompetenceStat:
-                    if let statRaw = payload.parameters[.stat],
-                       let statKey = CombatStatKey(statRaw) {
-                        let multiplier = payload.value[.multiplier] ?? 0.5
-                        talents.applyIncompetence(stat: statKey, value: multiplier)
-                    }
-                case .statFixedToOne:
-                    if let statRaw = payload.parameters[.stat],
-                       let statKey = CombatStatKey(statRaw) {
-                        forcedToOne.insert(statKey)
-                    }
-                default:
-                    continue
-                }
-            }
-        }
-
-        self.talents = talents
-        self.baseMultipliers = baseMultipliers
-        self.passives = passives
-        self.additives = additives
-        self.critical = critical
-        self.martialBonuses = martial
-        self.growthMultiplier = growthMultiplierProduct
-        self.statConversions = conversions
-        self.forcedToOne = forcedToOne
-        self.equipmentMultipliers = equipmentMultipliers
-        self.itemStatMultipliers = itemStatMultipliers
-    }
-
-    struct MartialBonuses {
-        var percent: Double = 0.0
-        var multiplier: Double = 1.0
-    }
-
-    struct StatConversion: Sendable {
-        let source: CombatStatKey
-        let ratio: Double
-    }
-
-}
-
-private extension SkillEffectAggregator {
-    nonisolated static func payload(from effect: SkillDefinition.Effect) -> Payload {
-        return Payload(effectType: effect.effectType,
-                       parameters: effect.parameters,
-                       value: effect.values)
-    }
-
-    struct Payload {
-        let effectType: SkillEffectType
-        let parameters: [EffectParamKey: Int]
-        let value: [EffectValueKey: Double]
-    }
-}
-
 // MARK: - Combat Calculation
 
 private struct CombatAccumulator {
@@ -584,17 +289,17 @@ private struct CombatAccumulator {
     private let attributes: CharacterValues.CoreAttributes
     private let race: RaceDefinition
     private let job: JobDefinition
-    private let talents: SkillEffectAggregator.TalentModifiers
-    private let passives: SkillEffectAggregator.PassiveMultipliers
-    private let additives: SkillEffectAggregator.AdditiveBonuses
-    private let criticalParams: SkillEffectAggregator.CriticalParameters
+    private let talents: CombatStatSkillEffectInputs.TalentModifiers
+    private let passives: CombatStatSkillEffectInputs.PassiveMultipliers
+    private let additives: CombatStatSkillEffectInputs.AdditiveBonuses
+    private let criticalParams: CombatStatSkillEffectInputs.CriticalParameters
     private let equipment: [CharacterValues.EquippedItem]
     private let cachedEquippedItems: [CachedInventoryItem]
     private let itemDefinitions: [ItemDefinition]
     private let titleDefinitions: [TitleDefinition]
-    private let martialBonuses: SkillEffectAggregator.MartialBonuses
+    private let martialBonuses: CombatStatSkillEffectInputs.MartialBonuses
     private let growthMultiplier: Double
-    private let statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]]
+    private let statConversions: [CombatStatKey: [CombatStatSkillEffectInputs.StatConversion]]
     private let forcedToOne: Set<CombatStatKey>
     private let equipmentMultipliers: [Int: Double]
     private let itemStatMultipliers: [CombatStatKey: Double]
@@ -605,17 +310,17 @@ private struct CombatAccumulator {
          attributes: CharacterValues.CoreAttributes,
          race: RaceDefinition,
          job: JobDefinition,
-         talents: SkillEffectAggregator.TalentModifiers,
-         passives: SkillEffectAggregator.PassiveMultipliers,
-         additives: SkillEffectAggregator.AdditiveBonuses,
-         critical: SkillEffectAggregator.CriticalParameters,
+         talents: CombatStatSkillEffectInputs.TalentModifiers,
+         passives: CombatStatSkillEffectInputs.PassiveMultipliers,
+         additives: CombatStatSkillEffectInputs.AdditiveBonuses,
+         critical: CombatStatSkillEffectInputs.CriticalParameters,
          equipment: [CharacterValues.EquippedItem],
          cachedEquippedItems: [CachedInventoryItem],
          itemDefinitions: [ItemDefinition],
          titleDefinitions: [TitleDefinition],
-         martial: SkillEffectAggregator.MartialBonuses,
+         martial: CombatStatSkillEffectInputs.MartialBonuses,
          growthMultiplier: Double,
-         statConversions: [CombatStatKey: [SkillEffectAggregator.StatConversion]],
+         statConversions: [CombatStatKey: [CombatStatSkillEffectInputs.StatConversion]],
          forcedToOne: Set<CombatStatKey>,
          equipmentMultipliers: [Int: Double],
          itemStatMultipliers: [CombatStatKey: Double]) {
@@ -998,83 +703,6 @@ private struct CombatAccumulator {
 // MARK: - Coefficient Helpers
 
 /// 戦闘ステータスの計算式は CombatFormulas.swift に分離
-
-private enum CombatStatKey: UInt8, CaseIterable {
-    case maxHP = 1
-    case physicalAttackScore = 2
-    case magicalAttackScore = 3
-    case physicalDefenseScore = 4
-    case magicalDefenseScore = 5
-    case hitScore = 6
-    case evasionScore = 7
-    case criticalChancePercent = 8
-    case attackCount = 9
-    case magicalHealingScore = 10
-    case trapRemovalScore = 11
-    case additionalDamageScore = 12
-    case breathDamageScore = 13
-
-    nonisolated static let allRawValue = 99
-
-    /// EnumMappings.combatStat のInt値から初期化
-    nonisolated init?(_ intValue: Int) {
-        switch intValue {
-        case 10: self = .maxHP
-        case 11: self = .physicalAttackScore
-        case 12: self = .magicalAttackScore
-        case 13: self = .physicalDefenseScore
-        case 14: self = .magicalDefenseScore
-        case 15: self = .hitScore
-        case 16: self = .evasionScore
-        case 17: self = .criticalChancePercent
-        case 18: self = .attackCount
-        case 19: self = .magicalHealingScore
-        case 20: self = .trapRemovalScore
-        case 21: self = .additionalDamageScore
-        case 22: self = .breathDamageScore
-        default: return nil
-        }
-    }
-
-    /// String識別子から初期化（CombatStats正本の名称に準拠）
-    nonisolated init?(_ raw: String?) {
-        guard let raw else { return nil }
-        switch raw {
-        case "maxHP": self = .maxHP
-        case "physicalAttackScore": self = .physicalAttackScore
-        case "magicalAttackScore": self = .magicalAttackScore
-        case "physicalDefenseScore": self = .physicalDefenseScore
-        case "magicalDefenseScore": self = .magicalDefenseScore
-        case "hitScore": self = .hitScore
-        case "evasionScore": self = .evasionScore
-        case "criticalChancePercent": self = .criticalChancePercent
-        case "attackCount": self = .attackCount
-        case "magicalHealingScore": self = .magicalHealingScore
-        case "trapRemovalScore": self = .trapRemovalScore
-        case "additionalDamageScore": self = .additionalDamageScore
-        case "breathDamageScore": self = .breathDamageScore
-        default: return nil
-        }
-    }
-
-    nonisolated var identifier: String {
-        switch self {
-        case .maxHP: return "maxHP"
-        case .physicalAttackScore: return "physicalAttackScore"
-        case .magicalAttackScore: return "magicalAttackScore"
-        case .physicalDefenseScore: return "physicalDefenseScore"
-        case .magicalDefenseScore: return "magicalDefenseScore"
-        case .hitScore: return "hitScore"
-        case .evasionScore: return "evasionScore"
-        case .criticalChancePercent: return "criticalChancePercent"
-        case .attackCount: return "attackCount"
-        case .magicalHealingScore: return "magicalHealingScore"
-        case .trapRemovalScore: return "trapRemovalScore"
-        case .additionalDamageScore: return "additionalDamageScore"
-        case .breathDamageScore: return "breathDamageScore"
-        }
-    }
-}
 
 private struct JobCoefficientLookup {
     private let coefficients: JobDefinition.CombatCoefficients

@@ -531,8 +531,9 @@ struct RaceDetailSheet: View {
             skillMap[skill.id] = skill
         }
         skills = skillMap
-        passiveSkillIds = masterData.racePassiveSkills[race.id] ?? []
-        skillUnlocks = masterData.raceSkillUnlocks[race.id] ?? []
+        passiveSkillIds = (masterData.racePassiveSkills[race.id] ?? []).sorted()
+        skillUnlocks = (masterData.raceSkillUnlocks[race.id] ?? [])
+            .sorted { $0.skillId < $1.skillId }
         isLoading = false
     }
 }
@@ -585,7 +586,7 @@ struct JobDetailSheet: View {
                             ProgressView()
                         } else {
                             VStack(alignment: .leading, spacing: 4) {
-                                ForEach(job.learnedSkillIds, id: \.self) { skillId in
+                                ForEach(job.learnedSkillIds.sorted(), id: \.self) { skillId in
                                     if let skill = skills[skillId] {
                                         Text("• \(skill.name)")
                                             .onTapGesture { selectedSkill = skill }
@@ -660,7 +661,8 @@ struct JobDetailSheet: View {
             skillMap[skill.id] = skill
         }
         skills = skillMap
-        skillUnlocks = masterData.jobSkillUnlocks[job.id] ?? []
+        skillUnlocks = (masterData.jobSkillUnlocks[job.id] ?? [])
+            .sorted { $0.skillId < $1.skillId }
 
         if let metadata = masterData.jobMetadata[job.id] {
             category = metadata.category

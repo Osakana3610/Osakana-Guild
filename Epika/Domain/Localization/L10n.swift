@@ -45,6 +45,7 @@ enum L10n {
         case actionPreferencePriestMagic = "actionPreference.priestMagic"
         case actionPreferenceMageMagic = "actionPreference.mageMagic"
         case actionPreferenceBreath = "actionPreference.breath"
+        case modifierConditional = "modifier.conditional"
         case resistancePhysical = "resistance.physical"
         case resistancePiercing = "resistance.piercing"
         case resistanceCritical = "resistance.critical"
@@ -105,6 +106,7 @@ enum L10n {
             case .actionPreferencePriestMagic: return "僧侶魔法"
             case .actionPreferenceMageMagic: return "魔法使い魔法"
             case .actionPreferenceBreath: return "ブレス"
+            case .modifierConditional: return "条件付き"
             case .resistancePhysical: return "物理"
             case .resistancePiercing: return "貫通"
             case .resistanceCritical: return "必殺"
@@ -183,6 +185,10 @@ enum L10n {
         nonisolated static var priestMagic: String { L10n.text(.actionPreferencePriestMagic) }
         nonisolated static var mageMagic: String { L10n.text(.actionPreferenceMageMagic) }
         nonisolated static var breath: String { L10n.text(.actionPreferenceBreath) }
+    }
+
+    enum Modifier {
+        nonisolated static var conditional: String { L10n.text(.modifierConditional) }
     }
 
     enum Resistance {

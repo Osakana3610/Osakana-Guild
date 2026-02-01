@@ -30,12 +30,12 @@ private enum StatusResistanceTargetResolver {
         payload: DecodedSkillEffectPayload,
         context: SkillEffectContext
     ) throws -> [UInt8] {
-        if let statusIdRaw = payload.parameters[.status] {
+        if let statusIdRaw = payload.parameters[.statusId] ?? payload.parameters[.status] {
             return [UInt8(statusIdRaw)]
         }
         guard let statusTypeRaw = payload.parameters[.statusType] else {
             throw RuntimeError.invalidConfiguration(
-                reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistance の statusType/status が無効です"
+                reason: "Skill \(context.skillId)#\(context.effectIndex) statusResistance の statusType/statusId が無効です"
             )
         }
         switch statusTypeRaw {

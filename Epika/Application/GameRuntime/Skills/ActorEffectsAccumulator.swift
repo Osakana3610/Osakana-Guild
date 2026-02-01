@@ -206,14 +206,14 @@ struct DamageAccumulator {
         let key = Int(damageType)
         let percent = dealtPercentByType[key] ?? 0.0
         let multiplier = dealtMultiplierByType[key] ?? 1.0
-        return max(0.0, 1.0 + percent / 100.0) * multiplier
+        return SkillEffectInterpretation.combinedMultiplier(additivePercent: percent, multiplier: multiplier)
     }
 
     nonisolated func totalTakenMultiplier(for damageType: UInt8) -> Double {
         let key = Int(damageType)
         let percent = takenPercentByType[key] ?? 0.0
         let multiplier = takenMultiplierByType[key] ?? 1.0
-        return max(0.0, 1.0 + percent / 100.0) * multiplier
+        return SkillEffectInterpretation.combinedMultiplier(additivePercent: percent, multiplier: multiplier)
     }
 }
 
@@ -359,6 +359,12 @@ extension ActorEffectsAccumulator {
             snapshot.flags.insert(key(kind, slot: slot, param: param))
         }
 
+        let partyHostileAllSlot: UInt8 = 1
+        let vampiricImpulseSlot: UInt8 = 2
+        let vampiricSuppressionSlot: UInt8 = 3
+        let partyHostileTargetSlot: UInt8 = 1
+        let partyProtectTargetSlot: UInt8 = 2
+
         // Damage
         for (rawType, percent) in damage.dealtPercentByType {
             setPercent(percent, kind: .damageDealtPercent, param: UInt16(rawType))
@@ -455,6 +461,20 @@ extension ActorEffectsAccumulator {
         }
         setMultiplier(misc.targetingWeight, kind: .targetingWeight)
         setFlag(misc.coverRowsBehind, kind: .coverRowsBehind, slot: 0)
+        if let condition = misc.coverRowsBehindCondition {
+            setFlag(true, kind: .coverRowsBehind, slot: 1, param: UInt16(condition.rawValue))
+        }
+        setFlag(misc.partyHostileAll, kind: .partyAttackFlag, slot: partyHostileAllSlot)
+        setFlag(misc.vampiricImpulse, kind: .partyAttackFlag, slot: vampiricImpulseSlot)
+        setFlag(misc.vampiricSuppression, kind: .partyAttackFlag, slot: vampiricSuppressionSlot)
+        for targetId in misc.partyHostileTargets {
+            setFlag(true, kind: .partyAttackTarget, slot: partyHostileTargetSlot, param: UInt16(targetId))
+        }
+        for targetId in misc.partyProtectedTargets {
+            setFlag(true, kind: .partyAttackTarget, slot: partyProtectTargetSlot, param: UInt16(targetId))
+        }
+        setFlag(misc.magicRunaway != nil, kind: .runawayMagic)
+        setFlag(misc.damageRunaway != nil, kind: .runawayDamage)
 
         return snapshot
     }

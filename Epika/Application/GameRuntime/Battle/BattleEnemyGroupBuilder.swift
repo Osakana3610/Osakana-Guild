@@ -165,9 +165,12 @@ struct BattleEnemyGroupBuilder {
         if let cached = cache[definition.id] {
             return cached
         }
-        let skills = definition.specialSkillIds.compactMap { masterData.skillsById[$0] }
-        let skillCompiler = try UnifiedSkillEffectCompiler(skills: skills)
-        let effects = skillCompiler.actorEffects
+        let skills = definition.specialSkillIds.sorted().compactMap { masterData.skillsById[$0] }
+        let result = try SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: skills),
+            options: []
+        )
+        let effects = result.battleEffects
         cache[definition.id] = effects
         return effects
     }

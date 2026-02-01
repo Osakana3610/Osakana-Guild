@@ -1,0 +1,1752 @@
+{
+  "kinds": {
+    "absorption": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "capPercent",
+            "percent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "actionOrderMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "actionOrderShuffle": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "enabled"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "actionOrderShuffleEnemy": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "additionalDamageScoreAdditive": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "additive"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "additionalDamageScoreMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "attackCountAdditive": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "additive"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "target"
+          ],
+          "values": [
+            "additive"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "attackCountMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "autoDegradationRepair": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "enabled"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "autoStatusCureOnAlly": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "barrier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "damageType"
+          ],
+          "values": [
+            "charges"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "barrierOnGuard": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "damageType"
+          ],
+          "values": [
+            "charges"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "berserk": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "breathVariant": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "type"
+          ],
+          "values": [
+            "extraCharges"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "counterAttackEvasionMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "coverRowsBehind": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "condition"
+          ],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "criticalChancePercentAdditive": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "additive"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "points"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "criticalChancePercentCap": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "additive"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "cap"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "criticalChancePercentMaxDelta": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "deltaPercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "criticalDamageMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "criticalDamagePercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "criticalDamageTakenMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "cumulativeHitDamageBonus": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "damagePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "damageDealtMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "damageType"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "damageDealtMultiplierAgainst": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": [
+            "targetRaceIds"
+          ]
+        }
+      ]
+    },
+    "damageDealtMultiplierByTargetHP": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "hpThresholdPercent",
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "damageDealtPercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "damageType"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "damageType",
+            "scalingStat"
+          ],
+          "values": [
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "damageType",
+            "target"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "damageTakenMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "damageType"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "damageTakenPercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "damageType"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "damageType",
+            "target"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "degradationRepair": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "maxPercent",
+            "minPercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "degradationRepairBoost": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "dodgeCap": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "maxDodge",
+            "minHitScale"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "endOfTurnHealing": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "endOfTurnSelfHPPercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "enemyActionDebuffChance": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "scalingStat"
+          ],
+          "values": [
+            "baseChancePercent",
+            "reduction",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "enemySingleActionSkipChance": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "equipmentSlotAdditive": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "add"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "equipmentSlotMultiplier": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "equipmentStatMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "equipmentType"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "explorationTimeMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "dungeonName"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "extraAction": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent",
+            "count"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "scalingStat",
+            "target",
+            "trigger"
+          ],
+          "values": [
+            "baseChancePercent",
+            "count",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "trigger"
+          ],
+          "values": [
+            "count"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "trigger"
+          ],
+          "values": [
+            "count",
+            "duration"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "firstStrike": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "growthMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "incompetenceStat": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stat"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "itemStatMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "statType"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "levelComparisonDamageTaken": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "magicCriticalEnable": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "magicNullifyChancePercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "scalingStat"
+          ],
+          "values": [
+            "baseChancePercent",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "martialBonusMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "martialBonusPercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "parry": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "bonusPercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "enabled"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "partyAttackFlag": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "hostileAll"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "vampiricImpulse"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "vampiricSuppression"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "partyAttackTarget": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "targetId"
+          ],
+          "values": [
+            "hostile"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "targetId"
+          ],
+          "values": [
+            "protect"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "penetrationDamageTakenMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "procMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "procRate": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stacking",
+            "target"
+          ],
+          "values": [
+            "addPercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "stacking",
+            "target"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "reaction": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "action",
+            "damageType",
+            "requiresAllyBehind",
+            "target",
+            "trigger"
+          ],
+          "values": [
+            "accuracyMultiplier",
+            "attackCountMultiplier",
+            "chancePercent",
+            "criticalChancePercentMultiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "action",
+            "damageType",
+            "requiresMartial",
+            "target",
+            "trigger"
+          ],
+          "values": [
+            "accuracyMultiplier",
+            "attackCountMultiplier",
+            "chancePercent",
+            "criticalChancePercentMultiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "action",
+            "damageType",
+            "scalingStat",
+            "trigger"
+          ],
+          "values": [
+            "baseChancePercent",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "action",
+            "damageType",
+            "target",
+            "trigger"
+          ],
+          "values": [
+            "accuracyMultiplier",
+            "attackCountMultiplier",
+            "chancePercent",
+            "criticalChancePercentMultiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "action",
+            "damageType",
+            "target",
+            "trigger"
+          ],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "action",
+            "damageType",
+            "trigger"
+          ],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "action",
+            "trigger"
+          ],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "reactionNextTurn": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "count"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "resurrectionActive": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "chancePercent",
+            "instant",
+            "maxTriggers"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "hpScale"
+          ],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "resurrectionBuff": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "guaranteed",
+            "maxTriggers"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "resurrectionPassive": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "scalingStat"
+          ],
+          "values": [
+            "baseChancePercent",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "type"
+          ],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "resurrectionSave": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "guaranteed",
+            "minLevel",
+            "usesPriestMagic"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "minLevel",
+            "usesPriestMagic"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "resurrectionSummon": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "targetStatus"
+          ],
+          "values": [
+            "everyTurns"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "resurrectionVitalize": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "rememberSkills",
+            "removePenalties"
+          ],
+          "arrays": [
+            "grantSkillIds",
+            "removeSkillIds"
+          ]
+        }
+      ]
+    },
+    "retreatAtTurn": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "chancePercent",
+            "turn"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "reverseHealing": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "enabled"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardExperienceMultiplier": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardExperiencePercent": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardGoldMultiplier": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardGoldPercent": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardItemMultiplier": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardItemPercent": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardTitleMultiplier": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rewardTitlePercent": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "rowProfile": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "farApt",
+            "nearApt",
+            "profile"
+          ],
+          "values": [],
+          "arrays": []
+        },
+        {
+          "params": [
+            "farApt",
+            "profile"
+          ],
+          "values": [],
+          "arrays": []
+        },
+        {
+          "params": [
+            "nearApt",
+            "profile"
+          ],
+          "values": [],
+          "arrays": []
+        },
+        {
+          "params": [
+            "profile"
+          ],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "runawayDamage": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent",
+            "thresholdPercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "runawayMagic": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent",
+            "thresholdPercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "sacrificeRite": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "everyTurns"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "shieldBlock": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "bonusPercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [],
+          "values": [
+            "enabled"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "specialAttack": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "mode",
+            "scalingStat",
+            "type"
+          ],
+          "values": [
+            "baseChancePercent",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "specialAttackId"
+          ],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellAccess": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "action",
+            "spellId"
+          ],
+          "values": [],
+          "arrays": []
+        }
+      ]
+    },
+    "spellChargeRecoveryChance": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "scalingStat"
+          ],
+          "values": [
+            "baseChancePercent",
+            "scalingCoefficient"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellCharges": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "initialBonus"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "spellId"
+          ],
+          "values": [
+            "gainOnPhysicalHit",
+            "initialCharges",
+            "maxCharges",
+            "maxTriggers",
+            "regenAmount",
+            "regenCap",
+            "regenEveryTurns"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellPowerMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellPowerPercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "school"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellSpecificMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "spellId"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellSpecificTakenMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "spellId"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "spellTierUnlock": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "school"
+          ],
+          "values": [
+            "tier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statAdditive": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stat"
+          ],
+          "values": [
+            "additive"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statConversionLinear": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "sourceStat",
+            "targetStat"
+          ],
+          "values": [
+            "valuePerUnit"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statConversionPercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "sourceStat",
+            "targetStat"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statDebuff": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stat",
+            "target"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statFixedToOne": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stat"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stat"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "stat",
+            "target"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "statType"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statusInflict": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "statusId"
+          ],
+          "values": [
+            "chancePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statusResistanceMultiplier": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "statusId"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "statusType"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "statusResistancePercent": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "statusId"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "statusType"
+          ],
+          "values": [
+            "valuePercent"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "tacticSpellAmplify": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "spellId"
+          ],
+          "values": [
+            "multiplier",
+            "triggerTurn"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "talentStat": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "stat"
+          ],
+          "values": [
+            "multiplier"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "targetingWeight": {
+      "evaluation": "static",
+      "variants": [
+        {
+          "params": [
+            "preference"
+          ],
+          "values": [
+            "weight"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "timedBreathPowerAmplify": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier",
+            "triggerTurn"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "timedBuffTrigger": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [
+            "buffType",
+            "trigger"
+          ],
+          "values": [
+            "attackCountPercentPerTurn"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "buffType",
+            "trigger"
+          ],
+          "values": [
+            "attackPercentPerTurn",
+            "defensePercentPerTurn"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "buffType",
+            "trigger"
+          ],
+          "values": [
+            "damageDealtPercent",
+            "duration"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "buffType",
+            "trigger"
+          ],
+          "values": [
+            "duration",
+            "hitScoreAdditive"
+          ],
+          "arrays": []
+        },
+        {
+          "params": [
+            "buffType",
+            "trigger"
+          ],
+          "values": [
+            "evasionScoreAdditivePerTurn",
+            "hitScoreAdditivePerTurn"
+          ],
+          "arrays": []
+        }
+      ]
+    },
+    "timedMagicPowerAmplify": {
+      "evaluation": "dynamic",
+      "variants": [
+        {
+          "params": [],
+          "values": [
+            "multiplier",
+            "triggerTurn"
+          ],
+          "arrays": []
+        }
+      ]
+    }
+  }
+}

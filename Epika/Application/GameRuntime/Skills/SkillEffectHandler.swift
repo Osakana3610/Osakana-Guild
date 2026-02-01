@@ -79,29 +79,15 @@ struct ActorStats: Sendable {
 extension DecodedSkillEffectPayload {
     /// statScalingが指定されている場合、ステータス値×係数を返す
     nonisolated func scaledValue(from stats: ActorStats?) -> Double {
-        guard let scalingStatInt = parameters[.scalingStat],
-              let coefficient = value[.scalingCoefficient],
-              let stats = stats else {
-            return 0.0
-        }
-        return Double(stats.value(for: scalingStatInt)) * coefficient
+        SkillEffectInterpretation.scaledValue(self, stats: stats)
     }
 
     /// chancePercent / baseChancePercent(+scalingStat) から発動率(%)を解決する
     nonisolated func resolvedChancePercent(stats: ActorStats?, skillId: UInt16, effectIndex: Int) throws -> Double? {
-        if let chance = value[.chancePercent] {
-            return chance
-        }
-        if let coefficient = value[.baseChancePercent] {
-            guard let statRaw = parameters[.scalingStat] else {
-                throw RuntimeError.invalidConfiguration(
-                    reason: "Skill \(skillId)#\(effectIndex) baseChancePercent に scalingStat がありません"
-                )
-            }
-            guard let stats else { return nil }
-            return Double(stats.value(for: statRaw)) * coefficient
-        }
-        return nil
+        try SkillEffectInterpretation.resolvedChancePercent(self,
+                                                            stats: stats,
+                                                            skillId: skillId,
+                                                            effectIndex: effectIndex)
     }
 }
 
@@ -111,10 +97,8 @@ extension DecodedSkillEffectPayload {
 /// 静的イミュータブル辞書として起動時に一度だけ構築される
 /// ハンドラは静的メソッドのみでSendable、辞書もSendable
 enum SkillEffectHandlerRegistry {
-    /// 全ハンドラの辞書（遅延初期化）
-    nonisolated static let handlers: [SkillEffectType: any SkillEffectHandler.Type] = {
-        var dict: [SkillEffectType: any SkillEffectHandler.Type] = [:]
-
+    /// 全ハンドラのテーブル（SkillEffectType.rawValue を添字に使用）
+    nonisolated static let handlerTable: [((any SkillEffectHandler.Type)?)] = {
         let allHandlers: [any SkillEffectHandler.Type] = [
             // MARK: Damage Handlers (17)
             DamageDealtPercentHandler.self,
@@ -235,19 +219,34 @@ enum SkillEffectHandlerRegistry {
             TalentStatHandler.self
         ]
 
+        let maxRawValue = SkillEffectType.allCases.map { Int($0.rawValue) }.max() ?? 0
+        var table: [((any SkillEffectHandler.Type)?)] = Array(repeating: nil, count: maxRawValue + 1)
+
         for handler in allHandlers {
-            assert(dict[handler.effectType] == nil,
-                   "Duplicate handler for \(handler.effectType)")
-            dict[handler.effectType] = handler
+            let index = Int(handler.effectType.rawValue)
+            assert(table[index] == nil, "Duplicate handler for \(handler.effectType)")
+            table[index] = handler
         }
 
-        return dict
+        return table
     }()
 
     /// 指定された effectType に対応するハンドラを取得
     /// - Parameter effectType: 検索する SkillEffectType
     /// - Returns: 対応するハンドラ、未登録の場合は nil
     nonisolated static func handler(for effectType: SkillEffectType) -> (any SkillEffectHandler.Type)? {
-        handlers[effectType]
+        let index = Int(effectType.rawValue)
+        guard index >= 0, index < handlerTable.count else { return nil }
+        return handlerTable[index]
     }
+
+    /// 登録済みのeffectType一覧（テスト/検証用）
+    nonisolated static let registeredTypes: Set<SkillEffectType> = {
+        var types: Set<SkillEffectType> = []
+        for (index, handler) in handlerTable.enumerated() {
+            guard handler != nil, let effectType = SkillEffectType(rawValue: UInt8(index)) else { continue }
+            types.insert(effectType)
+        }
+        return types
+    }()
 }

@@ -233,6 +233,7 @@ struct EquipmentEditorView: View {
             guard let skill = masterData.skill(unlock.skillId) else { return nil }
             return (level: unlock.level, skill: skill)
         }
+        .sorted { $0.skill.id < $1.skill.id }
     }
 
     private var jobSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
@@ -242,6 +243,7 @@ struct EquipmentEditorView: View {
             guard let skill = masterData.skill(unlock.skillId) else { return nil }
             return (level: unlock.level, skill: skill)
         }
+        .sorted { $0.skill.id < $1.skill.id }
     }
 
     init(character: CachedCharacter) {

@@ -411,6 +411,44 @@ private struct SkillEffectFlexibleValue: Decodable {
     }
 }
 
+// MARK: - SkillEffectSchema (Validation)
+
+private enum SkillEffectSchemaEvaluation: String, Decodable {
+    case `static`
+    case dynamic
+}
+
+private struct SkillEffectSchemaRoot: Decodable {
+    struct Kind: Decodable {
+        let evaluation: SkillEffectSchemaEvaluation
+        let variants: [Variant]
+    }
+
+    struct Variant: Decodable {
+        let params: [String]
+        let values: [String]
+        let arrays: [String]
+    }
+
+    let kinds: [String: Kind]
+}
+
+private struct SkillEffectSchemaVariantKey: Hashable {
+    let params: [String]
+    let values: [String]
+    let arrays: [String]
+
+    init(params: [String], values: [String], arrays: [String]) {
+        self.params = params.sorted()
+        self.values = values.sorted()
+        self.arrays = arrays.sorted()
+    }
+
+    init(paramSet: Set<String>, valueSet: Set<String>, arraySet: Set<String>) {
+        self.init(params: Array(paramSet), values: Array(valueSet), arrays: Array(arraySet))
+    }
+}
+
 extension Generator {
     func importSkillMaster(_ data: Data) throws -> Int {
         let decoder = JSONDecoder()
@@ -590,6 +628,193 @@ extension Generator {
         }
 
         return entries.count
+    }
+
+    // MARK: - SkillEffectSchema Validation
+
+    func validateSkillEffectSchema() throws {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: schemaPath.path) else {
+            throw GeneratorError.schemaMismatch("[MasterDataGenerator] SkillEffectSchema.json が見つかりません: \(schemaPath.path)")
+        }
+
+        let data = try Data(contentsOf: schemaPath)
+        let decoder = JSONDecoder()
+        let schema = try decoder.decode(SkillEffectSchemaRoot.self, from: data)
+
+        var issues: [String] = []
+
+        if schema.kinds.isEmpty {
+            issues.append("SkillEffectSchema.kinds が空です")
+        }
+
+        let deprecatedParamKeys: Set<String> = ["status", "equipmentCategory", "from", "to", "variant"]
+        let allowedParamKeys = Set(EnumMappings.skillEffectParamType.keys).subtracting(deprecatedParamKeys)
+        let allowedValueKeys = Set(EnumMappings.skillEffectValueType.keys)
+        let allowedArrayKeys = Set(EnumMappings.skillEffectArrayType.keys)
+
+        var schemaVariantMap: [String: Set<SkillEffectSchemaVariantKey>] = [:]
+
+        for (kind, kindSchema) in schema.kinds.sorted(by: { $0.key < $1.key }) {
+            if EnumMappings.skillEffectType[kind] == nil {
+                issues.append("未知の kind がスキーマに含まれています: \(kind)")
+            }
+            if kindSchema.variants.isEmpty {
+                issues.append("kind=\(kind) に variants がありません")
+            }
+
+            var variantSet: Set<SkillEffectSchemaVariantKey> = []
+
+            for (index, variant) in kindSchema.variants.enumerated() {
+                let paramDuplicates = duplicateKeys(in: variant.params)
+                let valueDuplicates = duplicateKeys(in: variant.values)
+                let arrayDuplicates = duplicateKeys(in: variant.arrays)
+                if !paramDuplicates.isEmpty {
+                    issues.append("kind=\(kind) variant[\(index)] params に重複があります: \(paramDuplicates.sorted())")
+                }
+                if !valueDuplicates.isEmpty {
+                    issues.append("kind=\(kind) variant[\(index)] values に重複があります: \(valueDuplicates.sorted())")
+                }
+                if !arrayDuplicates.isEmpty {
+                    issues.append("kind=\(kind) variant[\(index)] arrays に重複があります: \(arrayDuplicates.sorted())")
+                }
+
+                let unknownParams = Set(variant.params).subtracting(allowedParamKeys)
+                if !unknownParams.isEmpty {
+                    issues.append("kind=\(kind) variant[\(index)] params に未知キーがあります: \(unknownParams.sorted())")
+                }
+                let unknownValues = Set(variant.values).subtracting(allowedValueKeys)
+                if !unknownValues.isEmpty {
+                    issues.append("kind=\(kind) variant[\(index)] values に未知キーがあります: \(unknownValues.sorted())")
+                }
+                let unknownArrays = Set(variant.arrays).subtracting(allowedArrayKeys)
+                if !unknownArrays.isEmpty {
+                    issues.append("kind=\(kind) variant[\(index)] arrays に未知キーがあります: \(unknownArrays.sorted())")
+                }
+
+                let key = SkillEffectSchemaVariantKey(params: variant.params,
+                                                     values: variant.values,
+                                                     arrays: variant.arrays)
+                if !variantSet.insert(key).inserted {
+                    issues.append("kind=\(kind) に同一の variants が重複しています: params=\(key.params) values=\(key.values) arrays=\(key.arrays)")
+                }
+            }
+
+            schemaVariantMap[kind] = variantSet
+        }
+
+        if !issues.isEmpty {
+            var message = "[MasterDataGenerator] SkillEffectSchema validation failed:\n"
+            for issue in issues {
+                message += "- \(issue)\n"
+            }
+            throw GeneratorError.schemaMismatch(message.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+
+        try validateSkillMasterAgainstSchema(schema: schema,
+                                             variantMap: schemaVariantMap,
+                                             deprecatedParamKeys: deprecatedParamKeys)
+
+        print("[MasterDataGenerator] SkillEffectSchema validation passed")
+    }
+
+    private func validateSkillMasterAgainstSchema(schema: SkillEffectSchemaRoot,
+                                                  variantMap: [String: Set<SkillEffectSchemaVariantKey>],
+                                                  deprecatedParamKeys: Set<String>) throws {
+        let url = inputDirectory.appendingPathComponent("SkillMaster.json")
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let root = try decoder.decode(SkillMasterRoot.self, from: data)
+
+        var issues: [String] = []
+        var masterKinds: Set<String> = []
+
+        let categories: [(String, SkillCategory?)] = [
+            ("attack", root.attack),
+            ("defense", root.defense),
+            ("status", root.status),
+            ("reaction", root.reaction),
+            ("resurrection", root.resurrection),
+            ("combat", root.combat),
+            ("race", root.race),
+            ("job", root.job)
+        ]
+
+        for (categoryKey, category) in categories {
+            let groups = category?.groups ?? []
+            if groups.isEmpty { continue }
+
+            for group in groups {
+                for variant in group.variants {
+                    let effectNodes: [SkillEffectNode]
+                    if let effects = variant.effects, !effects.isEmpty {
+                        effectNodes = effects
+                    } else {
+                        let template = group.effectTemplate ?? .empty
+                        let merged = template.merged(with: variant.overrides)
+                        effectNodes = [merged]
+                    }
+
+                    for (index, node) in effectNodes.enumerated() {
+                        guard let kind = node.kind, !kind.isEmpty else {
+                            issues.append("Skill \(variant.id)#\(index) kind が空です (category=\(categoryKey))")
+                            continue
+                        }
+                        masterKinds.insert(kind)
+
+                        if node.statScale != nil {
+                            issues.append("Skill \(variant.id)#\(index) \(kind) に statScale が残っています。scalingStat + scalingCoefficient に移行してください")
+                        }
+
+                        let deprecated = Set(node.parameters.keys).intersection(deprecatedParamKeys)
+                        if !deprecated.isEmpty {
+                            issues.append("Skill \(variant.id)#\(index) \(kind) に旧名パラメータが残っています: \(deprecated.sorted())")
+                        }
+
+                        guard let schemaVariants = variantMap[kind] else {
+                            issues.append("Skill \(variant.id)#\(index) \(kind) がスキーマに存在しません")
+                            continue
+                        }
+
+                        let params = Set(node.parameters.keys)
+                        let values = Set(node.numericValues.keys)
+                        let arrays = Set(node.stringArrayValues.keys)
+
+                        let key = SkillEffectSchemaVariantKey(paramSet: params, valueSet: values, arraySet: arrays)
+                        if !schemaVariants.contains(key) {
+                            issues.append("Skill \(variant.id)#\(index) \(kind) のキー集合がスキーマに一致しません: params=\(key.params) values=\(key.values) arrays=\(key.arrays)")
+                        }
+                    }
+                }
+            }
+        }
+
+        let schemaKinds = Set(schema.kinds.keys)
+        let missingInSchema = masterKinds.subtracting(schemaKinds)
+        let extraInSchema = schemaKinds.subtracting(masterKinds)
+        if !missingInSchema.isEmpty {
+            issues.append("SkillMaster に存在するがスキーマにない kind: \(missingInSchema.sorted())")
+        }
+        if !extraInSchema.isEmpty {
+            issues.append("スキーマに存在するが SkillMaster にない kind: \(extraInSchema.sorted())")
+        }
+
+        if !issues.isEmpty {
+            var message = "[MasterDataGenerator] SkillMaster vs SkillEffectSchema mismatch:\n"
+            for issue in issues {
+                message += "- \(issue)\n"
+            }
+            throw GeneratorError.schemaMismatch(message.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+    }
+
+    private func duplicateKeys(in values: [String]) -> [String] {
+        var counts: [String: Int] = [:]
+        for value in values {
+            counts[value, default: 0] += 1
+        }
+        return counts.filter { $0.value > 1 }.map { $0.key }
     }
 
     /// Resolve a parameter string value to an integer based on its type

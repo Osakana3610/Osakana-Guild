@@ -61,17 +61,16 @@ enum ProcRateHandler: SkillEffectHandler {
         context: SkillEffectContext
     ) throws {
         let target = try payload.requireParam(.target, skillId: context.skillId, effectIndex: context.effectIndex)
-        let stackingRaw = try payload.requireParam(.stacking, skillId: context.skillId, effectIndex: context.effectIndex)
-        // stacking: 3=multiply, 1=add (EnumMappings.stackingType)
-        switch stackingRaw {
-        case Int(StackingType.multiply.rawValue):
+        let stacking = try SkillEffectInterpretation.resolveProcRateStacking(payload,
+                                                                             skillId: context.skillId,
+                                                                             effectIndex: context.effectIndex)
+        switch stacking {
+        case .multiply:
             let multiplier = try payload.requireValue(.multiplier, skillId: context.skillId, effectIndex: context.effectIndex)
             accumulator.combat.procRateMultipliers[target, default: 1.0] *= multiplier
-        case Int(StackingType.add.rawValue), Int(StackingType.additive.rawValue):
+        case .add, .additive:
             let addPercent = try payload.requireValue(.addPercent, skillId: context.skillId, effectIndex: context.effectIndex)
             accumulator.combat.procRateAdditives[target, default: 0.0] += addPercent
-        default:
-            throw RuntimeError.invalidConfiguration(reason: "Skill \(context.skillId)#\(context.effectIndex) procRate の stacking が不正です: \(stackingRaw)")
         }
     }
 }
