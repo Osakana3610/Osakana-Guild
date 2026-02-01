@@ -543,7 +543,6 @@ enum EnumMappings {
         // Passthrough系 (150-199)
         "criticalChancePercentAdditive": 150,
         "criticalChancePercentCap": 151,
-        "criticalChancePercentMaxAbsolute": 152,
         "criticalChancePercentMaxDelta": 153,
         "equipmentSlotAdditive": 154,
         "equipmentSlotMultiplier": 155,

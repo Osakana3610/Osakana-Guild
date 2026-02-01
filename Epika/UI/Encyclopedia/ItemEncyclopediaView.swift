@@ -236,10 +236,10 @@ struct ItemDetailView: View {
             let superRareSkillIds = superRareTitleDefinition?.skillIds ?? []
             if !item.grantedSkillIds.isEmpty || !superRareSkillIds.isEmpty {
                 Section("付与スキル") {
-                    ForEach(item.grantedSkillIds, id: \.self) { skillId in
+                    ForEach(item.grantedSkillIds.sorted(), id: \.self) { skillId in
                         Text(skillNames[skillId] ?? "スキルID: \(skillId)")
                     }
-                    ForEach(superRareSkillIds, id: \.self) { skillId in
+                    ForEach(superRareSkillIds.sorted(), id: \.self) { skillId in
                         Text(skillNames[skillId] ?? "スキルID: \(skillId)")
                     }
                 }

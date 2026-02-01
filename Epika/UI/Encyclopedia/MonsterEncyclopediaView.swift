@@ -204,7 +204,7 @@ private struct EnemyDetailView: View {
 
             if !enemy.specialSkillIds.isEmpty {
                 Section("特殊スキル") {
-                    ForEach(enemy.specialSkillIds, id: \.self) { skillId in
+                    ForEach(enemy.specialSkillIds.sorted(), id: \.self) { skillId in
                         if let skill = masterData.enemySkillsById[skillId] {
                             EnemySkillRow(skill: skill)
                         } else {

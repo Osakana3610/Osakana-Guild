@@ -54,6 +54,21 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
             return try UnifiedSkillEffectCompiler(skills: [skill], stats: stats).actorEffects
         }
 
+        func compileCombatInputs(_ effect: SkillDefinition.Effect, stats: ActorStats? = nil) throws -> CombatStatSkillEffectInputs {
+            let skill = makeSkill(effects: [effect])
+            let result = try SkillEffectAggregationService.aggregate(
+                input: SkillEffectAggregationInput(skills: [skill], actorStats: stats)
+            )
+            return result.combatStatInputs
+        }
+
+        func aggregate(_ effect: SkillDefinition.Effect, stats: ActorStats? = nil) throws -> SkillEffectAggregationResult {
+            let skill = makeSkill(effects: [effect])
+            return try SkillEffectAggregationService.aggregate(
+                input: SkillEffectAggregationInput(skills: [skill], actorStats: stats)
+            )
+        }
+
         func recordDouble(
             id: String,
             expected: Double,
@@ -829,7 +844,7 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
             let effect = makeEffect(type: .equipmentStatMultiplier,
                                     parameters: [.equipmentType: 2],
                                     values: [.multiplier: 1.1])
-            let measured = try compile(effect).misc.equipmentStatMultipliers[2] ?? 1
+            let measured = try compileCombatInputs(effect).equipmentMultipliers[2] ?? 1
             recordDouble(id: "SKILL-EFFECT-064",
                          expected: 1.1,
                          measured: measured,
@@ -1159,6 +1174,322 @@ nonisolated final class SkillRuntimeEffectExpectationTests: XCTestCase {
                                  "triggerTurn": 5,
                                  "multiplier": 1.2,
                                  "count": Double(triggers.count)])
+        }
+
+        // MARK: - Combat Stats / Non-battle
+
+        do {
+            let effect = makeEffect(type: .additionalDamageScoreAdditive,
+                                    values: [.additive: 5])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.additives.value(for: .additionalDamageScore)
+            recordDouble(id: "SKILL-EFFECT-079",
+                         expected: 5,
+                         measured: measured,
+                         rawData: ["additive": 5])
+        }
+
+        do {
+            let effect = makeEffect(type: .additionalDamageScoreMultiplier,
+                                    values: [.multiplier: 1.2])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.passives.multiplier(for: .additionalDamageScore)
+            recordDouble(id: "SKILL-EFFECT-080",
+                         expected: 1.2,
+                         measured: measured,
+                         rawData: ["multiplier": 1.2])
+        }
+
+        do {
+            let effect = makeEffect(type: .statAdditive,
+                                    parameters: [.stat: Int(CombatStat.physicalAttackScore.rawValue)],
+                                    values: [.additive: 20])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.additives.value(for: .physicalAttackScore)
+            recordDouble(id: "SKILL-EFFECT-081",
+                         expected: 20,
+                         measured: measured,
+                         rawData: ["stat": Double(CombatStat.physicalAttackScore.rawValue), "additive": 20])
+        }
+
+        do {
+            let effect = makeEffect(type: .statMultiplier,
+                                    parameters: [.stat: Int(CombatStat.magicalDefenseScore.rawValue)],
+                                    values: [.multiplier: 1.5])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.passives.multiplier(for: .magicalDefenseScore)
+            recordDouble(id: "SKILL-EFFECT-082",
+                         expected: 1.5,
+                         measured: measured,
+                         rawData: ["stat": Double(CombatStat.magicalDefenseScore.rawValue), "multiplier": 1.5])
+        }
+
+        do {
+            let effect = makeEffect(type: .statConversionPercent,
+                                    parameters: [
+                                        .sourceStat: Int(CombatStat.physicalDefenseScore.rawValue),
+                                        .targetStat: Int(CombatStat.physicalAttackScore.rawValue)
+                                    ],
+                                    values: [.valuePercent: 25])
+            let inputs = try compileCombatInputs(effect)
+            let conversions = inputs.statConversions[.physicalAttackScore] ?? []
+            let entry = conversions.first { $0.source == .physicalDefenseScore && $0.kind == .percent }
+            let measured = entry?.ratio ?? 0
+            recordDouble(id: "SKILL-EFFECT-083",
+                         expected: 0.25,
+                         measured: measured,
+                         rawData: ["sourceStat": Double(CombatStat.physicalDefenseScore.rawValue),
+                                   "targetStat": Double(CombatStat.physicalAttackScore.rawValue),
+                                   "valuePercent": 25])
+        }
+
+        do {
+            let effect = makeEffect(type: .statConversionLinear,
+                                    parameters: [
+                                        .sourceStat: Int(CombatStat.attackCount.rawValue),
+                                        .targetStat: Int(CombatStat.criticalChancePercent.rawValue)
+                                    ],
+                                    values: [.valuePerUnit: 3])
+            let inputs = try compileCombatInputs(effect)
+            let conversions = inputs.statConversions[.criticalChancePercent] ?? []
+            let entry = conversions.first { $0.source == .attackCount && $0.kind == .linear }
+            let measured = entry?.ratio ?? 0
+            recordDouble(id: "SKILL-EFFECT-084",
+                         expected: 3,
+                         measured: measured,
+                         rawData: ["sourceStat": Double(CombatStat.attackCount.rawValue),
+                                   "targetStat": Double(CombatStat.criticalChancePercent.rawValue),
+                                   "valuePerUnit": 3])
+        }
+
+        do {
+            let effect = makeEffect(type: .statFixedToOne,
+                                    parameters: [.stat: Int(CombatStat.hitScore.rawValue)])
+            let inputs = try compileCombatInputs(effect)
+            recordPass(id: "SKILL-EFFECT-085",
+                       passed: inputs.forcedToOne.contains(.hitScore),
+                       rawData: ["stat": Double(CombatStat.hitScore.rawValue)])
+        }
+
+        do {
+            let effect = makeEffect(type: .itemStatMultiplier,
+                                    parameters: [.statType: Int(CombatStat.breathDamageScore.rawValue)],
+                                    values: [.multiplier: 1.4])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.itemStatMultipliers[.breathDamageScore] ?? 1.0
+            recordDouble(id: "SKILL-EFFECT-086",
+                         expected: 1.4,
+                         measured: measured,
+                         rawData: ["statType": Double(CombatStat.breathDamageScore.rawValue), "multiplier": 1.4])
+        }
+
+        do {
+            let effect = makeEffect(type: .talentStat,
+                                    parameters: [.stat: Int(CombatStat.physicalAttackScore.rawValue)],
+                                    values: [.multiplier: 1.6])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.talents.talentMultiplier(for: .physicalAttackScore)
+            recordDouble(id: "SKILL-EFFECT-087",
+                         expected: 1.6,
+                         measured: measured,
+                         rawData: ["stat": Double(CombatStat.physicalAttackScore.rawValue), "multiplier": 1.6])
+        }
+
+        do {
+            let effect = makeEffect(type: .incompetenceStat,
+                                    parameters: [.stat: Int(CombatStat.magicalAttackScore.rawValue)],
+                                    values: [.multiplier: 0.4])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.talents.incompetenceMultiplier(for: .magicalAttackScore)
+            recordDouble(id: "SKILL-EFFECT-088",
+                         expected: 0.4,
+                         measured: measured,
+                         rawData: ["stat": Double(CombatStat.magicalAttackScore.rawValue), "multiplier": 0.4])
+        }
+
+        do {
+            let effect = makeEffect(type: .growthMultiplier,
+                                    values: [.multiplier: 1.3])
+            let inputs = try compileCombatInputs(effect)
+            recordDouble(id: "SKILL-EFFECT-089",
+                         expected: 1.3,
+                         measured: inputs.growthMultiplier,
+                         rawData: ["multiplier": 1.3])
+        }
+
+        do {
+            let effect = makeEffect(type: .attackCountMultiplier,
+                                    values: [.multiplier: 1.25])
+            let inputs = try compileCombatInputs(effect)
+            let measured = inputs.passives.multiplier(for: .attackCount)
+            recordDouble(id: "SKILL-EFFECT-090",
+                         expected: 1.25,
+                         measured: measured,
+                         rawData: ["multiplier": 1.25])
+        }
+
+        do {
+            let effect = makeEffect(type: .spellAccess,
+                                    parameters: [.spellId: 1, .action: 1])
+            let result = try aggregate(effect)
+            let passed = result.spellbook.learnedSpellIds.contains(1)
+            recordPass(id: "SKILL-EFFECT-091",
+                       passed: passed,
+                       rawData: ["spellId": 1])
+        }
+
+        do {
+            let effect = makeEffect(type: .spellTierUnlock,
+                                    parameters: [.school: Int(SpellDefinition.School.mage.rawValue)],
+                                    values: [.tier: 3])
+            let result = try aggregate(effect)
+            let measured = result.spellbook.tierUnlocks[SpellDefinition.School.mage.index] ?? 0
+            recordInt(id: "SKILL-EFFECT-092",
+                      expected: 3,
+                      measured: measured,
+                      rawData: ["school": Double(SpellDefinition.School.mage.rawValue), "tier": 3])
+        }
+
+        do {
+            let effect = makeEffect(type: .criticalChancePercentAdditive,
+                                    values: [.points: 7])
+            let inputs = try compileCombatInputs(effect)
+            recordDouble(id: "SKILL-EFFECT-093",
+                         expected: 7,
+                         measured: inputs.critical.flatBonus,
+                         rawData: ["points": 7])
+        }
+
+        do {
+            let effect = makeEffect(type: .criticalChancePercentCap,
+                                    values: [.cap: 80])
+            let inputs = try compileCombatInputs(effect)
+            recordDouble(id: "SKILL-EFFECT-094",
+                         expected: 80,
+                         measured: inputs.critical.cap ?? 0,
+                         rawData: ["cap": 80])
+        }
+
+        do {
+            let effect = makeEffect(type: .criticalChancePercentMaxDelta,
+                                    values: [.deltaPercent: 5])
+            let inputs = try compileCombatInputs(effect)
+            recordDouble(id: "SKILL-EFFECT-095",
+                         expected: 5,
+                         measured: inputs.critical.capDelta,
+                         rawData: ["deltaPercent": 5])
+        }
+
+        do {
+            let effect = makeEffect(type: .equipmentSlotAdditive,
+                                    values: [.add: 2])
+            let result = try aggregate(effect)
+            recordInt(id: "SKILL-EFFECT-096",
+                      expected: 2,
+                      measured: result.equipmentSlots.additive,
+                      rawData: ["add": 2])
+        }
+
+        do {
+            let effect = makeEffect(type: .equipmentSlotMultiplier,
+                                    values: [.multiplier: 1.5])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-097",
+                         expected: 1.5,
+                         measured: result.equipmentSlots.multiplier,
+                         rawData: ["multiplier": 1.5])
+        }
+
+        do {
+            let effect = makeEffect(type: .explorationTimeMultiplier,
+                                    parameters: [.dungeonName: 2],
+                                    values: [.multiplier: 0.8])
+            let result = try aggregate(effect)
+            let measured = result.explorationModifiers.multiplier(forDungeonId: 2, dungeonName: "dummy")
+            recordDouble(id: "SKILL-EFFECT-098",
+                         expected: 0.8,
+                         measured: measured,
+                         rawData: ["dungeonId": 2, "multiplier": 0.8])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardExperiencePercent,
+                                    values: [.valuePercent: 20])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-099",
+                         expected: 1.2,
+                         measured: result.rewardComponents.experienceScale(),
+                         rawData: ["valuePercent": 20])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardExperienceMultiplier,
+                                    values: [.multiplier: 1.5])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-100",
+                         expected: 1.5,
+                         measured: result.rewardComponents.experienceScale(),
+                         rawData: ["multiplier": 1.5])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardGoldPercent,
+                                    values: [.valuePercent: 10])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-101",
+                         expected: 1.1,
+                         measured: result.rewardComponents.goldScale(),
+                         rawData: ["valuePercent": 10])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardGoldMultiplier,
+                                    values: [.multiplier: 1.4])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-102",
+                         expected: 1.4,
+                         measured: result.rewardComponents.goldScale(),
+                         rawData: ["multiplier": 1.4])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardItemPercent,
+                                    values: [.valuePercent: 15])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-103",
+                         expected: 1.15,
+                         measured: result.rewardComponents.itemDropScale(),
+                         rawData: ["valuePercent": 15])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardItemMultiplier,
+                                    values: [.multiplier: 1.3])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-104",
+                         expected: 1.3,
+                         measured: result.rewardComponents.itemDropScale(),
+                         rawData: ["multiplier": 1.3])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardTitlePercent,
+                                    values: [.valuePercent: 25])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-105",
+                         expected: 1.25,
+                         measured: result.rewardComponents.titleScale(),
+                         rawData: ["valuePercent": 25])
+        }
+
+        do {
+            let effect = makeEffect(type: .rewardTitleMultiplier,
+                                    values: [.multiplier: 1.2])
+            let result = try aggregate(effect)
+            recordDouble(id: "SKILL-EFFECT-106",
+                         expected: 1.2,
+                         measured: result.rewardComponents.titleScale(),
+                         rawData: ["multiplier": 1.2])
         }
     }
 }

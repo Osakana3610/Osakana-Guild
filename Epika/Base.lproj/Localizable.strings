@@ -45,6 +45,7 @@
 "actionPreference.priestMagic" = "僧侶魔法";
 "actionPreference.mageMagic" = "魔法使い魔法";
 "actionPreference.breath" = "ブレス";
+"modifier.conditional" = "条件付き";
 
 "resistance.physical" = "物理";
 "resistance.piercing" = "貫通";

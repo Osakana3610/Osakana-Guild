@@ -7,6 +7,7 @@ import SQLite3
 struct MasterDataGenerator {
     static let defaultInput = "MasterData"
     static let defaultOutput = "Tools/MasterDataGenerator/output/master_data.db"
+    static let defaultSchema = "Tools/MasterDataGenerator/SkillEffectSchema.json"
 
     static func main() throws {
         setbuf(stdout, nil)  // Disable stdout buffering
@@ -15,6 +16,7 @@ struct MasterDataGenerator {
 
         let inputDir: String
         let outputPath: String
+        let schemaPath: String
 
         if let inputIndex = arguments.firstIndex(of: "--input"),
            inputIndex + 1 < arguments.count {
@@ -30,35 +32,46 @@ struct MasterDataGenerator {
             outputPath = defaultOutput
         }
 
+        if let schemaIndex = arguments.firstIndex(of: "--schema"),
+           schemaIndex + 1 < arguments.count {
+            schemaPath = arguments[schemaIndex + 1]
+        } else {
+            schemaPath = defaultSchema
+        }
+
         print("[MasterDataGenerator] Input: \(inputDir)")
         print("[MasterDataGenerator] Output: \(outputPath)")
+        print("[MasterDataGenerator] Schema: \(schemaPath)")
 
         let generator = Generator(inputDirectory: URL(fileURLWithPath: inputDir),
-                                  outputPath: URL(fileURLWithPath: outputPath))
+                                  outputPath: URL(fileURLWithPath: outputPath),
+                                  schemaPath: URL(fileURLWithPath: schemaPath))
         try generator.run()
 
         print("[MasterDataGenerator] Done")
     }
 
     static func printUsage() {
-        print("Usage: MasterDataGenerator [--input <json_directory>] [--output <sqlite_path>]")
-        print("Defaults: --input \(defaultInput) --output \(defaultOutput)")
+        print("Usage: MasterDataGenerator [--input <json_directory>] [--output <sqlite_path>] [--schema <schema_path>]")
+        print("Defaults: --input \(defaultInput) --output \(defaultOutput) --schema \(defaultSchema)")
     }
 }
 
 // MARK: - Generator
 
 final class Generator {
-    private let inputDirectory: URL
+    let inputDirectory: URL
     private let outputPath: URL
+    let schemaPath: URL
     private var db: OpaquePointer?
 
     private static let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     private let schemaVersion: Int32 = 1
 
-    init(inputDirectory: URL, outputPath: URL) {
+    init(inputDirectory: URL, outputPath: URL, schemaPath: URL) {
         self.inputDirectory = inputDirectory
         self.outputPath = outputPath
+        self.schemaPath = schemaPath
     }
 
     func run() throws {
@@ -161,6 +174,7 @@ final class Generator {
         // スキーマ検証を先に実行
         print("[MasterDataGenerator] Validating schemas...")
         try validateSchemas()
+        try validateSkillEffectSchema()
         print("[MasterDataGenerator] Schema validation done")
 
         let files: [(String, (Data) throws -> Int)] = [

@@ -14,6 +14,7 @@
 //     - レベル・経験値
 //     - 基本能力値
 //     - 戦闘ステータス
+//     - 補正一覧
 //     - 種族スキル
 //     - 職業スキル
 //     - 習得スキル一覧
@@ -91,6 +92,7 @@ struct CharacterDetailContent: View {
             guard let skill = masterData.skill(unlock.skillId) else { return nil }
             return (level: unlock.level, skill: skill)
         }
+        .sorted { $0.skill.id < $1.skill.id }
     }
 
     private var jobSkillUnlocks: [(level: Int, skill: SkillDefinition)] {
@@ -101,6 +103,7 @@ struct CharacterDetailContent: View {
             guard let skill = masterData.skill(unlock.skillId) else { return nil }
             return (level: unlock.level, skill: skill)
         }
+        .sorted { $0.skill.id < $1.skill.id }
     }
 
     var body: some View {
@@ -125,6 +128,13 @@ struct CharacterDetailContent: View {
 
             Section("戦闘ステータス") {
                 CharacterCombatStatsSection(character: character)
+            }
+
+            if !character.modifierSummary.isEmpty {
+                Section("補正一覧") {
+                    CharacterSkillModifierSummarySection(summary: character.modifierSummary,
+                                                         masterData: appServices.masterDataCache)
+                }
             }
 
             Section("種族スキル") {

@@ -91,8 +91,12 @@ struct PartyDropBonuses: Sendable {
 
         // 報酬系スキルはパーティ全体でID単位の重複無効
         let allSkills = members.flatMap { $0.learnedSkills }
-        let uniqueSkills = Array(Dictionary(allSkills.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values)
-        let rewardComponents = (try? SkillRuntimeEffectCompiler.rewardComponents(from: uniqueSkills)) ?? .neutral
+        let skillsById = Dictionary(allSkills.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let uniqueSkills = skillsById.keys.sorted().compactMap { skillsById[$0] }
+        let rewardComponents = (try? SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: uniqueSkills),
+            options: []
+        ).rewardComponents) ?? .neutral
 
         self.goldMultiplier = goldBase * rewardComponents.goldScale()
         self.rareDropMultiplier = rareBase * rewardComponents.itemDropScale()

@@ -49,8 +49,7 @@ enum BattleRewardCalculator {
 
         var rewardComponentsByMember: [UInt8: SkillRuntimeEffects.RewardComponents] = [:]
         for member in party.members {
-            let components = try SkillRuntimeEffectCompiler.rewardComponents(from: member.character.learnedSkills)
-            rewardComponentsByMember[member.id] = components
+            rewardComponentsByMember[member.id] = member.character.rewardComponents
         }
 
         for member in party.members {

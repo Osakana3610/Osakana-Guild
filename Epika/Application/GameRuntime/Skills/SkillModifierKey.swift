@@ -37,6 +37,7 @@ nonisolated struct SkillModifierKey: Sendable, Hashable {
 /// ModifierKeyベースの集約結果（簡易スナップショット）
 nonisolated struct SkillModifierSnapshot: Sendable, Hashable {
     var additivePercents: [SkillModifierKey: Double]
+    var additiveValues: [SkillModifierKey: Double]
     var multipliers: [SkillModifierKey: Double]
     var maxValues: [SkillModifierKey: Double]
     var minValues: [SkillModifierKey: Double]
@@ -44,12 +45,14 @@ nonisolated struct SkillModifierSnapshot: Sendable, Hashable {
     var flags: Set<SkillModifierKey>
 
     init(additivePercents: [SkillModifierKey: Double],
+         additiveValues: [SkillModifierKey: Double],
          multipliers: [SkillModifierKey: Double],
          maxValues: [SkillModifierKey: Double],
          minValues: [SkillModifierKey: Double],
          intValues: [SkillModifierKey: Int],
          flags: Set<SkillModifierKey>) {
         self.additivePercents = additivePercents
+        self.additiveValues = additiveValues
         self.multipliers = multipliers
         self.maxValues = maxValues
         self.minValues = minValues
@@ -59,6 +62,7 @@ nonisolated struct SkillModifierSnapshot: Sendable, Hashable {
 
     init() {
         self.init(additivePercents: [:],
+                  additiveValues: [:],
                   multipliers: [:],
                   maxValues: [:],
                   minValues: [:],
@@ -67,4 +71,16 @@ nonisolated struct SkillModifierSnapshot: Sendable, Hashable {
     }
 
     static let empty = SkillModifierSnapshot()
+
+    func merged(with other: SkillModifierSnapshot) -> SkillModifierSnapshot {
+        var combined = self
+        combined.additivePercents.merge(other.additivePercents) { _, new in new }
+        combined.additiveValues.merge(other.additiveValues) { _, new in new }
+        combined.multipliers.merge(other.multipliers) { _, new in new }
+        combined.maxValues.merge(other.maxValues) { _, new in new }
+        combined.minValues.merge(other.minValues) { _, new in new }
+        combined.intValues.merge(other.intValues) { _, new in new }
+        combined.flags.formUnion(other.flags)
+        return combined
+    }
 }

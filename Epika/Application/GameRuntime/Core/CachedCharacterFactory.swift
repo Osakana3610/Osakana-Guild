@@ -115,23 +115,27 @@ enum CachedCharacterFactory {
 
         // 重複除去してからスキル定義に変換
         let uniqueSkillIds = Set(allSkillIds)
-        let learnedSkills = uniqueSkillIds.compactMap { masterData.skill($0) }
+        let learnedSkills = uniqueSkillIds.sorted().compactMap { masterData.skill($0) }
 
         // Loadout構築
         let loadout = assembleLoadout(masterData: masterData, from: input.equippedItems)
 
-        // 統合スキルエフェクトコンパイラで一括処理
-        let skillCompiler = try UnifiedSkillEffectCompiler(skills: learnedSkills)
+        // 共通集計（戦闘前：装備枠/呪文/報酬/探索/戦闘ステータス入力）
+        let baseAggregation = try SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: learnedSkills),
+            options: []
+        )
 
         // 装備スロット計算
-        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: input.level, modifiers: skillCompiler.equipmentSlots)
+        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: input.level,
+                                                            modifiers: baseAggregation.equipmentSlots)
         let usedSlots = input.equippedItems.reduce(0) { $0 + max(0, $1.quantity) }
         if usedSlots > allowedSlots {
             throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
         }
 
         // スペルブック
-        let spellbook = skillCompiler.spellbook
+        let spellbook = baseAggregation.spellbook
         let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(
             from: spellbook,
             definitions: masterData.allSpells,
@@ -165,7 +169,7 @@ enum CachedCharacterFactory {
             race: race,
             job: job,
             personalitySecondary: secondaryPersonality,
-            learnedSkills: learnedSkills,
+            skillEffects: baseAggregation.combatStatInputs,
             loadout: CachedCharacter.Loadout(
                 items: loadout.items,
                 titles: loadout.titles,
@@ -182,7 +186,10 @@ enum CachedCharacterFactory {
             agility: calcResult.attributes.agility,
             luck: calcResult.attributes.luck
         )
-        let actorEffects = try UnifiedSkillEffectCompiler(skills: learnedSkills, stats: actorStats).actorEffects
+        let battleAggregation = try SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: learnedSkills, actorStats: actorStats)
+        )
+        let actorEffects = battleAggregation.battleEffects
 
         // isMartialEligible判定
         let isMartialEligible = calcResult.combat.isMartialEligible ||
@@ -231,6 +238,11 @@ enum CachedCharacterFactory {
             maxHP: calcResult.hitPoints.maximum,
             combat: combat,
             equipmentCapacity: allowedSlots,
+            skillEffects: actorEffects,
+            rewardComponents: baseAggregation.rewardComponents,
+            explorationModifiers: baseAggregation.explorationModifiers,
+            equipmentSlots: baseAggregation.equipmentSlots,
+            modifierSummary: battleAggregation.modifierSummary,
             race: race,
             job: job,
             previousJob: previousJob,
@@ -307,23 +319,27 @@ enum CachedCharacterFactory {
 
         // 重複除去してからスキル定義に変換
         let uniqueSkillIds = Set(allSkillIds)
-        let learnedSkills = uniqueSkillIds.compactMap { masterData.skill($0) }
+        let learnedSkills = uniqueSkillIds.sorted().compactMap { masterData.skill($0) }
 
         // Loadout構築
         let loadout = assembleLoadout(masterData: masterData, from: newEquippedItems)
 
-        // 統合スキルエフェクトコンパイラで一括処理
-        let skillCompiler = try UnifiedSkillEffectCompiler(skills: learnedSkills)
+        // 共通集計（戦闘前：装備枠/呪文/報酬/探索/戦闘ステータス入力）
+        let baseAggregation = try SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: learnedSkills),
+            options: []
+        )
 
         // 装備スロット計算
-        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: current.level, modifiers: skillCompiler.equipmentSlots)
+        let allowedSlots = EquipmentSlotCalculator.capacity(forLevel: current.level,
+                                                            modifiers: baseAggregation.equipmentSlots)
         let usedSlots = newEquippedItems.reduce(0) { $0 + max(0, $1.quantity) }
         if usedSlots > allowedSlots {
             throw RuntimeError.invalidConfiguration(reason: "装備枠を超過しています（装備数: \(usedSlots) / 上限: \(allowedSlots)）")
         }
 
         // スペルブック
-        let spellbook = skillCompiler.spellbook
+        let spellbook = baseAggregation.spellbook
         let spellLoadout = SkillRuntimeEffectCompiler.spellLoadout(
             from: spellbook,
             definitions: masterData.allSpells,
@@ -357,7 +373,7 @@ enum CachedCharacterFactory {
             race: race,
             job: job,
             personalitySecondary: secondaryPersonality,
-            learnedSkills: learnedSkills,
+            skillEffects: baseAggregation.combatStatInputs,
             loadout: CachedCharacter.Loadout(
                 items: loadout.items,
                 titles: loadout.titles,
@@ -366,6 +382,17 @@ enum CachedCharacterFactory {
         )
 
         let calcResult = try CombatStatCalculator.calculate(for: calcContext)
+        let actorStats = ActorStats(
+            strength: calcResult.attributes.strength,
+            wisdom: calcResult.attributes.wisdom,
+            spirit: calcResult.attributes.spirit,
+            vitality: calcResult.attributes.vitality,
+            agility: calcResult.attributes.agility,
+            luck: calcResult.attributes.luck
+        )
+        let battleAggregation = try SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: learnedSkills, actorStats: actorStats)
+        )
 
         // isMartialEligible判定
         let isMartialEligible = calcResult.combat.isMartialEligible ||
@@ -401,6 +428,11 @@ enum CachedCharacterFactory {
             maxHP: calcResult.hitPoints.maximum,
             combat: combat,
             equipmentCapacity: allowedSlots,
+            skillEffects: battleAggregation.battleEffects,
+            rewardComponents: baseAggregation.rewardComponents,
+            explorationModifiers: baseAggregation.explorationModifiers,
+            equipmentSlots: baseAggregation.equipmentSlots,
+            modifierSummary: battleAggregation.modifierSummary,
             race: race,
             job: job,
             previousJob: previousJob,

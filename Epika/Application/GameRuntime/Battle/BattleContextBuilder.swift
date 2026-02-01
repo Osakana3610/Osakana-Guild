@@ -35,16 +35,7 @@ struct BattleContextBuilder {
             let snapshot = character.combat
             var resources = BattleActionResource.makeDefault(for: snapshot,
                                                             spellLoadout: character.spellLoadout)
-            let stats = ActorStats(
-                strength: character.attributes.strength,
-                wisdom: character.attributes.wisdom,
-                spirit: character.attributes.spirit,
-                vitality: character.attributes.vitality,
-                agility: character.attributes.agility,
-                luck: character.attributes.luck
-            )
-            let skillCompiler = try UnifiedSkillEffectCompiler(skills: character.learnedSkills, stats: stats)
-            let skillEffects = skillCompiler.actorEffects
+            let skillEffects = character.skillEffects
             applySpellChargeModifiers(skillEffects: skillEffects,
                                       loadout: character.spellLoadout,
                                       resources: &resources)

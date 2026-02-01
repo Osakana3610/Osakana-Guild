@@ -15,7 +15,7 @@
 //   - ExplorationModifiers: ダンジョン別の探索時間倍率
 //
 // 【使用箇所】
-//   - SkillRuntimeEffectCompiler.*.swift の各メソッドの戻り値型
+//   - SkillEffectAggregationService の集計結果
 //   - キャラクターの能力計算・戦闘処理で参照
 //
 // ==============================================================================

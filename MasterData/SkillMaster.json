@@ -2838,53 +2838,6 @@
       },
       {
         "effectTemplate": {
-          "kind": "criticalChancePercentMaxAbsolute"
-        },
-        "variants": [
-          {
-            "id": 310,
-            "label": "[最大50%] 必殺率上限",
-            "description": "必殺率の上限が50%になる。",
-            "overrides": {
-              "maxPercent": 50
-            }
-          },
-          {
-            "id": 311,
-            "label": "[最大60%] 必殺率上限",
-            "description": "必殺率の上限が60%になる。",
-            "overrides": {
-              "maxPercent": 60
-            }
-          },
-          {
-            "id": 312,
-            "label": "[最大70%] 必殺率上限",
-            "description": "必殺率の上限が70%になる。",
-            "overrides": {
-              "maxPercent": 70
-            }
-          },
-          {
-            "id": 313,
-            "label": "[最大80%] 必殺率上限",
-            "description": "必殺率の上限が80%になる。",
-            "overrides": {
-              "maxPercent": 80
-            }
-          },
-          {
-            "id": 314,
-            "label": "[最大90%] 必殺率上限",
-            "description": "必殺率の上限が90%になる。",
-            "overrides": {
-              "maxPercent": 90
-            }
-          }
-        ]
-      },
-      {
-        "effectTemplate": {
           "kind": "criticalChancePercentMaxDelta"
         },
         "variants": [
@@ -5330,7 +5283,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "thin_sword"
+          "equipmentType": "thin_sword"
         },
         "variants": [
           {
@@ -5490,7 +5443,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "sword"
+          "equipmentType": "sword"
         },
         "variants": [
           {
@@ -5650,7 +5603,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "katana"
+          "equipmentType": "katana"
         },
         "variants": [
           {
@@ -5810,7 +5763,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "bow"
+          "equipmentType": "bow"
         },
         "variants": [
           {
@@ -5970,7 +5923,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "armor"
+          "equipmentType": "armor"
         },
         "variants": [
           {
@@ -6130,7 +6083,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "heavy_armor"
+          "equipmentType": "heavy_armor"
         },
         "variants": [
           {
@@ -6290,7 +6243,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "shield"
+          "equipmentType": "shield"
         },
         "variants": [
           {
@@ -6450,7 +6403,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "gauntlet"
+          "equipmentType": "gauntlet"
         },
         "variants": [
           {
@@ -6610,7 +6563,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "wand"
+          "equipmentType": "wand"
         },
         "variants": [
           {
@@ -6770,7 +6723,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "rod"
+          "equipmentType": "rod"
         },
         "variants": [
           {
@@ -6930,7 +6883,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "grimoire"
+          "equipmentType": "grimoire"
         },
         "variants": [
           {
@@ -7090,7 +7043,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "robe"
+          "equipmentType": "robe"
         },
         "variants": [
           {
@@ -7250,7 +7203,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "gem"
+          "equipmentType": "gem"
         },
         "variants": [
           {
@@ -7410,7 +7363,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "other"
+          "equipmentType": "other"
         },
         "variants": [
           {
@@ -7570,7 +7523,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "race_specific"
+          "equipmentType": "race_specific"
         },
         "variants": [
           {
@@ -7730,7 +7683,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "for_synthesis"
+          "equipmentType": "for_synthesis"
         },
         "variants": [
           {
@@ -7890,7 +7843,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "mazo_material"
+          "equipmentType": "mazo_material"
         },
         "variants": [
           {
@@ -8057,7 +8010,7 @@
             "label": "[戦術] ファイヤーブレス",
             "description": "ブレスの使用回数が1増加する。",
             "overrides": {
-              "variant": "fire",
+              "type": "fire",
               "extraCharges": 1
             }
           },
@@ -8066,7 +8019,7 @@
             "label": "[戦術] コールドブレス",
             "description": "ブレスの使用回数が1増加する。",
             "overrides": {
-              "variant": "cold",
+              "type": "cold",
               "extraCharges": 1
             }
           },
@@ -8075,7 +8028,7 @@
             "label": "[戦術] サンダーブレス",
             "description": "ブレスの使用回数が1増加する。",
             "overrides": {
-              "variant": "thunder",
+              "type": "thunder",
               "extraCharges": 1
             }
           }
@@ -9513,7 +9466,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistanceMultiplier",
-          "status": 0
+          "statusId": 0
         },
         "variants": [
           {
@@ -9553,7 +9506,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistanceMultiplier",
-          "status": 2
+          "statusId": 2
         },
         "variants": [
           {
@@ -9593,7 +9546,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistanceMultiplier",
-          "status": 1
+          "statusId": 1
         },
         "variants": [
           {
@@ -9625,7 +9578,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistancePercent",
-          "status": 1
+          "statusId": 1
         },
         "variants": [
           {
@@ -14040,7 +13993,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistanceMultiplier",
-          "status": 0
+          "statusId": 0
         },
         "variants": [
           {
@@ -14080,7 +14033,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistanceMultiplier",
-          "status": 2
+          "statusId": 2
         },
         "variants": [
           {
@@ -14120,7 +14073,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistanceMultiplier",
-          "status": 1
+          "statusId": 1
         },
         "variants": [
           {
@@ -14152,7 +14105,7 @@
       {
         "effectTemplate": {
           "kind": "statusResistancePercent",
-          "status": 1
+          "statusId": 1
         },
         "variants": [
           {
@@ -14318,10 +14271,8 @@
               "count": 1,
               "target": "ally",
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "spirit",
-                "percent": 0.5
-              }
+              "scalingStat": "spirit",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14337,10 +14288,8 @@
             "label": "[種族:ノームLv50] 精神依存で魔法威力増",
             "description": "精神1につき0.5%、魔法攻撃で与えるダメージが増加する。",
             "overrides": {
-              "statScale": {
-                "stat": "spirit",
-                "percent": 0.5
-              }
+              "scalingStat": "spirit",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14357,10 +14306,8 @@
             "description": "精神1につき0.3%の確率で使用した魔法の使用回数が回復する。",
             "overrides": {
               "baseChancePercent": 0.3,
-              "statScale": {
-                "stat": "spirit",
-                "percent": 0.3
-              }
+              "scalingStat": "spirit",
+              "scalingCoefficient": 0.3
             }
           }
         ]
@@ -14396,10 +14343,8 @@
             "overrides": {
               "reduction": 1,
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "agility",
-                "percent": 0.5
-              }
+              "scalingStat": "agility",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14419,10 +14364,8 @@
             "description": "敵を倒した時、敏捷1につき0.5%の確率で再攻撃をする。",
             "overrides": {
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "agility",
-                "percent": 0.5
-              }
+              "scalingStat": "agility",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14442,10 +14385,8 @@
             "description": "味方が魔法攻撃をした時、知恵1につき0.5%の確率で物理追撃をする。",
             "overrides": {
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "wisdom",
-                "percent": 0.5
-              }
+              "scalingStat": "wisdom",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14528,10 +14469,8 @@
             "description": "知恵1につき0.8%の確率で魔法攻撃を無効化する。",
             "overrides": {
               "baseChancePercent": 0.8,
-              "statScale": {
-                "stat": "wisdom",
-                "percent": 0.8
-              }
+              "scalingStat": "wisdom",
+              "scalingCoefficient": 0.8
             }
           }
         ]
@@ -14630,10 +14569,8 @@
             "description": "体力1につき0.5%の確率で先制ブレス攻撃をする。",
             "overrides": {
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "vitality",
-                "percent": 0.5
-              }
+              "scalingStat": "vitality",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14747,10 +14684,8 @@
             "description": "体力1につき0.5%の確率で階層移動時に自動で蘇生する。",
             "overrides": {
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "vitality",
-                "percent": 0.5
-              }
+              "scalingStat": "vitality",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14862,10 +14797,8 @@
             "description": "攻撃で敵を倒せなかった時、力1につき0.5%の確率で再攻撃をする。",
             "overrides": {
               "baseChancePercent": 0.5,
-              "statScale": {
-                "stat": "strength",
-                "percent": 0.5
-              }
+              "scalingStat": "strength",
+              "scalingCoefficient": 0.5
             }
           }
         ]
@@ -14992,7 +14925,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "shield"
+          "equipmentType": "shield"
         },
         "variants": [
           {
@@ -15497,7 +15430,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "bow"
+          "equipmentType": "bow"
         },
         "variants": [
           {
@@ -15669,7 +15602,7 @@
       {
         "effectTemplate": {
           "kind": "equipmentStatMultiplier",
-          "equipmentCategory": "katana"
+          "equipmentType": "katana"
         },
         "variants": [
           {
@@ -16269,7 +16202,7 @@
             "effects": [
               {
                 "kind": "equipmentStatMultiplier",
-                "equipmentCategory": "shield",
+                "equipmentType": "shield",
                 "multiplier": 1.4
               },
               {

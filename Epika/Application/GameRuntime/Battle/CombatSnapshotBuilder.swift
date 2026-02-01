@@ -32,7 +32,12 @@ nonisolated struct CombatSnapshotBuilder {
         let jobDefinition = definition.jobId.flatMap { masterData.jobsById[$0] } ?? makeJobDefinition(for: definition)
 
         // 敵のパッシブスキルを取得
-        let learnedSkills = definition.skillIds.compactMap { masterData.skillsById[$0] }
+        let learnedSkills = definition.skillIds.sorted().compactMap { masterData.skillsById[$0] }
+
+        let baseAggregation = try SkillEffectAggregationService.aggregate(
+            input: SkillEffectAggregationInput(skills: learnedSkills),
+            options: []
+        )
 
         let context = CombatStatCalculator.Context(
             raceId: definition.raceId,
@@ -44,7 +49,7 @@ nonisolated struct CombatSnapshotBuilder {
             race: raceDefinition,
             job: jobDefinition,
             personalitySecondary: nil,
-            learnedSkills: learnedSkills,
+            skillEffects: baseAggregation.combatStatInputs,
             loadout: CachedCharacter.Loadout(items: [], titles: [], superRareTitles: [])
         )
 

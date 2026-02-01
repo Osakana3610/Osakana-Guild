@@ -7,6 +7,7 @@ set -e
 GENERATOR="${SRCROOT}/Tools/MasterDataGenerator/.build/release/MasterDataGenerator"
 INPUT_DIR="${SRCROOT}/MasterData"
 OUTPUT_FILE="${SRCROOT}/Tools/MasterDataGenerator/output/master_data.db"
+SCHEMA_FILE="${SRCROOT}/Tools/MasterDataGenerator/SkillEffectSchema.json"
 
 echo "[MasterDataGenerator] Starting..."
 echo "[MasterDataGenerator] SRCROOT: ${SRCROOT}"
@@ -19,7 +20,7 @@ env -i PATH="$PATH" HOME="$HOME" swift build -c release --package-path "${SRCROO
 
 # SQLite生成
 echo "[MasterDataGenerator] Generating master_data.db..."
-"$GENERATOR" --input "$INPUT_DIR" --output "$OUTPUT_FILE"
+"$GENERATOR" --input "$INPUT_DIR" --output "$OUTPUT_FILE" --schema "$SCHEMA_FILE"
 
 echo "[MasterDataGenerator] Output: $OUTPUT_FILE"
 

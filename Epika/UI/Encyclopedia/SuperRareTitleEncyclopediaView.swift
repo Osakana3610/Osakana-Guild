@@ -63,7 +63,7 @@ private struct SuperRareTitleRow: View {
                 .font(.headline)
 
             if !title.skillIds.isEmpty {
-                ForEach(title.skillIds, id: \.self) { skillId in
+                ForEach(title.skillIds.sorted(), id: \.self) { skillId in
                     if let skill = skillDefinitions[skillId] {
                         Text(skill.name)
                             .font(.subheadline)
